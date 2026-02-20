@@ -56,11 +56,18 @@ def init_voice_tracking(bot, db):
 async def award_voice_xp_task():
     """
     Фоновая задача: начисляет XP каждую минуту всем пользователям в войсе
+    и проверяет выдачу ролей за ранги
     """
     if not _bot or not _db:
         return
     
     now = datetime.now()
+    
+    # Импортируем систему ролей
+    try:
+        import rank_roles
+    except:
+        rank_roles = None
     
     # Проходим по всем активным сессиям
     for user_id, session in list(active_sessions.items()):
@@ -84,11 +91,13 @@ async def award_voice_xp_task():
                 user['xp'] = old_xp + xp_reward
                 _db.check_rank_up(user)
                 _db.save_user(user_id, user)
+                new_xp = user.get('xp', 0)
                 
                 # Обновляем время последнего начисления
                 session['last_xp_time'] = now.isoformat()
                 
-                # Получаем информацию о пользователе для логирования
+                # Получаем информацию о пользователе для логирования и выдачи роли
+                member = None
                 try:
                     for guild in _bot.guilds:
                         member = guild.get_member(int(user_id))
@@ -97,6 +106,60 @@ async def award_voice_xp_task():
                             break
                 except:
                     print(f"💎 User {user_id} получил {xp_reward} XP за {minutes_passed} мин в войсе (онлайн)")
+                
+                # Проверяем и выдаём роль если нужно
+                if member and rank_roles:
+                    try:
+                        # Определяем старую и новую роль по XP
+                        old_tier = rank_roles.get_role_for_xp(old_xp)
+                        new_tier = rank_roles.get_role_for_xp(new_xp)
+                        
+                        # Если роль изменилась - обновляем
+                        if old_tier != new_tier and new_tier:
+                            result = await rank_roles.update_user_rank_role(member, new_xp)
+                            
+                            if result['success'] and result['action'] == 'added':
+                                print(f"🎊 {member.name} получил роль {result['role'].name} за достижение {new_xp} XP!")
+                                
+                                # Отправляем уведомление в первый доступный текстовый канал
+                                try:
+                                    for channel in member.guild.text_channels:
+                                        if channel.permissions_for(member.guild.me).send_messages:
+                                            from theme import BotTheme
+                                            from font_converter import convert_to_font
+                                            
+                                            embed = BotTheme.create_embed(
+                                                title=convert_to_font("🎊 новая роль!"),
+                                                description=convert_to_font(f"поздравляем {member.mention}!"),
+                                                embed_type='success'
+                                            )
+                                            
+                                            if old_tier:
+                                                embed.add_field(
+                                                    name=convert_to_font("старая роль"),
+                                                    value=convert_to_font(f"{old_tier} - ранг"),
+                                                    inline=True
+                                                )
+                                            
+                                            embed.add_field(
+                                                name=convert_to_font("новая роль"),
+                                                value=f"{result['role'].mention}",
+                                                inline=True
+                                            )
+                                            
+                                            embed.add_field(
+                                                name=convert_to_font("💎 твой xp"),
+                                                value=convert_to_font(str(new_xp)),
+                                                inline=False
+                                            )
+                                            
+                                            await channel.send(embed=embed)
+                                            break
+                                except Exception as notif_error:
+                                    print(f"⚠️ Не удалось отправить уведомление о роли: {notif_error}")
+                    
+                    except Exception as role_error:
+                        print(f"⚠️ Ошибка проверки/выдачи роли для {member.name}: {role_error}")
         
         except Exception as e:
             print(f"❌ Ошибка начисления XP для {user_id}: {e}")
