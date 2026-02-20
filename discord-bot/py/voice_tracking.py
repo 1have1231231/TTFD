@@ -1,7 +1,7 @@
 # Система отслеживания времени в голосовых каналах
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from datetime import datetime, timedelta
 import json
 import os
@@ -9,8 +9,12 @@ import os
 # Файл для хранения данных о войс активности
 VOICE_DATA_FILE = 'json/voice_data.json'
 
-# Активные сессии {user_id: {'channel_id': int, 'join_time': str, 'session_start': str}}
+# Активные сессии {user_id: {'channel_id': int, 'join_time': str, 'session_start': str, 'last_xp_time': str}}
 active_sessions = {}
+
+# Глобальные ссылки на бота и БД для фоновой задачи
+_bot = None
+_db = None
 
 def load_voice_data():
     """Загрузить данные о войс активности"""
@@ -30,6 +34,73 @@ def save_voice_data(data):
     os.makedirs('json', exist_ok=True)
     with open(VOICE_DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
+
+def init_voice_tracking(bot, db):
+    """
+    Инициализировать систему отслеживания войса
+    
+    Args:
+        bot: Discord Bot instance
+        db: Database instance
+    """
+    global _bot, _db
+    _bot = bot
+    _db = db
+    
+    # Запускаем фоновую задачу начисления XP
+    if not award_voice_xp_task.is_running():
+        award_voice_xp_task.start()
+        print("✅ Фоновая задача начисления XP за войс запущена")
+
+@tasks.loop(minutes=1)
+async def award_voice_xp_task():
+    """
+    Фоновая задача: начисляет XP каждую минуту всем пользователям в войсе
+    """
+    if not _bot or not _db:
+        return
+    
+    now = datetime.now()
+    
+    # Проходим по всем активным сессиям
+    for user_id, session in list(active_sessions.items()):
+        try:
+            # Получаем время последнего начисления XP
+            last_xp_time_str = session.get('last_xp_time', session['join_time'])
+            last_xp_time = datetime.fromisoformat(last_xp_time_str)
+            
+            # Вычисляем время с последнего начисления
+            time_since_last_xp = (now - last_xp_time).total_seconds()
+            
+            # Если прошла минута или больше - начисляем XP
+            if time_since_last_xp >= 60:
+                # Начисляем 2 XP за минуту
+                minutes_passed = int(time_since_last_xp / 60)
+                xp_reward = minutes_passed * 2
+                
+                # Обновляем данные пользователя
+                user = _db.get_user(user_id)
+                old_xp = user.get('xp', 0)
+                user['xp'] = old_xp + xp_reward
+                _db.check_rank_up(user)
+                _db.save_user(user_id, user)
+                
+                # Обновляем время последнего начисления
+                session['last_xp_time'] = now.isoformat()
+                
+                # Получаем информацию о пользователе для логирования
+                try:
+                    for guild in _bot.guilds:
+                        member = guild.get_member(int(user_id))
+                        if member:
+                            print(f"💎 {member.name} получил {xp_reward} XP за {minutes_passed} мин в войсе (онлайн)")
+                            break
+                except:
+                    print(f"💎 User {user_id} получил {xp_reward} XP за {minutes_passed} мин в войсе (онлайн)")
+        
+        except Exception as e:
+            print(f"❌ Ошибка начисления XP для {user_id}: {e}")
+            continue
 
 async def on_voice_state_update(member, before, after, db=None):
     """Обработка изменения голосового состояния"""
@@ -62,7 +133,8 @@ async def on_voice_state_update(member, before, after, db=None):
         active_sessions[user_id] = {
             'channel_id': channel_id,
             'join_time': now.isoformat(),
-            'session_start': now.isoformat()
+            'session_start': now.isoformat(),
+            'last_xp_time': now.isoformat()
         }
         
         print(f"🎤 {member.name} зашёл в {after.channel.name}")
@@ -166,7 +238,8 @@ async def on_voice_state_update(member, before, after, db=None):
         active_sessions[user_id] = {
             'channel_id': new_channel_id,
             'join_time': now.isoformat(),
-            'session_start': now.isoformat()
+            'session_start': now.isoformat(),
+            'last_xp_time': now.isoformat()
         }
         
         print(f"🎤 {member.name} переключился в {after.channel.name}")

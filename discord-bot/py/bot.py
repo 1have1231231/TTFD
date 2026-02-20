@@ -268,6 +268,16 @@ async def on_ready():
         import traceback
         traceback.print_exc()
     
+    # Инициализация системы отслеживания войса
+    print("🎤 Инициализация системы отслеживания войса...")
+    try:
+        voice_tracking.init_voice_tracking(bot, db)
+        print("✅ Система отслеживания войса инициализирована")
+    except Exception as e:
+        print(f"❌ Ошибка инициализации войса: {e}")
+        import traceback
+        traceback.print_exc()
+    
     # Синхронизация ВСЕХ slash команд с Discord (ВАЖНО: в самом конце после всех регистраций!)
     print("🔄 Синхронизация slash команд с Discord...")
     try:
