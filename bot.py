@@ -181,11 +181,20 @@ async def on_ready():
         # Регистрируем slash команды
         await register_slash_commands()
         
-        # Синхронизируем с Discord
+        # Синхронизируем с конкретным сервером (мгновенно)
+        if config.GUILD_ID and config.GUILD_ID > 0:
+            guild = discord.Object(id=config.GUILD_ID)
+            bot.tree.copy_global_to(guild=guild)
+            synced_guild = await bot.tree.sync(guild=guild)
+            print(f"✅ Синхронизировано {len(synced_guild)} slash команд с сервером (мгновенно)")
+        
+        # Глобальная синхронизация (до 1 часа)
         synced = await bot.tree.sync()
-        print(f"✅ Синхронизировано {len(synced)} slash команд")
+        print(f"✅ Синхронизировано {len(synced)} slash команд глобально")
     except Exception as e:
         print(f"❌ Ошибка синхронизации команд: {e}")
+        import traceback
+        traceback.print_exc()
     
     # Обновляем список команд в канале
     await update_commands_list()
