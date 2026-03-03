@@ -16,12 +16,12 @@ except ImportError:
 # Система рангов (F, E, D, C, B, A, S)
 RANKS = [
     {"id": 1, "name": "F-ранг", "color": "#95a5a6", "required_xp": 0, "reward_coins": 0},
-    {"id": 2, "name": "E-ранг", "color": "#3498db", "required_xp": 500, "reward_coins": 100},
-    {"id": 3, "name": "D-ранг", "color": "#2ecc71", "required_xp": 1500, "reward_coins": 300},
-    {"id": 4, "name": "C-ранг", "color": "#f39c12", "required_xp": 2800, "reward_coins": 500},
-    {"id": 5, "name": "B-ранг", "color": "#e74c3c", "required_xp": 5000, "reward_coins": 1000},
-    {"id": 6, "name": "A-ранг", "color": "#9b59b6", "required_xp": 15000, "reward_coins": 3000},
-    {"id": 7, "name": "S-ранг", "color": "#f1c40f", "required_xp": 50000, "reward_coins": 10000},
+    {"id": 2, "name": "E-ранг", "color": "#3498db", "required_xp": 50, "reward_coins": 100},
+    {"id": 3, "name": "D-ранг", "color": "#2ecc71", "required_xp": 150, "reward_coins": 300},
+    {"id": 4, "name": "C-ранг", "color": "#f39c12", "required_xp": 350, "reward_coins": 500},
+    {"id": 5, "name": "B-ранг", "color": "#e74c3c", "required_xp": 700, "reward_coins": 1000},
+    {"id": 6, "name": "A-ранг", "color": "#9b59b6", "required_xp": 1500, "reward_coins": 3000},
+    {"id": 7, "name": "S-ранг", "color": "#f1c40f", "required_xp": 3000, "reward_coins": 10000},
 ]
 
 class PostgresDatabase:
