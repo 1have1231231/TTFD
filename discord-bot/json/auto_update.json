@@ -71,6 +71,8 @@
     "add requirements.txt",
     "fix Python version to 3.11.7",
     "add Gunicorn and Procfile for production",
-    "update commands list to slash and fix rank notification channel"
+    "update commands list to slash and fix rank notification channel",
+    "fix slash commands and username error",
+    "add guild-specific slash command sync"
   ]
 }
