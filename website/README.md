@@ -1,160 +1,89 @@
-# 🌐 TTFD Website
+# TTFD — Elite Clan Website
 
-Веб-сайт TTFD с профилями, кастомизацией, магазином и Discord OAuth авторизацией.
+Premium esports-style website for TTFD Minecraft clan.
 
-## 🚀 Быстрый старт
+## Design System
 
-### 1. Установка зависимостей
+### Color Palette
+- **Primary Background**: `#0A0A0A` — Deep black
+- **Secondary Background**: `#111111` — Dark gray
+- **Card Background**: `#171717` — Elevated surface
+- **Primary Accent**: `#FFFFFF` — Pure white
+- **Secondary Accent**: `#AAAAAA` — Medium gray
+- **Highlight Accent**: `#E5E5E5` — Light gray
 
-```bash
-pip install -r requirements.txt
-```
+### Typography
+- **Font**: Inter, system sans-serif
+- **Style**: Bold uppercase headings, wide letter spacing
+- **Hierarchy**: Large hero titles (10rem) → Section titles (4rem) → Body text (1.3rem)
 
-### 2. Настройка
+### Layout Principles
+- Grid-based responsive design
+- Large breathing space between sections
+- Centered hero sections
+- Smooth scroll transitions
+- Minimal hover animations
 
-Создай файл `.env` на основе `.env.example`:
+## Structure
 
-```env
-# Flask
-SECRET_KEY=твой_секретный_ключ
-PORT=5000
+### 1. Hero Section
+- Fullscreen landing
+- Large TTFD title with wide letter spacing
+- Subtitle: "DOMINATE. CONTROL. WIN."
+- Two CTA buttons: Join Clan / View Members
 
-# Discord OAuth
-DISCORD_CLIENT_ID=твой_client_id
-DISCORD_CLIENT_SECRET=твой_client_secret
-DISCORD_REDIRECT_URI=https://ttfd.onrender.com/auth/discord/callback
-```
+### 2. About Section
+- Elite clan description
+- Three value pillars: Elite, Competitive, Professional
+- Minimal text presentation
 
-**Где взять Discord OAuth данные:**
-- https://discord.com/developers/applications
-- Выбери приложение → OAuth2 → General
-- Client ID и Client Secret
-- Добавь Redirect URI в списке разрешённых
+### 3. Members Section
+- Grid layout of player cards
+- Each card shows: Avatar, Nickname, Role, Status
+- Roles: Leader, Officer, Fighter, Recruit
+- Hover animations
 
-### 3. Запуск
+### 4. Statistics Section
+- Dashboard-style stat cards
+- Displays: Total Members, Clan Wins, Total Kills, Online Players
+- Animated counters on scroll
 
-```bash
-python main.py
-```
+### 5. Apply Section
+- Clean application form
+- Fields: Nickname, Age, Experience, Discord, Motivation
+- Minimal input styling
 
-Сайт будет доступен на http://localhost:5000
+### 6. Footer
+- TTFD logo
+- Discord link
+- Server IP
+- Copyright
 
-## 📋 Возможности
+## Features
 
-### Для пользователей:
-- ✅ **Discord OAuth** - Вход через Discord
-- 🎨 **Кастомизация** - Настройка темы, цветов, фона
-- 👤 **Профиль** - Личная страница с музыкой и информацией
-- ⚙️ **Настройки** - Управление аккаунтом
-- 🛒 **Магазин** - Покупка товаров и услуг
+- **Smooth Scrolling**: Elegant navigation between sections
+- **Fade-in Animations**: Sections animate on scroll
+- **Counter Animation**: Stats animate when visible
+- **Responsive Design**: Desktop-first, mobile-optimized
+- **Form Handling**: Application submission with validation
 
-### Технические:
-- Flask веб-фреймворк
-- Discord OAuth 2.0
-- JSON/PostgreSQL база данных
-- Адаптивный дизайн
-- Темная тема
+## Usage
 
-## 📁 Структура проекта
+Simply open `index.html` in a browser. No build process required.
 
-```
-TTFD-Website/
-├── app.py                 # Flask приложение и роуты
-├── main.py                # Точка входа
-├── config.py              # Конфигурация
-├── discord_oauth.py       # Discord OAuth логика
-├── database.py            # База данных (JSON)
-├── database_postgres.py   # База данных (PostgreSQL)
-├── static/                # CSS, JS, изображения
-│   ├── css/
-│   ├── js/
-│   └── фотографии/
-└── templates/             # HTML шаблоны
-    ├── base.html
-    ├── index.html
-    ├── login.html
-    ├── profile.html
-    ├── settings.html
-    ├── customize.html
-    └── shop.html
-```
+To customize:
+- Edit member data in HTML
+- Update statistics in HTML
+- Modify colors in CSS variables
+- Connect form to backend API
 
-## 🔧 Настройка
+## Design Philosophy
 
-### База данных
+This website follows elite esports organization aesthetics:
+- No neon colors or gaming clichés
+- Professional, minimal interface
+- Strong visual hierarchy
+- Premium feel through spacing and typography
+- Fast, clean user experience
 
-По умолчанию используется JSON файл (`accounts.json`).
-
-Для PostgreSQL добавь в `.env`:
-
-```env
-DATABASE_URL=postgresql://user:password@host/database
-```
-
-### Discord OAuth
-
-1. Создай приложение на https://discord.com/developers/applications
-2. OAuth2 → Redirects → Добавь `https://твой-домен.com/auth/discord/callback`
-3. OAuth2 → General → Скопируй Client ID и Client Secret
-4. Добавь в `.env`
-
-## 🚀 Деплой на Render
-
-1. Создай Web Service на https://render.com
-2. Подключи GitHub репозиторий
-3. Настрой Environment Variables:
-   - `SECRET_KEY`
-   - `DISCORD_CLIENT_ID`
-   - `DISCORD_CLIENT_SECRET`
-   - `DISCORD_REDIRECT_URI`
-4. Build Command: `pip install -r requirements.txt`
-5. Start Command: `python main.py`
-
-## 🤖 Discord Бот
-
-Discord бот теперь в отдельном проекте: **TTFD-Discord**
-
-Это позволяет:
-- Запускать бота и сайт независимо
-- Деплоить на разные сервера
-- Избежать конфликтов зависимостей
-
-## 📝 Разработка
-
-### Добавление нового роута
-
-```python
-@app.route('/mypage')
-def my_page():
-    current_user = get_current_user()
-    if not current_user:
-        return redirect(url_for('login'))
-    return render_template('mypage.html', user=current_user)
-```
-
-### Обновление темы
-
-Все стили в `static/css/`, темы управляются через `theme-engine.js`.
-
-## 🐛 Troubleshooting
-
-### OAuth не работает
-
-- Проверь что DISCORD_CLIENT_ID и DISCORD_CLIENT_SECRET правильные
-- Проверь что DISCORD_REDIRECT_URI совпадает с настройками в Discord Developer Portal
-- Проверь что redirect URI добавлен в список разрешённых
-
-### Сайт не запускается
-
-- Проверь что установлены все зависимости
-- Проверь что PORT не занят другим приложением
-- Проверь логи на наличие ошибок
-
-## 📄 Лицензия
-
-MIT
-
----
-
-**Последнее обновление:** 30.01.2026  
-**Discord Бот:** См. проект TTFD-Discord
+Inspired by: NAVI, FaZe Clan, Team Vitality

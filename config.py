@@ -17,15 +17,24 @@ except (ValueError, AttributeError):
     GUILD_ID = 0
 
 # Веб-сервер настройки
-# На Render используется переменная PORT, на локалке - WEB_PORT
-PORT = os.getenv('PORT')  # Render автоматически устанавливает PORT
+# На Railway/Render используется переменная PORT, на локалке - WEB_PORT
+PORT = os.getenv('PORT')  # Railway/Render автоматически устанавливает PORT
 WEB_PORT = int(PORT) if PORT else int(os.getenv('WEB_PORT', 5000))
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # Discord OAuth настройки
 DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID')
 DISCORD_CLIENT_SECRET = os.getenv('DISCORD_CLIENT_SECRET')
-DISCORD_REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI', 'http://localhost:5000/auth/discord/callback')
+# Автоматически определяем URL для Railway
+RAILWAY_PUBLIC_DOMAIN = os.getenv('RAILWAY_PUBLIC_DOMAIN')
+RAILWAY_STATIC_URL = os.getenv('RAILWAY_STATIC_URL')
+if RAILWAY_PUBLIC_DOMAIN:
+    default_redirect = f'https://{RAILWAY_PUBLIC_DOMAIN}/auth/discord/callback'
+elif RAILWAY_STATIC_URL:
+    default_redirect = f'{RAILWAY_STATIC_URL}/auth/discord/callback'
+else:
+    default_redirect = 'http://localhost:5000/auth/discord/callback'
+DISCORD_REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI', default_redirect)
 
 # Проверка обязательных настроек
 if not DISCORD_TOKEN:

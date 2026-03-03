@@ -61,10 +61,20 @@ def landing_premium():
     """Premium landing page - guns.lol style"""
     return render_template('landing_premium.html')
 
+@app.route('/clan')
+def clan():
+    """TTFD Clan Website - Elite esports style"""
+    return send_from_directory('website', 'index.html')
+
 @app.route('/test-design')
 def test_design():
     """Тестовая страница для проверки дизайна"""
     return render_template('test_design.html')
+
+@app.route('/website/<path:filename>')
+def website_static(filename):
+    """Serve static files for clan website"""
+    return send_from_directory('website', filename)
 
 @app.route('/')
 def index():
