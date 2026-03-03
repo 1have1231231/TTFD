@@ -82,6 +82,9 @@
     "add TTFD clan website and Railway deployment config",
     "remove old website files, keep only new clan website",
     "add standalone TTFD clan website",
-    "fix Flask app to properly serve static files"
+    "fix Flask app to properly serve static files",
+    "clean up old files, finalize clan website",
+    "add railway.json config for website",
+    "fix file paths in Flask app"
   ]
 }
