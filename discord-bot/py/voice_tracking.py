@@ -121,40 +121,40 @@ async def award_voice_xp_task():
                             if result['success'] and result['action'] == 'added':
                                 print(f"🎊 {member.name} получил роль {result['role'].name} за достижение {new_xp} XP!")
                                 
-                                # Отправляем уведомление в первый доступный текстовый канал
+                                # Отправляем уведомление в канал получения ролей
+                                RANK_UP_CHANNEL_ID = 1466923990936326294
                                 try:
-                                    for channel in member.guild.text_channels:
-                                        if channel.permissions_for(member.guild.me).send_messages:
-                                            from theme import BotTheme
-                                            from font_converter import convert_to_font
-                                            
-                                            embed = BotTheme.create_embed(
-                                                title=convert_to_font("🎊 новая роль!"),
-                                                description=convert_to_font(f"поздравляем {member.mention}!"),
-                                                embed_type='success'
-                                            )
-                                            
-                                            if old_tier:
-                                                embed.add_field(
-                                                    name=convert_to_font("старая роль"),
-                                                    value=convert_to_font(f"{old_tier} - ранг"),
-                                                    inline=True
-                                                )
-                                            
+                                    channel = member.guild.get_channel(RANK_UP_CHANNEL_ID)
+                                    if channel and channel.permissions_for(member.guild.me).send_messages:
+                                        from theme import BotTheme
+                                        from font_converter import convert_to_font
+                                        
+                                        embed = BotTheme.create_embed(
+                                            title=convert_to_font("🎊 новая роль!"),
+                                            description=convert_to_font(f"поздравляем {member.mention}!"),
+                                            embed_type='success'
+                                        )
+                                        
+                                        if old_tier:
                                             embed.add_field(
-                                                name=convert_to_font("новая роль"),
-                                                value=f"{result['role'].mention}",
+                                                name=convert_to_font("старая роль"),
+                                                value=convert_to_font(f"{old_tier} - ранг"),
                                                 inline=True
                                             )
-                                            
-                                            embed.add_field(
-                                                name=convert_to_font("💎 твой xp"),
-                                                value=convert_to_font(str(new_xp)),
-                                                inline=False
-                                            )
-                                            
-                                            await channel.send(embed=embed)
-                                            break
+                                        
+                                        embed.add_field(
+                                            name=convert_to_font("новая роль"),
+                                            value=f"{result['role'].mention}",
+                                            inline=True
+                                        )
+                                        
+                                        embed.add_field(
+                                            name=convert_to_font("💎 твой xp"),
+                                            value=convert_to_font(str(new_xp)),
+                                            inline=False
+                                        )
+                                        
+                                        await channel.send(embed=embed)
                                 except Exception as notif_error:
                                     print(f"⚠️ Не удалось отправить уведомление о роли: {notif_error}")
                     

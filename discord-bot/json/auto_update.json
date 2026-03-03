@@ -69,6 +69,7 @@
     "добавлена автоматическая проверка и выдача ролей каждую минуту при начислении XP за войс",
     "clean up project structure",
     "add requirements.txt",
-    "fix Python version to 3.11.7"
+    "fix Python version to 3.11.7",
+    "add Gunicorn and Procfile for production"
   ]
 }
