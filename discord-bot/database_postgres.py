@@ -63,16 +63,20 @@ class PostgresDatabase:
                 last_daily TIMESTAMP,
                 daily_streak INTEGER DEFAULT 0,
                 last_daily_date DATE,
-                daily_tasks JSONB DEFAULT '[]'::jsonb
+                daily_tasks JSONB DEFAULT '[]'::jsonb,
+                voice_streak INTEGER DEFAULT 0,
+                last_voice_date DATE
             )
         """)
         
-        # Добавляем колонки daily_streak и last_daily_date если их нет (миграция)
+        # Добавляем колонки если их нет (миграция)
         try:
             cur.execute("""
                 ALTER TABLE users 
                 ADD COLUMN IF NOT EXISTS daily_streak INTEGER DEFAULT 0,
-                ADD COLUMN IF NOT EXISTS last_daily_date DATE
+                ADD COLUMN IF NOT EXISTS last_daily_date DATE,
+                ADD COLUMN IF NOT EXISTS voice_streak INTEGER DEFAULT 0,
+                ADD COLUMN IF NOT EXISTS last_voice_date DATE
             """)
         except:
             pass

@@ -55,6 +55,7 @@ import rank_roles
 import game_integration
 import slash_commands
 import views
+import chatgpt_system
 
 print("✅ Используется JSON база данных")
 
@@ -277,6 +278,16 @@ async def on_ready():
     except Exception as e:
         print(f"❌ Ошибка инициализации войса: {e}")
         import traceback
+    
+    # Настройка ChatGPT
+    print("🤖 Настройка ChatGPT...")
+    try:
+        await chatgpt_system.setup_chatgpt_commands(bot)
+        print(f"✅ ChatGPT настроен (канал: {chatgpt_system.CHATGPT_CHANNEL_ID})")
+    except Exception as e:
+        print(f"❌ Ошибка настройки ChatGPT: {e}")
+        import traceback
+        traceback.print_exc()
         traceback.print_exc()
     
     # Синхронизация ВСЕХ slash команд с Discord (ВАЖНО: в самом конце после всех регистраций!)
@@ -679,6 +690,11 @@ async def on_message(message):
         return
     
     bot.stats['messages_seen'] += 1
+    
+    # Проверяем канал ChatGPT (обрабатываем ДО команд)
+    if chatgpt_system.is_chatgpt_channel(message.channel.id):
+        await chatgpt_system.on_message_chatgpt(message, bot)
+        return  # Не обрабатываем как обычное сообщение
     
     # Обычное сообщение - начисляем XP
     if voice_tracking.can_earn_message_xp(message.author.id):

@@ -178,6 +178,81 @@ async def award_voice_xp_task():
             print(f"❌ Ошибка начисления XP для {user_id}: {e}")
             continue
 
+def check_and_update_voice_streak(user, db):
+    """
+    Проверить и обновить стрик за ежедневный вход в войс
+    
+    Args:
+        user: Данные пользователя
+        db: Database instance
+    
+    Returns:
+        dict: {'streak_updated': bool, 'current_streak': int, 'bonus_xp': int}
+    """
+    from datetime import date
+    
+    today = date.today()
+    last_voice_date = user.get('last_voice_date')
+    
+    # Если last_voice_date это строка, конвертируем в date
+    if isinstance(last_voice_date, str):
+        try:
+            last_voice_date = date.fromisoformat(last_voice_date)
+        except:
+            last_voice_date = None
+    
+    current_streak = user.get('voice_streak', 0)
+    bonus_xp = 0
+    streak_updated = False
+    
+    # Если сегодня уже был в войсе - не обновляем
+    if last_voice_date == today:
+        return {
+            'streak_updated': False,
+            'current_streak': current_streak,
+            'bonus_xp': 0
+        }
+    
+    # Проверяем был ли вчера
+    if last_voice_date:
+        days_diff = (today - last_voice_date).days
+        
+        if days_diff == 1:
+            # Продолжаем стрик
+            current_streak += 1
+            streak_updated = True
+        elif days_diff > 1:
+            # Стрик сброшен
+            current_streak = 1
+            streak_updated = True
+        # days_diff == 0 не должно быть (проверили выше)
+    else:
+        # Первый раз в войсе
+        current_streak = 1
+        streak_updated = True
+    
+    # Рассчитываем бонус XP за стрик
+    # 1 день = +5 XP, 7 дней = +10 XP, 30 дней = +20 XP, 100 дней = +50 XP
+    if current_streak >= 100:
+        bonus_xp = 50
+    elif current_streak >= 30:
+        bonus_xp = 20
+    elif current_streak >= 7:
+        bonus_xp = 10
+    else:
+        bonus_xp = 5
+    
+    # Обновляем данные пользователя
+    if streak_updated:
+        user['voice_streak'] = current_streak
+        user['last_voice_date'] = today.isoformat()
+    
+    return {
+        'streak_updated': streak_updated,
+        'current_streak': current_streak,
+        'bonus_xp': bonus_xp
+    }
+
 async def on_voice_state_update(member, before, after, db=None):
     """Обработка изменения голосового состояния"""
     user_id = str(member.id)
@@ -204,6 +279,19 @@ async def on_voice_state_update(member, before, after, db=None):
                 'sessions': [],
                 'channel_name': after.channel.name
             }
+        
+        # Проверяем и обновляем стрик
+        if db:
+            user = db.get_user(user_id, member.name)
+            streak_result = check_and_update_voice_streak(user, db)
+            
+            if streak_result['streak_updated']:
+                # Начисляем бонус XP за стрик
+                user['xp'] = user.get('xp', 0) + streak_result['bonus_xp']
+                db.check_rank_up(user)
+                db.save_user(user_id, user)
+                
+                print(f"🔥 {member.name} получил стрик {streak_result['current_streak']} дней! Бонус: +{streak_result['bonus_xp']} XP")
         
         # Сохраняем активную сессию
         active_sessions[user_id] = {

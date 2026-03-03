@@ -96,6 +96,8 @@
     "major update: shop roles, rank notifications, verification channel, database fixes",
     "fix website deployment: correct Procfile, fix CSS/JS paths, add shop items with role IDs",
     "update auto_update.json",
-    "update gitignore to include shop_items.json"
+    "update gitignore to include shop_items.json",
+    "новая система магазина: обмен XP на монеты, обновленные цены ролей, XP только за войс",
+    "обновлены требования XP для рангов под новый баланс"
   ]
 }

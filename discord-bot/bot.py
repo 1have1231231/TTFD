@@ -311,6 +311,60 @@ async def on_ready():
     
     # Запускаем обновление онлайна
     update_online_members.start()
+    
+    # Миграция XP: начисляем XP пользователям по их текущим ролям
+    print("🔄 Начинаю миграцию XP...")
+    role_xp_map = {
+        1467727827473530931: 0,    # F-ранг
+        1467727807001137336: 50,   # E-ранг
+        1467727832456233113: 150,  # D-ранг
+        1467727811480649940: 350,  # C-ранг
+        1467727824558231653: 700,  # B-ранг
+        1467727451500187718: 1500, # A-ранг
+        1467727794296328234: 3000  # S-ранг
+    }
+    
+    migration_stats = {'updated': 0, 'skipped': 0}
+    
+    for guild in bot.guilds:
+        for member in guild.members:
+            if member.bot:
+                continue
+            
+            try:
+                user_id = str(member.id)
+                user = db.get_user(user_id, member.name)
+                current_xp = user.get('xp', 0)
+                
+                # Находим самую высокую роль ранга
+                highest_xp = 0
+                for role in member.roles:
+                    if role.id in role_xp_map:
+                        role_xp = role_xp_map[role.id]
+                        if role_xp > highest_xp:
+                            highest_xp = role_xp
+                
+                # Если нашли роль и текущий XP меньше требуемого
+                if highest_xp > 0 and current_xp < highest_xp:
+                    user['xp'] = highest_xp
+                    
+                    # Обновляем ранг
+                    new_rank = 1
+                    for rank in db.get_all_ranks():
+                        if highest_xp >= rank['required_xp']:
+                            new_rank = rank['id']
+                    user['rank_id'] = new_rank
+                    
+                    db.save_user(user_id, user)
+                    migration_stats['updated'] += 1
+                    print(f"✅ {member.name}: установлен XP {highest_xp}")
+                else:
+                    migration_stats['skipped'] += 1
+            
+            except Exception as e:
+                print(f"❌ Ошибка миграции для {member.name}: {e}")
+    
+    print(f"✅ Миграция завершена: обновлено {migration_stats['updated']}, пропущено {migration_stats['skipped']}")
 
 @bot.event
 async def on_message(message):
@@ -524,10 +578,80 @@ async def profile(ctx, member: discord.Member = None):
     embed.add_field(name="🖱️ Кликов", value=f"{user['clicks']}", inline=True)
     embed.add_field(name="✅ Заданий", value=f"{user['tasks_completed']}", inline=True)
     
+    # Стрик за войс
+    voice_streak = user.get('voice_streak', 0)
+    if voice_streak > 0:
+        streak_emoji = "🔥" if voice_streak >= 7 else "⚡"
+        embed.add_field(name=f"{streak_emoji} Войс стрик", value=f"{voice_streak} дней", inline=True)
+    
     if next_rank:
         embed.add_field(name="📈 До следующего ранга", value=f"{xp_needed} XP", inline=False)
     
     embed.set_footer(text="Играй в кликер на сайте!")
+    
+    await ctx.send(embed=embed)
+
+@bot.command(name='streak')
+async def streak(ctx, member: discord.Member = None):
+    """Посмотреть стрик за ежедневный войс"""
+    member = member or ctx.author
+    user = db.get_user(str(member.id), username=member.name)
+    
+    voice_streak = user.get('voice_streak', 0)
+    last_voice_date = user.get('last_voice_date')
+    
+    # Определяем эмодзи и бонус
+    if voice_streak >= 100:
+        streak_emoji = "💎"
+        bonus_xp = 50
+        tier = "ЛЕГЕНДА"
+    elif voice_streak >= 30:
+        streak_emoji = "🏆"
+        bonus_xp = 20
+        tier = "МАСТЕР"
+    elif voice_streak >= 7:
+        streak_emoji = "🔥"
+        bonus_xp = 10
+        tier = "АКТИВНЫЙ"
+    elif voice_streak > 0:
+        streak_emoji = "⚡"
+        bonus_xp = 5
+        tier = "НОВИЧОК"
+    else:
+        streak_emoji = "💤"
+        bonus_xp = 0
+        tier = "НЕТ СТРИКА"
+    
+    embed = discord.Embed(
+        title=f"{streak_emoji} Войс стрик {member.name}",
+        description=f"**{tier}**",
+        color=discord.Color.orange() if voice_streak > 0 else discord.Color.greyple(),
+        timestamp=datetime.now()
+    )
+    
+    embed.add_field(name="🔥 Текущий стрик", value=f"{voice_streak} дней", inline=True)
+    embed.add_field(name="💎 Бонус XP", value=f"+{bonus_xp} XP/день", inline=True)
+    
+    if last_voice_date:
+        from datetime import date
+        if isinstance(last_voice_date, str):
+            last_voice_date = date.fromisoformat(last_voice_date)
+        
+        today = date.today()
+        if last_voice_date == today:
+            embed.add_field(name="✅ Сегодня", value="Уже был в войсе!", inline=False)
+        else:
+            days_ago = (today - last_voice_date).days
+            embed.add_field(name="⏰ Последний раз", value=f"{days_ago} дней назад", inline=False)
+    
+    # Информация о бонусах
+    embed.add_field(
+        name="📊 Уровни стриков",
+        value="⚡ 1-6 дней: +5 XP\n🔥 7-29 дней: +10 XP\n🏆 30-99 дней: +20 XP\n💎 100+ дней: +50 XP",
+        inline=False
+    )
+    
+    embed.set_footer(text="Заходи в войс каждый день чтобы не потерять стрик!")
     
     await ctx.send(embed=embed)
 
