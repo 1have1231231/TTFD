@@ -73,6 +73,12 @@
     "add Gunicorn and Procfile for production",
     "update commands list to slash and fix rank notification channel",
     "fix slash commands and username error",
-    "add guild-specific slash command sync"
+    "add guild-specific slash command sync",
+    "replace 20 ranks system with F-S rank system",
+    "add /shop slash command",
+    "update /shop to sell roles with buttons",
+    "improve shop design: role mentions, emojis on buttons, better layout",
+    "fix role mentions in shop to display properly",
+    "add TTFD clan website and Railway deployment config"
   ]
 }
