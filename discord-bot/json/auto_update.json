@@ -92,6 +92,7 @@
     "force Railway redeploy",
     "add new roles to shop with prices",
     "fix PostgreSQL: add daily_streak column",
-    "update shop with correct role IDs and prices"
+    "update shop with correct role IDs and prices",
+    "major update: shop roles, rank notifications, verification channel, database fixes"
   ]
 }
