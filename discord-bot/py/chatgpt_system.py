@@ -174,6 +174,7 @@ async def setup_chatgpt_commands(bot):
     """Настроить slash команды ChatGPT"""
     
     @bot.tree.command(name="ask", description="Задать вопрос ChatGPT")
+    @discord.app_commands.describe(question="Твой вопрос к ChatGPT")
     async def ask_slash(interaction: discord.Interaction, question: str):
         """Slash команда для вопроса ChatGPT"""
         # Проверяем канал
@@ -282,6 +283,8 @@ async def setup_chatgpt_commands(bot):
         )
         
         await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+    print(f"✅ Зарегистрировано 3 ChatGPT команды")
 
 
 async def on_message_chatgpt(message, bot):
