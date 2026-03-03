@@ -161,7 +161,7 @@ async def register_slash_commands():
         
         embed = discord.Embed(
             title="🛒 Магазин Ролей",
-            description=f"💰 Твой баланс: **{user['coins']}** монет\n\n"
+            description=f"Твой баланс: **{user['coins']}** монет\n\n"
                        "Доступные роли для покупки:",
             color=discord.Color.gold(),
             timestamp=datetime.now()
@@ -169,24 +169,24 @@ async def register_slash_commands():
         
         # Роли в магазине
         roles = [
-            {"role_id": 1478224551287590983, "price": 15000, "name": "Премиум роль"},
-            {"role_id": 1478208144319582312, "price": 10000, "name": "VIP роль"},
-            {"role_id": 1478222910794502335, "price": 5000, "name": "Элитная роль"},
-            {"role_id": 1478226541094637628, "price": 1000, "name": "Базовая роль"},
+            {"role_id": 1478224551287590983, "price": 15000, "emoji": "💎"},
+            {"role_id": 1478208144319582312, "price": 10000, "emoji": "👑"},
+            {"role_id": 1478222910794502335, "price": 5000, "emoji": "⭐"},
+            {"role_id": 1478226541094637628, "price": 1000, "emoji": "🎯"},
         ]
         
         for role_data in roles:
             role = interaction.guild.get_role(role_data["role_id"])
             if role:
                 has_role = role in interaction.user.roles
-                status = "✅ Куплено" if has_role else f"💰 {role_data['price']} монет"
+                status = "✅ Куплено" if has_role else f"{role_data['price']} монет"
                 embed.add_field(
-                    name=f"{role.name}",
+                    name=f"{role_data['emoji']} {role.mention}",
                     value=status,
-                    inline=True
+                    inline=False
                 )
         
-        embed.set_footer(text="Нажми на кнопку ниже чтобы купить роль")
+        embed.set_footer(text="Выбери роль которую хочешь купить")
         
         # Создаём кнопки для покупки
         view = ShopView(roles, user['coins'])
@@ -204,7 +204,8 @@ class ShopView(discord.ui.View):
         for role_data in roles:
             button = discord.ui.Button(
                 label=f"{role_data['price']} монет",
-                style=discord.ButtonStyle.green,
+                emoji=role_data['emoji'],
+                style=discord.ButtonStyle.blurple,
                 custom_id=f"buy_role_{role_data['role_id']}"
             )
             button.callback = self.create_callback(role_data)
@@ -229,7 +230,7 @@ class ShopView(discord.ui.View):
             if user['coins'] < role_data['price']:
                 needed = role_data['price'] - user['coins']
                 await interaction.response.send_message(
-                    f"❌ Недостаточно монет! Нужно ещё {needed} монет.",
+                    f"❌ Недостаточно монет! Нужно ещё **{needed}** монет.",
                     ephemeral=True
                 )
                 return
@@ -244,9 +245,9 @@ class ShopView(discord.ui.View):
                 
                 embed = discord.Embed(
                     title="✅ Покупка успешна!",
-                    description=f"Ты купил роль {role.mention}\n"
-                               f"Потрачено: {role_data['price']} монет\n"
-                               f"Осталось: {user['coins']} монет",
+                    description=f"Ты купил роль {role.mention}\n\n"
+                               f"Потрачено: **{role_data['price']}** монет\n"
+                               f"Осталось: **{user['coins']}** монет",
                     color=discord.Color.green()
                 )
                 
