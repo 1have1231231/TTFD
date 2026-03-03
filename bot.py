@@ -1,5 +1,6 @@
 # Discord Bot - Основной файл
 import discord
+from discord import app_commands
 from discord.ext import commands, tasks
 import asyncio
 import aiohttp
@@ -46,6 +47,114 @@ COMMANDS_CHANNEL_ID = 1466295322002067607
 # ID сообщения со списком команд (будет обновляться)
 COMMANDS_MESSAGE_ID = None
 
+# ==================== SLASH КОМАНДЫ ====================
+
+async def register_slash_commands():
+    """Регистрация slash команд"""
+    
+    @bot.tree.command(name="ping", description="Проверка задержки бота")
+    async def ping_slash(interaction: discord.Interaction):
+        latency = round(bot.latency * 1000)
+        embed = discord.Embed(
+            title="🏓 Понг!",
+            description=f"Задержка: **{latency}ms**",
+            color=discord.Color.blue()
+        )
+        await interaction.response.send_message(embed=embed)
+    
+    @bot.tree.command(name="profile", description="Профиль пользователя")
+    @app_commands.describe(member="Пользователь (оставь пустым для своего профиля)")
+    async def profile_slash(interaction: discord.Interaction, member: discord.Member = None):
+        member = member or interaction.user
+        user = db.get_user(str(member.id))
+        
+        rank = db.get_rank_info(user['rank_id'])
+        
+        embed = discord.Embed(
+            title=f"👤 Профиль {member.name}",
+            color=int(rank['color'].replace('#', '0x'), 16),
+            timestamp=datetime.now()
+        )
+        embed.set_thumbnail(url=member.display_avatar.url)
+        
+        embed.add_field(name="🏆 Ранг", value=f"{rank['name']}", inline=True)
+        embed.add_field(name="⭐ Опыт", value=f"{user['xp']} XP", inline=True)
+        embed.add_field(name="💰 Монеты", value=f"{user['coins']}", inline=True)
+        
+        await interaction.response.send_message(embed=embed)
+    
+    @bot.tree.command(name="top", description="Таблица лидеров")
+    async def top_slash(interaction: discord.Interaction):
+        leaders = db.get_leaderboard(10)
+        
+        embed = discord.Embed(
+            title="🏆 Топ-10 игроков",
+            color=discord.Color.gold(),
+            timestamp=datetime.now()
+        )
+        
+        medals = ["🥇", "🥈", "🥉"]
+        
+        for i, user_data in enumerate(leaders):
+            medal = medals[i] if i < 3 else f"{i+1}."
+            rank = db.get_rank_info(user_data['rank_id'])
+            
+            username = user_data.get('username', 'Unknown')
+            try:
+                discord_user = await bot.fetch_user(int(user_data['id']))
+                username = discord_user.name
+            except:
+                pass
+            
+            embed.add_field(
+                name=f"{medal} {username}",
+                value=f"Ранг: {rank['name']} | XP: {user_data['xp']} | Монеты: {user_data['coins']}",
+                inline=False
+            )
+        
+        await interaction.response.send_message(embed=embed)
+    
+    @bot.tree.command(name="daily", description="Ежедневная награда")
+    async def daily_slash(interaction: discord.Interaction):
+        result = db.claim_daily(str(interaction.user.id))
+        
+        if result['success']:
+            embed = discord.Embed(
+                title="🎁 Ежедневная награда!",
+                description=f"Ты получил:\n⭐ {result['xp']} XP\n💰 {result['coins']} монет",
+                color=discord.Color.green()
+            )
+            embed.set_footer(text="Возвращайся завтра за новой наградой!")
+        else:
+            embed = discord.Embed(
+                title="⏰ Слишком рано!",
+                description=result['error'],
+                color=discord.Color.red()
+            )
+        
+        await interaction.response.send_message(embed=embed)
+    
+    @bot.tree.command(name="link", description="Ссылка на сайт")
+    async def link_slash(interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="🌐 Сайт TTFD",
+            description="Играй в игры и зарабатывай ранги!",
+            color=discord.Color.blue(),
+            url="https://ttfd.onrender.com/"
+        )
+        
+        embed.add_field(
+            name="🎮 Игры",
+            value="[Все игры](https://ttfd.onrender.com/games)\n"
+                  "[Змейка](https://ttfd.onrender.com/snake)\n"
+                  "[Кликер](https://ttfd.onrender.com/game)",
+            inline=True
+        )
+        
+        embed.set_thumbnail(url=bot.user.display_avatar.url)
+        
+        await interaction.response.send_message(embed=embed)
+
 # ==================== СОБЫТИЯ ====================
 
 @bot.event
@@ -67,13 +176,14 @@ async def on_ready():
         status=discord.Status.online
     )
     
-    # Синхронизируем slash команды (если есть)
+    # Синхронизируем slash команды
     try:
+        # Регистрируем slash команды
+        await register_slash_commands()
+        
+        # Синхронизируем с Discord
         synced = await bot.tree.sync()
-        if len(synced) > 0:
-            print(f"✅ Синхронизировано {len(synced)} slash команд")
-        else:
-            print("ℹ️ Slash команды отключены (используются только ! команды)")
+        print(f"✅ Синхронизировано {len(synced)} slash команд")
     except Exception as e:
         print(f"❌ Ошибка синхронизации команд: {e}")
     
@@ -92,8 +202,8 @@ async def on_message(message):
     
     bot.stats['messages_seen'] += 1
     
-    # Даём 1 XP за сообщение и обновляем username
-    db.add_xp(str(message.author.id), 1, username=message.author.name)
+    # Даём 1 XP за сообщение
+    db.add_xp(str(message.author.id), 1)
     
     # Обрабатываем команды
     await bot.process_commands(message)

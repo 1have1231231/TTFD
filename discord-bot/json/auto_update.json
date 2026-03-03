@@ -70,6 +70,7 @@
     "clean up project structure",
     "add requirements.txt",
     "fix Python version to 3.11.7",
-    "add Gunicorn and Procfile for production"
+    "add Gunicorn and Procfile for production",
+    "update commands list to slash and fix rank notification channel"
   ]
 }
