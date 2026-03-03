@@ -13,6 +13,44 @@ SHOP_FILE = 'json/shop_items.json'
 
 # Предметы магазина по умолчанию
 DEFAULT_SHOP_ITEMS = {
+    'roles': [
+        {
+            'id': 'premium_role_1',
+            'name': 'Премиум роль 💎',
+            'description': 'Эксклюзивная роль',
+            'price': 15000,
+            'emoji': '💎',
+            'category': 'roles',
+            'role_id': 1478224551287590983
+        },
+        {
+            'id': 'vip_role',
+            'name': 'VIP роль 👑',
+            'description': 'VIP статус',
+            'price': 10000,
+            'emoji': '👑',
+            'category': 'roles',
+            'role_id': 1478208144319582312
+        },
+        {
+            'id': 'star_role',
+            'name': 'Звёздная роль ⭐',
+            'description': 'Особая роль',
+            'price': 5000,
+            'emoji': '⭐',
+            'category': 'roles',
+            'role_id': 1478222910794502335
+        },
+        {
+            'id': 'supporter_role',
+            'name': 'Роль поддержки 🎯',
+            'description': 'Роль саппортера',
+            'price': 1000,
+            'emoji': '🎯',
+            'category': 'roles',
+            'role_id': 1478226541094637628
+        },
+    ],
     'boosts': [
         {
             'id': 'xp_boost_1h',
