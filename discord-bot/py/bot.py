@@ -56,6 +56,7 @@ import game_integration
 import slash_commands
 import views
 import chatgpt_system
+import private_channels_system
 
 print("✅ Используется JSON база данных")
 
@@ -278,8 +279,9 @@ async def on_ready():
     except Exception as e:
         print(f"❌ Ошибка инициализации войса: {e}")
         import traceback
+        traceback.print_exc()
     
-    # Настройка ChatGPT
+    # Настройка ChatGPT (ПЕРЕД синхронизацией команд!)
     print("🤖 Настройка ChatGPT...")
     try:
         await chatgpt_system.setup_chatgpt_commands(bot)
@@ -288,6 +290,14 @@ async def on_ready():
         print(f"❌ Ошибка настройки ChatGPT: {e}")
         import traceback
         traceback.print_exc()
+    
+    # Настройка приватных каналов
+    try:
+        await private_channels_system.setup_private_channels(bot)
+        print("✅ Система приватных каналов настроена")
+    except Exception as e:
+        print(f"❌ Ошибка настройки приватных каналов: {e}")
+        import traceback
         traceback.print_exc()
     
     # Синхронизация ВСЕХ slash команд с Discord (ВАЖНО: в самом конце после всех регистраций!)
@@ -380,6 +390,13 @@ async def on_raw_reaction_remove(payload):
 async def on_voice_state_update(member, before, after):
     """Обработка изменения голосового состояния"""
     await voice_tracking.on_voice_state_update(member, before, after)
+
+@bot.event
+async def on_member_update(before, after):
+    """Обработка изменения данных участника (роли, ник и т.д.)"""
+    # Проверяем изменение ролей для системы приватных каналов
+    if before.roles != after.roles:
+        await private_channels_system.on_member_update_role(before, after, bot)
 
 
 # ==================== Фоновые задачи ====================

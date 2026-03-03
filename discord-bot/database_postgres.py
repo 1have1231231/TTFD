@@ -73,13 +73,25 @@ class PostgresDatabase:
         try:
             cur.execute("""
                 ALTER TABLE users 
-                ADD COLUMN IF NOT EXISTS daily_streak INTEGER DEFAULT 0,
-                ADD COLUMN IF NOT EXISTS last_daily_date DATE,
-                ADD COLUMN IF NOT EXISTS voice_streak INTEGER DEFAULT 0,
+                ADD COLUMN IF NOT EXISTS daily_streak INTEGER DEFAULT 0
+            """)
+            cur.execute("""
+                ALTER TABLE users 
+                ADD COLUMN IF NOT EXISTS last_daily_date DATE
+            """)
+            cur.execute("""
+                ALTER TABLE users 
+                ADD COLUMN IF NOT EXISTS voice_streak INTEGER DEFAULT 0
+            """)
+            cur.execute("""
+                ALTER TABLE users 
                 ADD COLUMN IF NOT EXISTS last_voice_date DATE
             """)
-        except:
-            pass
+            conn.commit()
+            print("✅ Миграция колонок выполнена")
+        except Exception as e:
+            print(f"⚠️ Ошибка миграции: {e}")
+            conn.rollback()
         
         # Таблица аккаунтов
         cur.execute("""

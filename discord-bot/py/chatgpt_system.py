@@ -286,19 +286,23 @@ async def setup_chatgpt_commands(bot):
 
 async def on_message_chatgpt(message, bot):
     """
-    Обработка сообщений в канале ChatGPT
+    Обработка сообщений в канале ChatGPT или приватных каналах
     Автоматически отвечает на сообщения без команды
     """
     # Игнорируем ботов
     if message.author.bot:
         return
     
-    # Проверяем канал
-    if not is_chatgpt_channel(message.channel.id):
+    # Проверяем канал (ChatGPT канал или приватный канал)
+    import private_channels_system
+    is_chatgpt = is_chatgpt_channel(message.channel.id)
+    is_private = private_channels_system.is_private_channel(message.channel.id)
+    
+    if not is_chatgpt and not is_private:
         return
     
     # Игнорируем команды
-    if message.content.startswith('!'):
+    if message.content.startswith('!') or message.content.startswith('/'):
         return
     
     # Проверяем кулдаун
