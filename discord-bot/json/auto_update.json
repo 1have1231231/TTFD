@@ -79,6 +79,9 @@
     "update /shop to sell roles with buttons",
     "improve shop design: role mentions, emojis on buttons, better layout",
     "fix role mentions in shop to display properly",
-    "add TTFD clan website and Railway deployment config"
+    "add TTFD clan website and Railway deployment config",
+    "remove old website files, keep only new clan website",
+    "add standalone TTFD clan website",
+    "fix Flask app to properly serve static files"
   ]
 }
