@@ -154,6 +154,37 @@ async def register_slash_commands():
         embed.set_thumbnail(url=bot.user.display_avatar.url)
         
         await interaction.response.send_message(embed=embed)
+    
+    @bot.tree.command(name="shop", description="Магазин предметов")
+    async def shop_slash(interaction: discord.Interaction):
+        user = db.get_user(str(interaction.user.id))
+        
+        embed = discord.Embed(
+            title="🛒 Магазин",
+            description=f"💰 Твой баланс: **{user['coins']}** монет\n\n"
+                       "Доступные предметы:",
+            color=discord.Color.gold(),
+            timestamp=datetime.now()
+        )
+        
+        # Предметы магазина
+        items = [
+            {"name": "💎 1000 XP", "price": 500, "emoji": "💎"},
+            {"name": "💰 500 монет", "price": 300, "emoji": "💰"},
+            {"name": "🎁 Случайная награда", "price": 1000, "emoji": "🎁"},
+            {"name": "⭐ Сброс daily", "price": 2000, "emoji": "⭐"},
+        ]
+        
+        for item in items:
+            embed.add_field(
+                name=f"{item['emoji']} {item['name']}",
+                value=f"Цена: {item['price']} монет",
+                inline=True
+            )
+        
+        embed.set_footer(text="Используй команды на сайте для покупки")
+        
+        await interaction.response.send_message(embed=embed)
 
 # ==================== СОБЫТИЯ ====================
 
@@ -304,19 +335,12 @@ async def update_commands_list():
             "```\n\n"
             "**🎮 Основные команды:**\n"
             "• `/ping` - Проверка задержки бота\n"
-            "• `/stats` - Статистика бота\n"
-            "• `/link` - Ссылка на сайт\n"
-            "• `/slut` - Случайное фото котика 🐱\n\n"
+            "• `/link` - Ссылка на сайт\n\n"
             "**👤 Профиль и игра:**\n"
             "• `/profile [@user]` - Профиль пользователя\n"
-            "• `/rank` - Твой текущий ранг\n"
             "• `/top` - Таблица лидеров\n"
-            "• `/daily` - Ежедневная награда\n\n"
-            "**🎫 Поддержка:**\n"
-            "• `/ticket` - Создать тикет поддержки\n"
-            "• `/close` - Закрыть тикет *(только в канале тикета)*\n\n"
-            "**🛡️ Модерация:**\n"
-            "• `/clear <число>` - Очистить сообщения *(только для модераторов)*\n\n"
+            "• `/daily` - Ежедневная награда\n"
+            "• `/shop` - Магазин предметов 🛒\n\n"
             f"```\n🎮 Играй в игры на сайте и получай ранги!\n"
             f"Обновлено: {datetime.now().strftime('%d.%m.%Y %H:%M')}\n```"
         )
