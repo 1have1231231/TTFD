@@ -61,9 +61,21 @@ class PostgresDatabase:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_daily TIMESTAMP,
+                daily_streak INTEGER DEFAULT 0,
+                last_daily_date DATE,
                 daily_tasks JSONB DEFAULT '[]'::jsonb
             )
         """)
+        
+        # Добавляем колонки daily_streak и last_daily_date если их нет (миграция)
+        try:
+            cur.execute("""
+                ALTER TABLE users 
+                ADD COLUMN IF NOT EXISTS daily_streak INTEGER DEFAULT 0,
+                ADD COLUMN IF NOT EXISTS last_daily_date DATE
+            """)
+        except:
+            pass
         
         # Таблица аккаунтов
         cur.execute("""
