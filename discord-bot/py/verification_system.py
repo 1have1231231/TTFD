@@ -9,7 +9,7 @@ from font_converter import convert_to_font
 from theme import BotTheme, success_embed
 
 # ID канала верификации
-VERIFICATION_CHANNEL_ID = 1466923990936326294
+VERIFICATION_CHANNEL_ID = 997173753924554832
 
 # ID роли для выдачи
 VERIFIED_ROLE_ID = 997163765806153728
