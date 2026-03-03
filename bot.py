@@ -155,36 +155,112 @@ async def register_slash_commands():
         
         await interaction.response.send_message(embed=embed)
     
-    @bot.tree.command(name="shop", description="Магазин предметов")
+    @bot.tree.command(name="shop", description="Магазин ролей")
     async def shop_slash(interaction: discord.Interaction):
         user = db.get_user(str(interaction.user.id))
         
         embed = discord.Embed(
-            title="🛒 Магазин",
+            title="🛒 Магазин Ролей",
             description=f"💰 Твой баланс: **{user['coins']}** монет\n\n"
-                       "Доступные предметы:",
+                       "Доступные роли для покупки:",
             color=discord.Color.gold(),
             timestamp=datetime.now()
         )
         
-        # Предметы магазина
-        items = [
-            {"name": "💎 1000 XP", "price": 500, "emoji": "💎"},
-            {"name": "💰 500 монет", "price": 300, "emoji": "💰"},
-            {"name": "🎁 Случайная награда", "price": 1000, "emoji": "🎁"},
-            {"name": "⭐ Сброс daily", "price": 2000, "emoji": "⭐"},
+        # Роли в магазине
+        roles = [
+            {"role_id": 1478224551287590983, "price": 15000, "name": "Премиум роль"},
+            {"role_id": 1478208144319582312, "price": 10000, "name": "VIP роль"},
+            {"role_id": 1478222910794502335, "price": 5000, "name": "Элитная роль"},
+            {"role_id": 1478226541094637628, "price": 1000, "name": "Базовая роль"},
         ]
         
-        for item in items:
-            embed.add_field(
-                name=f"{item['emoji']} {item['name']}",
-                value=f"Цена: {item['price']} монет",
-                inline=True
+        for role_data in roles:
+            role = interaction.guild.get_role(role_data["role_id"])
+            if role:
+                has_role = role in interaction.user.roles
+                status = "✅ Куплено" if has_role else f"💰 {role_data['price']} монет"
+                embed.add_field(
+                    name=f"{role.name}",
+                    value=status,
+                    inline=True
+                )
+        
+        embed.set_footer(text="Нажми на кнопку ниже чтобы купить роль")
+        
+        # Создаём кнопки для покупки
+        view = ShopView(roles, user['coins'])
+        
+        await interaction.response.send_message(embed=embed, view=view)
+
+# Класс для кнопок магазина
+class ShopView(discord.ui.View):
+    def __init__(self, roles, user_coins):
+        super().__init__(timeout=180)  # 3 минуты
+        self.roles = roles
+        self.user_coins = user_coins
+        
+        # Добавляем кнопки для каждой роли
+        for role_data in roles:
+            button = discord.ui.Button(
+                label=f"{role_data['price']} монет",
+                style=discord.ButtonStyle.green,
+                custom_id=f"buy_role_{role_data['role_id']}"
             )
+            button.callback = self.create_callback(role_data)
+            self.add_item(button)
+    
+    def create_callback(self, role_data):
+        async def callback(interaction: discord.Interaction):
+            # Проверяем есть ли уже роль
+            role = interaction.guild.get_role(role_data["role_id"])
+            if not role:
+                await interaction.response.send_message("❌ Роль не найдена на сервере!", ephemeral=True)
+                return
+            
+            if role in interaction.user.roles:
+                await interaction.response.send_message("❌ У тебя уже есть эта роль!", ephemeral=True)
+                return
+            
+            # Получаем актуальный баланс
+            user = db.get_user(str(interaction.user.id))
+            
+            # Проверяем хватает ли монет
+            if user['coins'] < role_data['price']:
+                needed = role_data['price'] - user['coins']
+                await interaction.response.send_message(
+                    f"❌ Недостаточно монет! Нужно ещё {needed} монет.",
+                    ephemeral=True
+                )
+                return
+            
+            # Снимаем монеты
+            user['coins'] -= role_data['price']
+            db.save_data()
+            
+            # Выдаём роль
+            try:
+                await interaction.user.add_roles(role)
+                
+                embed = discord.Embed(
+                    title="✅ Покупка успешна!",
+                    description=f"Ты купил роль {role.mention}\n"
+                               f"Потрачено: {role_data['price']} монет\n"
+                               f"Осталось: {user['coins']} монет",
+                    color=discord.Color.green()
+                )
+                
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+            except discord.Forbidden:
+                # Возвращаем монеты если не удалось выдать роль
+                user['coins'] += role_data['price']
+                db.save_data()
+                await interaction.response.send_message(
+                    "❌ Не удалось выдать роль. Монеты возвращены.",
+                    ephemeral=True
+                )
         
-        embed.set_footer(text="Используй команды на сайте для покупки")
-        
-        await interaction.response.send_message(embed=embed)
+        return callback
 
 # ==================== СОБЫТИЯ ====================
 
