@@ -85,6 +85,13 @@
     "fix Flask app to properly serve static files",
     "clean up old files, finalize clan website",
     "add railway.json config for website",
-    "fix file paths in Flask app"
+    "fix file paths in Flask app",
+    "update discord-bot files with latest changes",
+    "update verification channel ID",
+    "switch to simple HTTP server for website",
+    "force Railway redeploy",
+    "add new roles to shop with prices",
+    "fix PostgreSQL: add daily_streak column",
+    "update shop with correct role IDs and prices"
   ]
 }

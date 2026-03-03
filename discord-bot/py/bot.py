@@ -117,8 +117,9 @@ def save_commands_message_id(message_id):
     except Exception as e:
         print(f"⚠️ Не удалось сохранить ID сообщения: {e}")
 
-# ID канала для уведомлений об обновлениях
-UPDATES_CHANNEL_ID = 1466923990936326294
+# ID канала для уведомлений об обновлениях (ОТКЛЮЧЕНО)
+# UPDATES_CHANNEL_ID = 1466923990936326294
+UPDATES_CHANNEL_ID = None  # Отключено
 
 # ID роли администратора
 ADMIN_ROLE_ID = 1466282400219922536

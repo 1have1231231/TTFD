@@ -39,8 +39,9 @@ async def on_ready():
     print(f"✅ Бот подключен: {bot.user.name}")
     print(f"🌐 Серверов: {len(bot.guilds)}")
     
-    # Проверяем канал
-    channel_id = 1466923990936326294
+    # Проверяем канал (ОТКЛЮЧЕНО)
+    # channel_id = 1466923990936326294
+    channel_id = None  # Отключено
     channel = bot.get_channel(channel_id)
     
     if not channel:

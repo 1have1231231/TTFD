@@ -6,8 +6,9 @@ import json
 import os
 from py.update_version import bump_version, get_current_version
 
-# ID канала для уведомлений
-UPDATES_CHANNEL_ID = 1466923990936326294
+# ID канала для уведомлений (ОТКЛЮЧЕНО)
+# UPDATES_CHANNEL_ID = 1466923990936326294
+UPDATES_CHANNEL_ID = None  # Отключено
 
 # Путь к файлу автообновления
 AUTO_UPDATE_FILE = "json/auto_update.json"

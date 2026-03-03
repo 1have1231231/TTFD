@@ -18,8 +18,9 @@ import discord
 from discord.ext import commands
 from font_converter import convert_to_font
 
-# ID канала для обновлений
-UPDATES_CHANNEL_ID = 1466923990936326294
+# ID канала для обновлений (ОТКЛЮЧЕНО)
+# UPDATES_CHANNEL_ID = 1466923990936326294
+UPDATES_CHANNEL_ID = None  # Отключено
 
 # Текст сообщения
 UPDATE_MESSAGE = """═══════════════════════════════════════════════════════════════

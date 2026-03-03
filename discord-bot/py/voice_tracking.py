@@ -122,7 +122,7 @@ async def award_voice_xp_task():
                                 print(f"🎊 {member.name} получил роль {result['role'].name} за достижение {new_xp} XP!")
                                 
                                 # Отправляем уведомление в канал получения ролей
-                                RANK_UP_CHANNEL_ID = 1466923990936326294
+                                RANK_UP_CHANNEL_ID = 1466294080589008916
                                 try:
                                     channel = member.guild.get_channel(RANK_UP_CHANNEL_ID)
                                     if channel and channel.permissions_for(member.guild.me).send_messages:

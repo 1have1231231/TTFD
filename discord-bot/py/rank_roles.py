@@ -239,6 +239,9 @@ async def send_rank_up_notification(ctx, member, old_xp, new_xp, old_tier, new_t
     """
     from theme import BotTheme
     
+    # ID канала для уведомлений о получении ролей
+    RANK_UP_CHANNEL_ID = 1466294080589008916
+    
     embed = BotTheme.create_embed(
         title=convert_to_font("🎊 новая роль!"),
         description=convert_to_font(f"поздравляем {member.mention}!"),
@@ -274,7 +277,17 @@ async def send_rank_up_notification(ctx, member, old_xp, new_xp, old_tier, new_t
             inline=False
         )
     
-    await ctx.send(embed=embed)
+    # Отправляем в специальный канал уведомлений
+    try:
+        notification_channel = ctx.guild.get_channel(RANK_UP_CHANNEL_ID)
+        if notification_channel:
+            await notification_channel.send(embed=embed)
+        else:
+            # Если канал не найден, отправляем в текущий
+            await ctx.send(embed=embed)
+    except:
+        # В случае ошибки отправляем в текущий канал
+        await ctx.send(embed=embed)
 
 def get_next_role_info(current_tier):
     """Получить информацию о следующей роли"""
