@@ -94,6 +94,8 @@
     "fix PostgreSQL: add daily_streak column",
     "update shop with correct role IDs and prices",
     "major update: shop roles, rank notifications, verification channel, database fixes",
-    "fix website deployment: correct Procfile, fix CSS/JS paths, add shop items with role IDs"
+    "fix website deployment: correct Procfile, fix CSS/JS paths, add shop items with role IDs",
+    "update auto_update.json",
+    "update gitignore to include shop_items.json"
   ]
 }

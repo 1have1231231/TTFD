@@ -81,9 +81,22 @@ async def award_voice_xp_task():
             
             # Если прошла минута или больше - начисляем XP
             if time_since_last_xp >= 60:
-                # Начисляем 2 XP за минуту
+                # Начисляем 0.5 XP за минуту
                 minutes_passed = int(time_since_last_xp / 60)
-                xp_reward = minutes_passed * 2
+                xp_reward = minutes_passed * 0.5
+                
+                # Проверяем бонус за час (каждые 60 минут +10 XP)
+                total_minutes_in_voice = (now - datetime.fromisoformat(session['session_start'])).total_seconds() / 60
+                hours_completed = int(total_minutes_in_voice / 60)
+                previous_hours = int((total_minutes_in_voice - minutes_passed) / 60)
+                
+                # Если завершился новый час - добавляем бонус
+                if hours_completed > previous_hours:
+                    hours_bonus = (hours_completed - previous_hours) * 10
+                    xp_reward += hours_bonus
+                    print(f"🎉 Бонус за {hours_completed} час(ов): +{hours_bonus} XP")
+                
+                xp_reward = int(xp_reward)
                 
                 # Обновляем данные пользователя
                 user = _db.get_user(user_id)
@@ -405,52 +418,27 @@ def calculate_voice_xp(duration_seconds):
     Рассчитать XP за время в войсе
     
     Формула:
-    - 5 минут = 10 XP (2 XP за минуту)
-    - 10 минут = 20 XP
-    - 1 час = 100 XP
-    - После 1 часа: каждые +30 минут X2 к имеющемуся показателю
-    - Без ограничения максимума
+    - 1 минута = 0.5 XP
+    - 1 час = +10 XP бонус к накопленному
     """
     minutes = duration_seconds / 60
     
-    if minutes < 60:
-        # До 1 часа: 2 XP за минуту
-        xp = int(minutes * 2)
-    else:
-        # После 1 часа: базовые 100 XP + экспоненциальный рост
-        base_xp = 100
-        extra_minutes = minutes - 60
-        
-        # Каждые 30 минут удваиваем
-        multiplier_count = int(extra_minutes / 30)
-        xp = base_xp * (2 ** multiplier_count)
+    # Базовый XP: 0.5 за минуту
+    base_xp = minutes * 0.5
     
-    return xp
+    # Бонус за каждый час: +10 XP
+    hours = int(minutes / 60)
+    bonus_xp = hours * 10
+    
+    total_xp = base_xp + bonus_xp
+    
+    return int(total_xp)
 
 def calculate_message_xp(message_length):
     """
-    Рассчитать XP за сообщение
-    
-    Формула:
-    - Короткие сообщения (< 10 символов): 0 XP (спам)
-    - 10-50 символов: 1 XP
-    - 50-100 символов: 10 XP
-    - 100-200 символов: 50 XP
-    - 200-500 символов: 100 XP
-    - 500+ символов: 250 XP
+    XP за сообщения отключен - XP начисляется только за войс
     """
-    if message_length < 10:
-        return 0  # Спам
-    elif message_length < 50:
-        return 1
-    elif message_length < 100:
-        return 10
-    elif message_length < 200:
-        return 50
-    elif message_length < 500:
-        return 100
-    else:
-        return 250  # Максимум за очень длинное сообщение
+    return 0
 
 # Кулдаун для сообщений убран - каждое сообщение даёт XP
 # {user_id: last_message_time}

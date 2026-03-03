@@ -9,12 +9,46 @@
 @bot.command(name='shop')
 async def shop(ctx, category: str = 'all'):
     """Магазин предметов"""
-    valid_categories = ['all', 'roles', 'boosts', 'cosmetics', 'special']
+    valid_categories = ['all', 'roles', 'exchange']
     
     if category not in valid_categories:
         category = 'all'
     
     embed = shop_system.get_shop_embed_page(category=category)
+    await ctx.send(embed=embed)
+
+@bot.command(name='exchange')
+async def exchange(ctx, xp_amount: int = None):
+    """Обменять XP на монеты (1 XP = 5 монет)"""
+    if not xp_amount or xp_amount <= 0:
+        await ctx.send(convert_to_font("❌ укажи количество XP: !exchange [количество]"))
+        return
+    
+    result = shop_system.exchange_xp_to_coins(db, str(ctx.author.id), xp_amount)
+    
+    if not result['success']:
+        embed = error_embed(
+            title=convert_to_font("❌ ошибка обмена"),
+            description=convert_to_font(result['error'])
+        )
+        await ctx.send(embed=embed)
+        return
+    
+    embed = success_embed(
+        title=convert_to_font("💱 обмен выполнен!"),
+        description=convert_to_font(f"обменял {result['xp_spent']} XP на {result['coins_received']} монет")
+    )
+    embed.add_field(
+        name=convert_to_font("💎 твой XP"),
+        value=convert_to_font(str(result['new_xp'])),
+        inline=True
+    )
+    embed.add_field(
+        name=convert_to_font("💰 твои монеты"),
+        value=convert_to_font(str(result['new_coins'])),
+        inline=True
+    )
+    
     await ctx.send(embed=embed)
 
 @bot.command(name='buy')

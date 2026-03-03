@@ -13,12 +13,22 @@ SHOP_FILE = 'json/shop_items.json'
 
 # Предметы магазина по умолчанию
 DEFAULT_SHOP_ITEMS = {
+    'exchange': [
+        {
+            'id': 'xp_to_coins',
+            'name': 'Обмен XP на монеты',
+            'description': '1 XP = 5 монет',
+            'rate': 5,
+            'emoji': '💱',
+            'category': 'exchange'
+        }
+    ],
     'roles': [
         {
             'id': 'premium_role_1',
             'name': 'Премиум роль 💎',
             'description': 'Эксклюзивная роль',
-            'price': 15000,
+            'price': 20000,
             'emoji': '💎',
             'category': 'roles',
             'role_id': 1478224551287590983
@@ -27,7 +37,7 @@ DEFAULT_SHOP_ITEMS = {
             'id': 'vip_role',
             'name': 'VIP роль 👑',
             'description': 'VIP статус',
-            'price': 10000,
+            'price': 15000,
             'emoji': '👑',
             'category': 'roles',
             'role_id': 1478208144319582312
@@ -36,7 +46,7 @@ DEFAULT_SHOP_ITEMS = {
             'id': 'star_role',
             'name': 'Звёздная роль ⭐',
             'description': 'Особая роль',
-            'price': 5000,
+            'price': 15000,
             'emoji': '⭐',
             'category': 'roles',
             'role_id': 1478222910794502335
@@ -45,119 +55,11 @@ DEFAULT_SHOP_ITEMS = {
             'id': 'supporter_role',
             'name': 'Роль поддержки 🎯',
             'description': 'Роль саппортера',
-            'price': 1000,
+            'price': 5000,
             'emoji': '🎯',
             'category': 'roles',
             'role_id': 1478226541094637628
-        },
-    ],
-    'boosts': [
-        {
-            'id': 'xp_boost_1h',
-            'name': 'Буст XP (1 час)',
-            'description': 'x2 xp на 1 час',
-            'price': 500,
-            'duration': 3600,  # секунды
-            'multiplier': 2,
-            'emoji': '⚡',
-            'category': 'boosts',
-            'boost_type': 'xp'
-        },
-        {
-            'id': 'xp_boost_24h',
-            'name': 'Буст XP (24 часа)',
-            'description': 'x2 xp на 24 часа',
-            'price': 3000,
-            'duration': 86400,
-            'multiplier': 2,
-            'emoji': '🚀',
-            'category': 'boosts',
-            'boost_type': 'xp'
-        },
-        {
-            'id': 'coins_boost_1h',
-            'name': 'Буст монет (1 час)',
-            'description': 'x2 монеты на 1 час',
-            'price': 600,
-            'duration': 3600,
-            'multiplier': 2,
-            'emoji': '💰',
-            'category': 'boosts',
-            'boost_type': 'coins'
-        },
-        {
-            'id': 'luck_boost_1h',
-            'name': 'Буст удачи (1 час)',
-            'description': 'больше шанс выигрыша в играх',
-            'price': 800,
-            'duration': 3600,
-            'multiplier': 1.5,
-            'emoji': '🍀',
-            'category': 'boosts',
-            'boost_type': 'luck'
-        },
-    ],
-    'cosmetics': [
-        {
-            'id': 'profile_bg_dark',
-            'name': 'Тёмный фон профиля',
-            'description': 'чёрный фон для профиля',
-            'price': 1500,
-            'emoji': '🌑',
-            'category': 'cosmetics',
-            'cosmetic_type': 'background',
-            'value': '#0d0d0d'
-        },
-        {
-            'id': 'profile_bg_red',
-            'name': 'Красный фон профиля',
-            'description': 'кроваво-красный фон',
-            'price': 1500,
-            'emoji': '🔴',
-            'category': 'cosmetics',
-            'cosmetic_type': 'background',
-            'value': '#8b0000'
-        },
-        {
-            'id': 'profile_bg_gradient',
-            'name': 'Градиентный фон',
-            'description': 'чёрно-красный градиент',
-            'price': 2500,
-            'emoji': '🎨',
-            'category': 'cosmetics',
-            'cosmetic_type': 'background',
-            'value': 'gradient'
-        },
-        {
-            'id': 'custom_nickname',
-            'name': 'Смена ника',
-            'description': 'изменить свой ник на сервере',
-            'price': 2000,
-            'emoji': '✏️',
-            'category': 'cosmetics',
-            'cosmetic_type': 'nickname'
-        },
-    ],
-    'special': [
-        {
-            'id': 'daily_reset',
-            'name': 'Сброс daily',
-            'description': 'сбросить кулдаун !daily',
-            'price': 1000,
-            'emoji': '🔄',
-            'category': 'special',
-            'special_type': 'daily_reset'
-        },
-        {
-            'id': 'rank_boost',
-            'name': 'Ускорение ранга',
-            'description': '+1000 xp мгновенно',
-            'price': 2000,
-            'emoji': '📈',
-            'category': 'special',
-            'special_type': 'xp_instant',
-            'value': 1000
-        },
+        }
     ]
 }
 
@@ -217,18 +119,24 @@ def get_shop_embed_page(page=1, category='all'):
         
         # Названия категорий
         category_names = {
-            'roles': '👑 роли',
-            'boosts': '⚡ бусты',
-            'cosmetics': '🎨 косметика',
-            'special': '✨ особое'
+            'exchange': '💱 обмен',
+            'roles': '👑 роли'
         }
         
         items_text = []
         for item in items:
-            items_text.append(
-                f"{item['emoji']} **{item['id']}** - {convert_to_font(item['name'])}\n"
-                f"   {convert_to_font(item['description'])} | {convert_to_font(str(item['price']))} монет"
-            )
+            if item['category'] == 'exchange':
+                # Специальное отображение для обмена
+                items_text.append(
+                    f"{item['emoji']} **{item['id']}** - {convert_to_font(item['name'])}\n"
+                    f"   {convert_to_font(item['description'])}\n"
+                    f"   {convert_to_font('используй !exchange [количество XP]')}"
+                )
+            else:
+                items_text.append(
+                    f"{item['emoji']} **{item['id']}** - {convert_to_font(item['name'])}\n"
+                    f"   {convert_to_font(item['description'])} | {convert_to_font(str(item['price']))} монет"
+                )
         
         if items_text:
             embed.add_field(
@@ -252,6 +160,51 @@ def get_shop_items(category='all'):
         return all_items
     
     return shop_items.get(category, [])
+
+def exchange_xp_to_coins(db, user_id, xp_amount):
+    """
+    Обменять XP на монеты (1 XP = 5 монет)
+    
+    Args:
+        db: Database instance
+        user_id: ID пользователя
+        xp_amount: Количество XP для обмена
+    
+    Returns:
+        dict: {'success': bool, 'coins_received': int, 'error': str}
+    """
+    user = db.get_user(user_id)
+    
+    if not user:
+        return {'success': False, 'error': 'пользователь не зарегистрирован'}
+    
+    current_xp = user.get('xp', 0)
+    
+    if xp_amount <= 0:
+        return {'success': False, 'error': 'укажи положительное количество XP'}
+    
+    if current_xp < xp_amount:
+        return {
+            'success': False,
+            'error': f'недостаточно XP\nу тебя: {current_xp} XP, нужно: {xp_amount} XP'
+        }
+    
+    # Обмен: 1 XP = 5 монет
+    coins_received = xp_amount * 5
+    
+    # Обновляем пользователя
+    user['xp'] -= xp_amount
+    user['coins'] = user.get('coins', 0) + coins_received
+    
+    db.save_user(user_id, user)
+    
+    return {
+        'success': True,
+        'xp_spent': xp_amount,
+        'coins_received': coins_received,
+        'new_xp': user['xp'],
+        'new_coins': user['coins']
+    }
 
 def buy_item(db, user_id, item_id):
     """
@@ -288,33 +241,8 @@ def buy_item(db, user_id, item_id):
     user['coins'] -= item['price']
     
     # Обработка по типу предмета
-    if item['category'] in ['roles', 'cosmetics']:
+    if item['category'] in ['roles']:
         user['inventory'].append(item_id)
-    
-    elif item['category'] == 'boosts':
-        # Активация буста
-        if 'active_boosts' not in user:
-            user['active_boosts'] = []
-        
-        boost_data = {
-            'item_id': item_id,
-            'boost_type': item.get('boost_type', 'xp'),
-            'multiplier': item.get('multiplier', 2),
-            'expires_at': (datetime.now() + timedelta(seconds=item['duration'])).isoformat()
-        }
-        
-        user['active_boosts'].append(boost_data)
-    
-    elif item['category'] == 'special':
-        special_type = item.get('special_type')
-        
-        if special_type == 'daily_reset':
-            user['last_daily_date'] = None
-        
-        elif special_type == 'xp_instant':
-            xp_amount = item.get('value', 1000)
-            user['xp'] = user.get('xp', 0) + xp_amount
-            db.check_rank_up(user)
     
     db.save_user(user_id, user)
     
@@ -379,71 +307,6 @@ async def buy_item_legacy(ctx, bot, db, item_id):
             result_message = convert_to_font("роль не настроена (обратись к админу)")
         
         user['inventory'].append(item_id)
-    
-    elif item['category'] == 'boosts':
-        # Активация буста
-        if 'active_boosts' not in user:
-            user['active_boosts'] = []
-        
-        boost_data = {
-            'item_id': item_id,
-            'boost_type': item.get('boost_type', 'xp'),
-            'multiplier': item.get('multiplier', 2),
-            'expires_at': (datetime.now() + timedelta(seconds=item['duration'])).isoformat()
-        }
-        
-        user['active_boosts'].append(boost_data)
-        
-        hours = item['duration'] // 3600
-        minutes = (item['duration'] % 3600) // 60
-        time_str = f"{hours}ч" if hours > 0 else f"{minutes}м"
-        
-        result_message = convert_to_font(f"буст активирован на {time_str}!")
-    
-    elif item['category'] == 'cosmetics':
-        user['inventory'].append(item_id)
-        
-        if item.get('cosmetic_type') == 'background':
-            # Автоматически применяем фон
-            if 'profile_settings' not in user:
-                user['profile_settings'] = {}
-            user['profile_settings']['background'] = item.get('value', '#0d0d0d')
-            result_message = convert_to_font("фон профиля изменён!")
-        elif item.get('cosmetic_type') == 'nickname':
-            result_message = convert_to_font("используй !setnick [новый ник] для смены")
-        else:
-            result_message = convert_to_font("предмет добавлен в инвентарь!")
-    
-    elif item['category'] == 'special':
-        special_type = item.get('special_type')
-        
-        if special_type == 'daily_reset':
-            user['last_daily_date'] = None
-            result_message = convert_to_font("кулдаун !daily сброшен!")
-        
-        elif special_type == 'rank_up':
-            # Повышаем ранг на следующий уровень
-            current_rank_id = user.get('rank_id', 1)
-            all_ranks = db.get_all_ranks()
-            
-            if current_rank_id < len(all_ranks):
-                # Переходим на следующий ранг
-                user['rank_id'] = current_rank_id + 1
-                new_rank = db.get_rank_info(user['rank_id'])
-                
-                # Устанавливаем XP на минимум для нового ранга
-                user['xp'] = new_rank['required_xp']
-                
-                result_message = convert_to_font(f"ранг повышен до {new_rank['name']}!")
-            else:
-                # Уже максимальный ранг
-                result_message = convert_to_font("у тебя уже максимальный ранг!")
-        
-        elif special_type == 'xp_instant':
-            xp_amount = item.get('value', 1000)
-            user['xp'] = user.get('xp', 0) + xp_amount
-            db.check_rank_up(user)
-            result_message = convert_to_font(f"+{xp_amount} xp получено!")
     
     db.save_user(str(ctx.author.id), user)
     
