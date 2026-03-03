@@ -3,17 +3,20 @@ import os
 
 app = Flask(__name__)
 
+# Get the directory where app.py is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 @app.route('/')
 def index():
-    return send_file('index.html')
+    return send_file(os.path.join(BASE_DIR, 'index.html'))
 
 @app.route('/styles.css')
 def styles():
-    return send_file('styles.css', mimetype='text/css')
+    return send_file(os.path.join(BASE_DIR, 'styles.css'), mimetype='text/css')
 
 @app.route('/script.js')
 def script():
-    return send_file('script.js', mimetype='application/javascript')
+    return send_file(os.path.join(BASE_DIR, 'script.js'), mimetype='application/javascript')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
