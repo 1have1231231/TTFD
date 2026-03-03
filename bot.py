@@ -161,8 +161,7 @@ async def register_slash_commands():
         
         embed = discord.Embed(
             title="🛒 Магазин Ролей",
-            description=f"Твой баланс: **{user['coins']}** монет\n\n"
-                       "Доступные роли для покупки:",
+            description=f"Твой баланс: **{user['coins']}** монет",
             color=discord.Color.gold(),
             timestamp=datetime.now()
         )
@@ -175,16 +174,19 @@ async def register_slash_commands():
             {"role_id": 1478226541094637628, "price": 1000, "emoji": "🎯"},
         ]
         
+        roles_text = ""
         for role_data in roles:
             role = interaction.guild.get_role(role_data["role_id"])
             if role:
                 has_role = role in interaction.user.roles
-                status = "✅ Куплено" if has_role else f"{role_data['price']} монет"
-                embed.add_field(
-                    name=f"{role_data['emoji']} {role.mention}",
-                    value=status,
-                    inline=False
-                )
+                status = "✅ Куплено" if has_role else f"**{role_data['price']}** монет"
+                roles_text += f"{role_data['emoji']} {role.mention}\n{status}\n\n"
+        
+        embed.add_field(
+            name="Доступные роли для покупки:",
+            value=roles_text,
+            inline=False
+        )
         
         embed.set_footer(text="Выбери роль которую хочешь купить")
         
