@@ -171,72 +171,66 @@ async def ask_chatgpt(user_id, question):
 
 
 async def setup_chatgpt_commands(bot):
-    """Настроить команды ChatGPT"""
+    """Настроить slash команды ChatGPT"""
     
-    @bot.command(name='ask')
-    async def ask_command(ctx, *, question: str = None):
-        """Задать вопрос ChatGPT"""
+    @bot.tree.command(name="ask", description="Задать вопрос ChatGPT")
+    async def ask_slash(interaction: discord.Interaction, question: str):
+        """Slash команда для вопроса ChatGPT"""
         # Проверяем канал
-        if not is_chatgpt_channel(ctx.channel.id):
-            await ctx.send(
+        if not is_chatgpt_channel(interaction.channel_id):
+            await interaction.response.send_message(
                 convert_to_font(f"❌ эта команда работает только в канале <#{CHATGPT_CHANNEL_ID}>"),
-                delete_after=5
-            )
-            return
-        
-        if not question:
-            await ctx.send(
-                convert_to_font("❌ укажи вопрос: !ask [твой вопрос]"),
-                delete_after=5
+                ephemeral=True
             )
             return
         
         # Проверяем кулдаун
-        can_use, time_left = check_cooldown(ctx.author.id)
+        can_use, time_left = check_cooldown(interaction.user.id)
         if not can_use:
-            await ctx.send(
+            await interaction.response.send_message(
                 convert_to_font(f"⏰ подожди {time_left} секунд перед следующим вопросом"),
-                delete_after=5
+                ephemeral=True
             )
             return
         
         # Отправляем сообщение о загрузке
-        async with ctx.typing():
-            # Отправляем запрос к ChatGPT
-            result = await ask_chatgpt(ctx.author.id, question)
+        await interaction.response.defer()
+        
+        # Отправляем запрос к ChatGPT
+        result = await ask_chatgpt(interaction.user.id, question)
+        
+        if result['success']:
+            # Обновляем время последнего запроса
+            last_requests[interaction.user.id] = datetime.now()
             
-            if result['success']:
-                # Обновляем время последнего запроса
-                last_requests[ctx.author.id] = datetime.now()
-                
-                # Создаём embed с ответом
-                embed = BotTheme.create_embed(
-                    title="🤖 ChatGPT",
-                    description=result['response'],
-                    embed_type='info'
-                )
-                embed.set_footer(text=f"Вопрос от {ctx.author.name}")
-                
-                await ctx.reply(embed=embed, mention_author=False)
-            else:
-                # Ошибка
-                embed = error_embed(
-                    title=convert_to_font("❌ ошибка"),
-                    description=convert_to_font(result['error'])
-                )
-                await ctx.send(embed=embed)
+            # Создаём embed с ответом
+            embed = BotTheme.create_embed(
+                title="🤖 ChatGPT",
+                description=result['response'],
+                embed_type='info'
+            )
+            embed.set_footer(text=f"Вопрос от {interaction.user.name}")
+            
+            await interaction.followup.send(embed=embed)
+        else:
+            # Ошибка
+            embed = error_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font(result['error'])
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
     
-    @bot.command(name='clear_chat')
-    async def clear_chat_command(ctx):
-        """Очистить историю диалога с ChatGPT"""
-        if not is_chatgpt_channel(ctx.channel.id):
-            await ctx.send(
+    @bot.tree.command(name="clear_chat", description="Очистить историю диалога с ChatGPT")
+    async def clear_chat_slash(interaction: discord.Interaction):
+        """Slash команда для очистки истории"""
+        if not is_chatgpt_channel(interaction.channel_id):
+            await interaction.response.send_message(
                 convert_to_font(f"❌ эта команда работает только в канале <#{CHATGPT_CHANNEL_ID}>"),
-                delete_after=5
+                ephemeral=True
             )
             return
         
-        clear_history(ctx.author.id)
+        clear_history(interaction.user.id)
         
         embed = BotTheme.create_embed(
             title="🗑️ История очищена",
@@ -244,18 +238,11 @@ async def setup_chatgpt_commands(bot):
             embed_type='success'
         )
         
-        await ctx.send(embed=embed, delete_after=10)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
     
-    @bot.command(name='chatgpt_help')
-    async def chatgpt_help_command(ctx):
-        """Помощь по ChatGPT"""
-        if not is_chatgpt_channel(ctx.channel.id):
-            await ctx.send(
-                convert_to_font(f"❌ эта команда работает только в канале <#{CHATGPT_CHANNEL_ID}>"),
-                delete_after=5
-            )
-            return
-        
+    @bot.tree.command(name="chatgpt_help", description="Помощь по ChatGPT")
+    async def chatgpt_help_slash(interaction: discord.Interaction):
+        """Slash команда для справки"""
         embed = BotTheme.create_embed(
             title="🤖 ChatGPT - Помощь",
             description="Как использовать ChatGPT в Discord",
@@ -265,10 +252,16 @@ async def setup_chatgpt_commands(bot):
         embed.add_field(
             name="📝 Команды",
             value=(
-                "**!ask [вопрос]** - задать вопрос ChatGPT\n"
-                "**!clear_chat** - очистить историю диалога\n"
-                "**!chatgpt_help** - эта справка"
+                "**/ask [вопрос]** - задать вопрос ChatGPT\n"
+                "**/clear_chat** - очистить историю диалога\n"
+                "**/chatgpt_help** - эта справка"
             ),
+            inline=False
+        )
+        
+        embed.add_field(
+            name="💬 Автоматический режим",
+            value=f"Просто пиши в канале <#{CHATGPT_CHANNEL_ID}> без команды - бот автоматически ответит!",
             inline=False
         )
         
@@ -283,12 +276,12 @@ async def setup_chatgpt_commands(bot):
             value=(
                 "• Задавай конкретные вопросы\n"
                 "• ChatGPT помнит последние 10 сообщений\n"
-                "• Используй !clear_chat для начала нового диалога"
+                "• Используй /clear_chat для начала нового диалога"
             ),
             inline=False
         )
         
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 async def on_message_chatgpt(message, bot):

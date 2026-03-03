@@ -194,6 +194,76 @@ async def register_slash_commands():
         view = ShopView(roles, user['coins'])
         
         await interaction.response.send_message(embed=embed, view=view)
+    
+    @bot.tree.command(name="streak", description="Посмотреть стрик за ежедневный войс")
+    @app_commands.describe(member="Пользователь (оставь пустым для своего профиля)")
+    async def streak_slash(interaction: discord.Interaction, member: discord.Member = None):
+        """Slash команда для просмотра стрика"""
+        target = member or interaction.user
+        user = db.get_user(str(target.id), username=target.name)
+        
+        voice_streak = user.get('voice_streak', 0)
+        last_voice_date = user.get('last_voice_date')
+        
+        # Определяем эмодзи и бонус
+        if voice_streak >= 100:
+            streak_emoji = "💎"
+            bonus_xp = 50
+            tier = "ЛЕГЕНДА"
+            color = discord.Color.purple()
+        elif voice_streak >= 30:
+            streak_emoji = "🏆"
+            bonus_xp = 20
+            tier = "МАСТЕР"
+            color = discord.Color.gold()
+        elif voice_streak >= 7:
+            streak_emoji = "🔥"
+            bonus_xp = 10
+            tier = "АКТИВНЫЙ"
+            color = discord.Color.orange()
+        elif voice_streak > 0:
+            streak_emoji = "⚡"
+            bonus_xp = 5
+            tier = "НОВИЧОК"
+            color = discord.Color.green()
+        else:
+            streak_emoji = "💤"
+            bonus_xp = 0
+            tier = "НЕТ СТРИКА"
+            color = discord.Color.greyple()
+        
+        embed = discord.Embed(
+            title=f"{streak_emoji} Войс стрик {target.name}",
+            description=f"**{tier}**",
+            color=color,
+            timestamp=datetime.now()
+        )
+        
+        embed.add_field(name="🔥 Текущий стрик", value=f"{voice_streak} дней", inline=True)
+        embed.add_field(name="💎 Бонус XP", value=f"+{bonus_xp} XP/день", inline=True)
+        
+        if last_voice_date:
+            from datetime import date
+            if isinstance(last_voice_date, str):
+                last_voice_date = date.fromisoformat(last_voice_date)
+            
+            today = date.today()
+            if last_voice_date == today:
+                embed.add_field(name="✅ Сегодня", value="Уже был в войсе!", inline=False)
+            else:
+                days_ago = (today - last_voice_date).days
+                embed.add_field(name="⏰ Последний раз", value=f"{days_ago} дней назад", inline=False)
+        
+        # Информация о бонусах
+        embed.add_field(
+            name="📊 Уровни стриков",
+            value="⚡ 1-6 дней: +5 XP\n🔥 7-29 дней: +10 XP\n🏆 30-99 дней: +20 XP\n💎 100+ дней: +50 XP",
+            inline=False
+        )
+        
+        embed.set_footer(text="Заходи в войс каждый день чтобы не потерять стрик!")
+        
+        await interaction.response.send_message(embed=embed)
 
 # Класс для кнопок магазина
 class ShopView(discord.ui.View):
