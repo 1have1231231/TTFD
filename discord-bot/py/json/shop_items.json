@@ -1,30 +1,39 @@
 {
   "roles": [
     {
-      "id": "vip_role",
-      "name": "VIP роль",
-      "description": "особая роль с крутым цветом",
-      "price": 5000,
-      "role_id": null,
-      "emoji": "👑",
-      "category": "roles"
-    },
-    {
-      "id": "premium_role",
-      "name": "Premium роль",
-      "description": "премиум роль с привилегиями",
-      "price": 10000,
-      "role_id": null,
+      "id": "premium_role_1",
+      "name": "Премиум роль 💎",
+      "description": "Эксклюзивная роль",
+      "price": 15000,
+      "role_id": 1478224551287590983,
       "emoji": "💎",
       "category": "roles"
     },
     {
-      "id": "legend_role",
-      "name": "Legend роль",
-      "description": "легендарная роль для избранных",
-      "price": 25000,
-      "role_id": null,
-      "emoji": "🔥",
+      "id": "vip_role",
+      "name": "VIP роль 👑",
+      "description": "VIP статус",
+      "price": 10000,
+      "role_id": 1478208144319582312,
+      "emoji": "👑",
+      "category": "roles"
+    },
+    {
+      "id": "star_role",
+      "name": "Звёздная роль ⭐",
+      "description": "Особая роль",
+      "price": 5000,
+      "role_id": 1478222910794502335,
+      "emoji": "⭐",
+      "category": "roles"
+    },
+    {
+      "id": "supporter_role",
+      "name": "Роль поддержки 🎯",
+      "description": "Роль саппортера",
+      "price": 1000,
+      "role_id": 1478226541094637628,
+      "emoji": "🎯",
       "category": "roles"
     }
   ],
