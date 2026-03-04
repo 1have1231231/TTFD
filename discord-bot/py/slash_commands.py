@@ -156,10 +156,10 @@ async def setup_slash_commands(bot, db):
         
         # Роли в магазине
         roles_data = [
-            {"role_id": 1478224551287590983, "price": 20000, "emoji": "💎", "name": "Премиум"},
-            {"role_id": 1478208144319582312, "price": 15000, "emoji": "👑", "name": "VIP"},
-            {"role_id": 1478222910794502335, "price": 15000, "emoji": "⭐", "name": "Звезда"},
-            {"role_id": 1478226541094637628, "price": 5000, "emoji": "🎯", "name": "Саппорт"},
+            {"role_id": 1478224551287590983, "price": 20000},
+            {"role_id": 1478208144319582312, "price": 15000},
+            {"role_id": 1478222910794502335, "price": 15000},
+            {"role_id": 1478226541094637628, "price": 5000},
         ]
         
         embed = BotTheme.create_embed(
