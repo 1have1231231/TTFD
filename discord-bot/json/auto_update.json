@@ -119,6 +119,7 @@
     "добавлена миграция для колонок last_work, last_dice, last_coinflip",
     "исправлено: удалены дубликаты команд, синхронизация только с guild",
     "hOTFIX: исправлен порядок синхронизации - сначала guild, потом очистка глобальных",
-    "fix: Add username column migration for PostgreSQL"
+    "fix: Add username column migration for PostgreSQL",
+    "fix: Add games_played and games_won columns migration"
   ]
 }
