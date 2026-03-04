@@ -151,17 +151,64 @@ async def setup_slash_commands(bot, db):
     
     @bot.tree.command(name="shop", description="Открыть магазин")
     async def shop_slash(interaction: discord.Interaction):
-        """Slash команда для магазина с кнопками"""
-        from views import ShopView
-        
+        """Slash команда для магазина - временно недоступен"""
         embed = BotTheme.create_embed(
             title=convert_to_font("🏪 магазин"),
-            description=convert_to_font("выбери категорию:"),
+            description=convert_to_font("магазин временно недоступен\n\nиспользуй /exchange для обмена XP на монеты"),
             embed_type='info'
         )
         
-        view = ShopView(db, interaction.user)
-        await interaction.response.send_message(embed=embed, view=view)
+        embed.add_field(
+            name=convert_to_font("💱 обмен"),
+            value=convert_to_font("1 XP = 5 монет"),
+            inline=False
+        )
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+    @bot.tree.command(name="exchange", description="Обменять XP на монеты")
+    @app_commands.describe(xp_amount="Количество XP для обмена (1 XP = 5 монет)")
+    async def exchange_slash(interaction: discord.Interaction, xp_amount: int):
+        """Slash команда для обмена XP на монеты"""
+        if xp_amount <= 0:
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font("укажи положительное количество XP"),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
+        from shop_system import exchange_xp_to_coins
+        
+        result = exchange_xp_to_coins(db, str(interaction.user.id), xp_amount)
+        
+        if not result['success']:
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка обмена"),
+                description=convert_to_font(result['error']),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
+        embed = BotTheme.create_embed(
+            title=convert_to_font("💱 обмен выполнен!"),
+            description=convert_to_font(f"обменял {result['xp_spent']} XP на {result['coins_received']} монет"),
+            embed_type='success'
+        )
+        embed.add_field(
+            name=convert_to_font("💎 твой XP"),
+            value=convert_to_font(str(result['new_xp'])),
+            inline=True
+        )
+        embed.add_field(
+            name=convert_to_font("💰 твои монеты"),
+            value=convert_to_font(str(result['new_coins'])),
+            inline=True
+        )
+        
+        await interaction.response.send_message(embed=embed)
     
     @bot.tree.command(name="inventory", description="Посмотреть инвентарь")
     @app_commands.describe(member="Пользователь (оставь пустым чтобы посмотреть свой)")
@@ -445,33 +492,13 @@ async def setup_slash_commands(bot, db):
     @bot.tree.command(name="buy", description="Купить предмет из магазина")
     @app_commands.describe(item_id="ID предмета из магазина")
     async def buy_slash(interaction: discord.Interaction, item_id: str):
-        """Slash команда для покупки"""
-        from shop_system import buy_item, find_item
-        
-        user_data = db.get_user(str(interaction.user.id))
-        result = buy_item(db, str(interaction.user.id), item_id)
-        
-        if result['success']:
-            item = result['item']
-            embed = BotTheme.create_embed(
-                title=convert_to_font(f"✅ куплено: {item['name']}"),
-                description=convert_to_font(f"{item['description']}"),
-                embed_type='success'
-            )
-            user_data = db.get_user(str(interaction.user.id))
-            embed.add_field(
-                name=convert_to_font("💰 баланс"),
-                value=convert_to_font(f"{user_data.get('coins', 0)} монет"),
-                inline=True
-            )
-            await interaction.response.send_message(embed=embed)
-        else:
-            embed = BotTheme.create_embed(
-                title=convert_to_font("❌ ошибка покупки"),
-                description=convert_to_font(result['error']),
-                embed_type='error'
-            )
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+        """Slash команда для покупки - временно недоступна"""
+        embed = BotTheme.create_embed(
+            title=convert_to_font("❌ недоступно"),
+            description=convert_to_font("покупка предметов временно недоступна\n\nиспользуй /exchange для обмена XP на монеты"),
+            embed_type='error'
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
     
     @bot.tree.command(name="pay", description="Перевести монеты другому пользователю")
     @app_commands.describe(member="Кому перевести", amount="Сумма")

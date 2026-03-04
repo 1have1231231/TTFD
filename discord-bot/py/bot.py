@@ -47,7 +47,7 @@ import tickets_system
 import verification_system
 from commands_manager import get_commands_text
 from theme import BotTheme, game_embed, profile_embed, success_embed, error_embed, warning_embed
-import shop_system
+# import shop_system  # Магазин отключен
 import commands_channel
 import updates_system
 import voice_tracking
