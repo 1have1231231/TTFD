@@ -281,15 +281,8 @@ async def on_ready():
         import traceback
         traceback.print_exc()
     
-    # Настройка ChatGPT (ПЕРЕД синхронизацией команд!)
-    print("🤖 Настройка ChatGPT...")
-    try:
-        await chatgpt_system.setup_chatgpt_commands(bot)
-        print(f"✅ ChatGPT настроен (канал: {chatgpt_system.CHATGPT_CHANNEL_ID})")
-    except Exception as e:
-        print(f"❌ Ошибка настройки ChatGPT: {e}")
-        import traceback
-        traceback.print_exc()
+    # ChatGPT команды теперь регистрируются в setup_slash_commands
+    print(f"✅ ChatGPT настроен (канал: {chatgpt_system.CHATGPT_CHANNEL_ID})")
     
     # Настройка приватных каналов
     try:

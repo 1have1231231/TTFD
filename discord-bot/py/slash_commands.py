@@ -1349,3 +1349,109 @@ async def setup_slash_commands(bot, db):
     
     
     print(f"✅ Slash команды зарегистрированы ({len(bot.tree.get_commands())} команд)")
+
+    # ==================== ChatGPT команды ====================
+    
+    @bot.tree.command(name="ask", description="Задать вопрос ChatGPT")
+    @app_commands.describe(question="Твой вопрос к ChatGPT")
+    async def ask_slash(interaction: discord.Interaction, question: str):
+        """Slash команда для вопроса ChatGPT"""
+        import chatgpt_system
+        from datetime import datetime
+        
+        # Проверяем кулдаун
+        can_use, time_left = chatgpt_system.check_cooldown(interaction.user.id)
+        if not can_use:
+            await interaction.response.send_message(
+                convert_to_font(f"⏰ подожди {time_left} секунд перед следующим вопросом"),
+                ephemeral=True
+            )
+            return
+        
+        # Отправляем сообщение о загрузке
+        await interaction.response.defer()
+        
+        # Отправляем запрос к ChatGPT
+        result = await chatgpt_system.ask_chatgpt(interaction.user.id, question)
+        
+        if result['success']:
+            # Обновляем время последнего запроса
+            chatgpt_system.last_requests[interaction.user.id] = datetime.now()
+            
+            # Создаём embed с ответом
+            embed = BotTheme.create_embed(
+                title="🤖 ChatGPT",
+                description=result['response'],
+                embed_type='info'
+            )
+            embed.set_footer(text=f"Вопрос от {interaction.user.name}")
+            
+            await interaction.followup.send(embed=embed)
+        else:
+            # Ошибка
+            from theme import error_embed
+            embed = error_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font(result['error'])
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+    
+    @bot.tree.command(name="clear_chat", description="Очистить историю диалога с ChatGPT")
+    async def clear_chat_slash(interaction: discord.Interaction):
+        """Slash команда для очистки истории"""
+        import chatgpt_system
+        
+        chatgpt_system.clear_history(interaction.user.id)
+        
+        embed = BotTheme.create_embed(
+            title="🗑️ История очищена",
+            description=convert_to_font("твоя история диалога с ChatGPT очищена"),
+            embed_type='success'
+        )
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+    @bot.tree.command(name="chatgpt_help", description="Помощь по ChatGPT")
+    async def chatgpt_help_slash(interaction: discord.Interaction):
+        """Slash команда для справки"""
+        import chatgpt_system
+        
+        embed = BotTheme.create_embed(
+            title="🤖 ChatGPT - Помощь",
+            description="Как использовать ChatGPT в Discord",
+            embed_type='info'
+        )
+        
+        embed.add_field(
+            name="📝 Команды",
+            value=(
+                "**/ask [вопрос]** - задать вопрос ChatGPT\n"
+                "**/clear_chat** - очистить историю диалога\n"
+                "**/chatgpt_help** - эта справка"
+            ),
+            inline=False
+        )
+        
+        embed.add_field(
+            name="💬 Автоматический режим",
+            value=f"Просто пиши в канале <#{chatgpt_system.CHATGPT_CHANNEL_ID}> без команды - бот автоматически ответит!",
+            inline=False
+        )
+        
+        embed.add_field(
+            name="⏰ Ограничения",
+            value=f"Кулдаун между вопросами: {chatgpt_system.COOLDOWN_SECONDS} секунд",
+            inline=False
+        )
+        
+        embed.add_field(
+            name="💡 Советы",
+            value=(
+                "• Задавай конкретные вопросы\n"
+                "• ChatGPT помнит последние 10 сообщений\n"
+                "• Используй /clear_chat для начала нового диалога"
+            ),
+            inline=False
+        )
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
