@@ -264,6 +264,47 @@ async def register_slash_commands():
         embed.set_footer(text="Заходи в войс каждый день чтобы не потерять стрик!")
         
         await interaction.response.send_message(embed=embed)
+    
+    # ChatGPT команды
+    @bot.tree.command(name="ask", description="Задать вопрос ChatGPT")
+    @app_commands.describe(question="Твой вопрос к ChatGPT")
+    async def ask_slash(interaction: discord.Interaction, question: str):
+        """Slash команда для вопроса ChatGPT"""
+        await interaction.response.defer()
+        
+        result = await chatgpt_system.ask_chatgpt(interaction.user.id, question)
+        
+        if result['success']:
+            chatgpt_system.last_requests[interaction.user.id] = datetime.now()
+            
+            embed = discord.Embed(
+                title="🤖 ChatGPT",
+                description=result['response'],
+                color=discord.Color.blue()
+            )
+            embed.set_footer(text=f"Вопрос от {interaction.user.name}")
+            
+            await interaction.followup.send(embed=embed)
+        else:
+            embed = discord.Embed(
+                title="❌ Ошибка",
+                description=result['error'],
+                color=discord.Color.red()
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+    
+    @bot.tree.command(name="clear_chat", description="Очистить историю диалога с ChatGPT")
+    async def clear_chat_slash(interaction: discord.Interaction):
+        """Slash команда для очистки истории"""
+        chatgpt_system.clear_history(interaction.user.id)
+        
+        embed = discord.Embed(
+            title="🗑️ История очищена",
+            description="Твоя история диалога с ChatGPT очищена",
+            color=discord.Color.green()
+        )
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 # Класс для кнопок магазина
 class ShopView(discord.ui.View):
