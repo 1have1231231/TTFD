@@ -301,7 +301,15 @@ async def on_ready():
         print(f"   - /{cmd.name}: {cmd.description}")
     
     try:
-        # Сначала копируем глобальные команды в guild и синхронизируем для мгновенного появления
+        # Очищаем глобальные команды чтобы удалить дубликаты
+        try:
+            bot.tree.clear_commands(guild=None)
+            await bot.tree.sync()
+            print("🗑️ Глобальные команды очищены (удаление дубликатов)")
+        except Exception as clear_error:
+            print(f"⚠️ Не удалось очистить глобальные команды: {clear_error}")
+        
+        # Синхронизируем ТОЛЬКО с guild для мгновенного появления (без дубликатов)
         try:
             guild = discord.Object(id=config.GUILD_ID)
             # ВАЖНО: копируем глобальные команды в guild
@@ -316,10 +324,9 @@ async def on_ready():
             import traceback
             traceback.print_exc()
         
-        # Также делаем GLOBAL sync для всех команд (работает везде, но обновляется до 1 часа)
-        synced = await bot.tree.sync()
-        print(f"✅ Синхронизировано {len(synced)} slash команд с Discord (global sync)")
-        print("⏰ Глобальные команды появятся в течение 1 часа")
+        # НЕ делаем global sync чтобы избежать дубликатов
+        # Команды будут работать только на этом сервере
+        print("ℹ️ Команды синхронизированы только с текущим сервером (без дубликатов)")
     except Exception as e:
         print(f"❌ Ошибка синхронизации команд: {e}")
         import traceback
