@@ -370,6 +370,8 @@ async def on_ready():
     # Запуск фоновых задач
     if not update_bot_status.is_running():
         update_bot_status.start()
+    if not update_website_stats.is_running():
+        update_website_stats.start()
 
 @bot.event
 async def on_command(ctx):
@@ -430,6 +432,40 @@ async def update_bot_status():
         discord.Activity(type=discord.ActivityType.listening, name="ваши команды"),
     ]
     await bot.change_presence(activity=random.choice(statuses))
+
+@tasks.loop(minutes=1)
+async def update_website_stats():
+    """Обновление статистики для сайта"""
+    try:
+        import json
+        from datetime import datetime
+        
+        guild = bot.get_guild(config.GUILD_ID)
+        if not guild:
+            return
+        
+        # Подсчитываем онлайн участников
+        online_count = sum(1 for member in guild.members 
+                         if not member.bot and member.status != discord.Status.offline)
+        
+        total_count = sum(1 for member in guild.members if not member.bot)
+        
+        stats = {
+            'online_members': online_count,
+            'total_members': total_count,
+            'last_update': datetime.now().isoformat()
+        }
+        
+        # Сохраняем в файл для сайта
+        stats_file = os.path.join(os.path.dirname(__file__), '..', '..', 'website', 'discord_stats.json')
+        os.makedirs(os.path.dirname(stats_file), exist_ok=True)
+        
+        with open(stats_file, 'w') as f:
+            json.dump(stats, f)
+        
+        print(f"📊 Статистика для сайта обновлена: {online_count}/{total_count} онлайн")
+    except Exception as e:
+        print(f"❌ Ошибка обновления статистики для сайта: {e}")
 
 
 # ==================== Обновление списка команд ====================

@@ -207,6 +207,36 @@ function animateCounter(element, target, duration = 2000) {
     }, 16);
 }
 
+// Fetch Discord stats from API
+async function updateDiscordStats() {
+    try {
+        const response = await fetch('/api/stats');
+        const data = await response.json();
+        
+        // Обновляем статистику на странице
+        const totalMembersElement = document.querySelector('.stats-grid .stat-card:nth-child(1) .stat-number');
+        const onlineNowElement = document.querySelector('.stats-grid .stat-card:nth-child(2) .stat-number');
+        
+        if (totalMembersElement && data.total_members) {
+            totalMembersElement.textContent = data.total_members;
+        }
+        
+        if (onlineNowElement && data.online_members) {
+            onlineNowElement.textContent = data.online_members;
+        }
+        
+        console.log('📊 Статистика обновлена:', data);
+    } catch (error) {
+        console.error('❌ Ошибка загрузки статистики:', error);
+    }
+}
+
+// Обновляем статистику при загрузке и каждые 30 секунд
+document.addEventListener('DOMContentLoaded', () => {
+    updateDiscordStats();
+    setInterval(updateDiscordStats, 30000); // Обновление каждые 30 секунд
+});
+
 // Trigger counter animation when stats section is visible
 const statsObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
