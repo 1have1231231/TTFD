@@ -120,6 +120,22 @@ class PostgresDatabase:
             ADD COLUMN IF NOT EXISTS last_voice_date DATE
         """)
         
+        # Добавляем колонки для команд /work, /dice, /coinflip (миграция)
+        cur.execute("""
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS last_work TIMESTAMP
+        """)
+        
+        cur.execute("""
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS last_dice TIMESTAMP
+        """)
+        
+        cur.execute("""
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS last_coinflip TIMESTAMP
+        """)
+        
         # Создаём индекс для быстрого поиска по telegram_id
         cur.execute("""
             CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id)
