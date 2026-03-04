@@ -121,6 +121,7 @@
     "hOTFIX: исправлен порядок синхронизации - сначала guild, потом очистка глобальных",
     "fix: Add username column migration for PostgreSQL",
     "fix: Add games_played and games_won columns migration",
-    "update: Complete commands list with all 32 commands"
+    "update: Complete commands list with all 32 commands",
+    "fix: Auto-update commands list on bot startup"
   ]
 }

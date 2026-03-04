@@ -259,6 +259,86 @@ async def setup_slash_commands(bot, db):
         
         await interaction.response.send_message(embed=embed)
     
+    @bot.tree.command(name="streak", description="Посмотреть стрик за ежедневный войс")
+    @app_commands.describe(member="Пользователь (оставь пустым чтобы посмотреть свой)")
+    async def streak_slash(interaction: discord.Interaction, member: discord.Member = None):
+        """Slash команда для просмотра стрика"""
+        target = member or interaction.user
+        user_data = db.get_user(str(target.id))
+        
+        voice_streak = user_data.get('voice_streak', 0)
+        last_voice_date = user_data.get('last_voice_date')
+        
+        # Определяем эмодзи и бонус
+        if voice_streak >= 100:
+            streak_emoji = "💎"
+            bonus_xp = 50
+            tier = "легенда"
+            color = 0x9b59b6  # Purple
+        elif voice_streak >= 30:
+            streak_emoji = "🏆"
+            bonus_xp = 20
+            tier = "мастер"
+            color = 0xf1c40f  # Gold
+        elif voice_streak >= 7:
+            streak_emoji = "🔥"
+            bonus_xp = 10
+            tier = "активный"
+            color = 0xe67e22  # Orange
+        elif voice_streak > 0:
+            streak_emoji = "⚡"
+            bonus_xp = 5
+            tier = "новичок"
+            color = 0x3498db  # Blue
+        else:
+            streak_emoji = "😴"
+            bonus_xp = 0
+            tier = "нет стрика"
+            color = 0x95a5a6  # Grey
+        
+        embed = discord.Embed(
+            title=convert_to_font(f"{streak_emoji} войс стрик {target.name}"),
+            description=convert_to_font(f"**{tier}**"),
+            color=color
+        )
+        
+        embed.add_field(
+            name=convert_to_font("🔥 текущий стрик"),
+            value=convert_to_font(f"{voice_streak} дней"),
+            inline=True
+        )
+        embed.add_field(
+            name=convert_to_font("💎 бонус xp"),
+            value=convert_to_font(f"+{bonus_xp} xp/день"),
+            inline=True
+        )
+        
+        if last_voice_date:
+            from datetime import datetime
+            if isinstance(last_voice_date, str):
+                last_date = datetime.fromisoformat(last_voice_date)
+            else:
+                last_date = last_voice_date
+            embed.add_field(
+                name=convert_to_font("📅 последний вход"),
+                value=convert_to_font(last_date.strftime("%d.%m.%Y")),
+                inline=True
+            )
+        
+        embed.add_field(
+            name=convert_to_font("ℹ️ как работает"),
+            value=convert_to_font("заходи в войс каждый день чтобы увеличить стрик!\n"
+                                 "⚡ 1-6 дней: +5 xp\n"
+                                 "🔥 7-29 дней: +10 xp\n"
+                                 "🏆 30-99 дней: +20 xp\n"
+                                 "💎 100+ дней: +50 xp"),
+            inline=False
+        )
+        
+        embed.set_thumbnail(url=target.display_avatar.url)
+        
+        await interaction.response.send_message(embed=embed)
+    
     @bot.tree.command(name="daily", description="Получить ежедневную награду")
     async def daily_slash(interaction: discord.Interaction):
         """Slash команда для ежедневной награды"""
