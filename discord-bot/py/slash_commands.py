@@ -594,40 +594,35 @@ async def setup_slash_commands(bot, db):
         await interaction.response.send_message(embed=embed)
     
     @bot.tree.command(name="buyrole", description="Купить роль за монеты")
-    @app_commands.describe(role_choice="Выбери роль для покупки")
-    @app_commands.choices(role_choice=[
-        app_commands.Choice(name="5000 монет", value=1478224551287590983),
-        app_commands.Choice(name="3500 монет", value=1478208144319582312),
-        app_commands.Choice(name="2500 монет", value=1478222910794502335),
-        app_commands.Choice(name="1000 монет", value=1478226541094637628),
+    @app_commands.describe(role_number="Выбери номер роли из магазина (используй /shop чтобы увидеть список)")
+    @app_commands.choices(role_number=[
+        app_commands.Choice(name="Роль 1 - 5000 монет", value=1),
+        app_commands.Choice(name="Роль 2 - 3500 монет", value=2),
+        app_commands.Choice(name="Роль 3 - 2500 монет", value=3),
+        app_commands.Choice(name="Роль 4 - 1000 монет", value=4),
     ])
-    async def buyrole_slash(interaction: discord.Interaction, role_choice: int):
+    async def buyrole_slash(interaction: discord.Interaction, role_number: int):
         """Slash команда для покупки роли"""
-        # Роли в магазине с ценами
-        roles_prices = {
-            1478224551287590983: {"price": 5000},
-            1478208144319582312: {"price": 3500},
-            1478222910794502335: {"price": 2500},
-            1478226541094637628: {"price": 1000},
-        }
+        # Роли в магазине с ценами (по порядку)
+        roles_list = [
+            {"role_id": 1478224551287590983, "price": 5000},
+            {"role_id": 1478208144319582312, "price": 3500},
+            {"role_id": 1478222910794502335, "price": 2500},
+            {"role_id": 1478226541094637628, "price": 1000},
+        ]
+        
+        # Получаем выбранную роль
+        selected_role_data = roles_list[role_number - 1]
+        role_id = selected_role_data["role_id"]
+        price = selected_role_data["price"]
         
         # Получаем роль по ID
-        role = interaction.guild.get_role(role_choice)
+        role = interaction.guild.get_role(role_id)
         
         if not role:
             embed = BotTheme.create_embed(
                 title=convert_to_font("❌ ошибка"),
                 description=convert_to_font("роль не найдена на сервере"),
-                embed_type='error'
-            )
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-            return
-        
-        # Проверяем что роль есть в магазине
-        if role.id not in roles_prices:
-            embed = BotTheme.create_embed(
-                title=convert_to_font("❌ ошибка"),
-                description=convert_to_font("эта роль не продаётся в магазине"),
                 embed_type='error'
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -642,9 +637,6 @@ async def setup_slash_commands(bot, db):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
-        
-        role_info = roles_prices[role.id]
-        price = role_info["price"]
         
         user_data = db.get_user(str(interaction.user.id))
         
