@@ -124,6 +124,7 @@
     "update: Complete commands list with all 32 commands",
     "fix: Auto-update commands list on bot startup",
     "add: /streak slash command for voice activity streak",
-    "fIX"
+    "fIX",
+    "fix: Simplify shop - remove emoji and custom names, show only role name and price"
   ]
 }

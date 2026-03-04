@@ -156,10 +156,10 @@ async def setup_slash_commands(bot, db):
         
         # Роли в магазине
         roles_data = [
-            {"role_id": 1478224551287590983, "price": 20000},
-            {"role_id": 1478208144319582312, "price": 15000},
-            {"role_id": 1478222910794502335, "price": 15000},
-            {"role_id": 1478226541094637628, "price": 5000},
+            {"role_id": 1478224551287590983, "price": 5000},
+            {"role_id": 1478208144319582312, "price": 3500},
+            {"role_id": 1478222910794502335, "price": 2500},
+            {"role_id": 1478226541094637628, "price": 1000},
         ]
         
         embed = BotTheme.create_embed(
@@ -594,16 +594,34 @@ async def setup_slash_commands(bot, db):
         await interaction.response.send_message(embed=embed)
     
     @bot.tree.command(name="buyrole", description="Купить роль за монеты")
-    @app_commands.describe(role="Роль которую хочешь купить")
-    async def buyrole_slash(interaction: discord.Interaction, role: discord.Role):
+    @app_commands.describe(role_choice="Выбери роль для покупки")
+    @app_commands.choices(role_choice=[
+        app_commands.Choice(name="5000 монет", value=1478224551287590983),
+        app_commands.Choice(name="3500 монет", value=1478208144319582312),
+        app_commands.Choice(name="2500 монет", value=1478222910794502335),
+        app_commands.Choice(name="1000 монет", value=1478226541094637628),
+    ])
+    async def buyrole_slash(interaction: discord.Interaction, role_choice: int):
         """Slash команда для покупки роли"""
         # Роли в магазине с ценами
         roles_prices = {
-            1478224551287590983: {"price": 20000},
-            1478208144319582312: {"price": 15000},
-            1478222910794502335: {"price": 15000},
-            1478226541094637628: {"price": 5000},
+            1478224551287590983: {"price": 5000},
+            1478208144319582312: {"price": 3500},
+            1478222910794502335: {"price": 2500},
+            1478226541094637628: {"price": 1000},
         }
+        
+        # Получаем роль по ID
+        role = interaction.guild.get_role(role_choice)
+        
+        if not role:
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font("роль не найдена на сервере"),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
         
         # Проверяем что роль есть в магазине
         if role.id not in roles_prices:
