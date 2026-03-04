@@ -126,6 +126,7 @@
     "add: /streak slash command for voice activity streak",
     "fIX",
     "fix: Simplify shop - remove emoji and custom names, show only role name and price",
-    "update: Change shop prices and buyrole to dropdown selection, remove /claim command"
+    "update: Change shop prices and buyrole to dropdown selection, remove /claim command",
+    "fix: Change buyrole to numbered selection (1-4) instead of role picker"
   ]
 }

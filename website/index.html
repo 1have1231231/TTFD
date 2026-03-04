@@ -11,10 +11,15 @@
     <nav class="nav">
         <div class="nav-logo">TTFD</div>
         <div class="nav-links">
-            <a href="#about">ABOUT</a>
-            <a href="#members">MEMBERS</a>
-            <a href="#stats">STATS</a>
-            <a href="#apply">APPLY</a>
+            <a href="#about" data-i18n="nav.about">ABOUT</a>
+            <a href="#members" data-i18n="nav.members">MEMBERS</a>
+            <a href="#stats" data-i18n="nav.stats">STATS</a>
+            <a href="#apply" data-i18n="nav.apply">APPLY</a>
+        </div>
+        <div class="language-switcher">
+            <button class="lang-btn active" data-lang="en">EN</button>
+            <span class="lang-divider">|</span>
+            <button class="lang-btn" data-lang="ru">RU</button>
         </div>
     </nav>
 
@@ -22,10 +27,10 @@
     <section class="hero">
         <div class="hero-content">
             <h1 class="hero-title">TTFD</h1>
-            <p class="hero-subtitle">DOMINATE. CONTROL. WIN.</p>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">DOMINATE. CONTROL. WIN.</p>
             <div class="hero-buttons">
-                <a href="#apply" class="btn btn-primary">JOIN CLAN</a>
-                <a href="#members" class="btn btn-secondary">VIEW MEMBERS</a>
+                <a href="#apply" class="btn btn-primary" data-i18n="hero.join">JOIN CLAN</a>
+                <a href="#members" class="btn btn-secondary" data-i18n="hero.view">VIEW MEMBERS</a>
             </div>
         </div>
     </section>
@@ -33,24 +38,24 @@
     <!-- About Section -->
     <section id="about" class="section about">
         <div class="container">
-            <h2 class="section-title">ABOUT CLAN</h2>
+            <h2 class="section-title" data-i18n="about.title">ABOUT CLAN</h2>
             <div class="about-content">
-                <p class="about-text">
+                <p class="about-text" data-i18n="about.description">
                     TTFD is an elite Minecraft clan built on dominance, strategy, and excellence. 
                     We are not just players — we are competitors who set the standard.
                 </p>
                 <div class="about-values">
                     <div class="value-item">
-                        <h3>ELITE</h3>
-                        <p>Only the best join our ranks</p>
+                        <h3 data-i18n="about.elite.title">ELITE</h3>
+                        <p data-i18n="about.elite.desc">Only the best join our ranks</p>
                     </div>
                     <div class="value-item">
-                        <h3>COMPETITIVE</h3>
-                        <p>Victory is our only option</p>
+                        <h3 data-i18n="about.competitive.title">COMPETITIVE</h3>
+                        <p data-i18n="about.competitive.desc">Victory is our only option</p>
                     </div>
                     <div class="value-item">
-                        <h3>PROFESSIONAL</h3>
-                        <p>Discipline and skill define us</p>
+                        <h3 data-i18n="about.professional.title">PROFESSIONAL</h3>
+                        <p data-i18n="about.professional.desc">Discipline and skill define us</p>
                     </div>
                 </div>
             </div>
@@ -60,31 +65,31 @@
     <!-- Members Section -->
     <section id="members" class="section members">
         <div class="container">
-            <h2 class="section-title">ROSTER</h2>
+            <h2 class="section-title" data-i18n="members.title">ROSTER</h2>
             <div class="members-grid">
                 <div class="member-card">
                     <div class="member-avatar"></div>
                     <h3 class="member-name">PLAYER_NAME</h3>
-                    <p class="member-role">LEADER</p>
-                    <span class="member-status online">ONLINE</span>
+                    <p class="member-role" data-i18n="members.leader">LEADER</p>
+                    <span class="member-status online" data-i18n="members.online">ONLINE</span>
                 </div>
                 <div class="member-card">
                     <div class="member-avatar"></div>
                     <h3 class="member-name">PLAYER_NAME</h3>
-                    <p class="member-role">OFFICER</p>
-                    <span class="member-status online">ONLINE</span>
+                    <p class="member-role" data-i18n="members.officer">OFFICER</p>
+                    <span class="member-status online" data-i18n="members.online">ONLINE</span>
                 </div>
                 <div class="member-card">
                     <div class="member-avatar"></div>
                     <h3 class="member-name">PLAYER_NAME</h3>
-                    <p class="member-role">FIGHTER</p>
-                    <span class="member-status offline">OFFLINE</span>
+                    <p class="member-role" data-i18n="members.fighter">FIGHTER</p>
+                    <span class="member-status offline" data-i18n="members.offline">OFFLINE</span>
                 </div>
                 <div class="member-card">
                     <div class="member-avatar"></div>
                     <h3 class="member-name">PLAYER_NAME</h3>
-                    <p class="member-role">RECRUIT</p>
-                    <span class="member-status online">ONLINE</span>
+                    <p class="member-role" data-i18n="members.recruit">RECRUIT</p>
+                    <span class="member-status online" data-i18n="members.online">ONLINE</span>
                 </div>
             </div>
         </div>
@@ -93,23 +98,23 @@
     <!-- Statistics Section -->
     <section id="stats" class="section stats">
         <div class="container">
-            <h2 class="section-title">STATISTICS</h2>
+            <h2 class="section-title" data-i18n="stats.title">STATISTICS</h2>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-number">24</div>
-                    <div class="stat-label">TOTAL MEMBERS</div>
+                    <div class="stat-label" data-i18n="stats.members">TOTAL MEMBERS</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">156</div>
-                    <div class="stat-label">CLAN WINS</div>
+                    <div class="stat-label" data-i18n="stats.wins">CLAN WINS</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">3,842</div>
-                    <div class="stat-label">TOTAL KILLS</div>
+                    <div class="stat-label" data-i18n="stats.kills">TOTAL KILLS</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">12</div>
-                    <div class="stat-label">ONLINE NOW</div>
+                    <div class="stat-label" data-i18n="stats.online">ONLINE NOW</div>
                 </div>
             </div>
         </div>
@@ -118,14 +123,14 @@
     <!-- Apply Section -->
     <section id="apply" class="section apply">
         <div class="container">
-            <h2 class="section-title">JOIN TTFD</h2>
+            <h2 class="section-title" data-i18n="apply.title">JOIN TTFD</h2>
             <form class="apply-form">
-                <input type="text" placeholder="NICKNAME" required>
-                <input type="number" placeholder="AGE" required>
-                <input type="text" placeholder="EXPERIENCE" required>
-                <input type="text" placeholder="DISCORD" required>
-                <textarea placeholder="WHY DO YOU WANT TO JOIN TTFD?" rows="5" required></textarea>
-                <button type="submit" class="btn btn-primary">SUBMIT APPLICATION</button>
+                <input type="text" data-i18n-placeholder="apply.nickname" placeholder="NICKNAME" required>
+                <input type="number" data-i18n-placeholder="apply.age" placeholder="AGE" required>
+                <input type="text" data-i18n-placeholder="apply.experience" placeholder="EXPERIENCE" required>
+                <input type="text" data-i18n-placeholder="apply.discord" placeholder="DISCORD" required>
+                <textarea data-i18n-placeholder="apply.why" placeholder="WHY DO YOU WANT TO JOIN TTFD?" rows="5" required></textarea>
+                <button type="submit" class="btn btn-primary" data-i18n="apply.submit">SUBMIT APPLICATION</button>
             </form>
         </div>
     </section>

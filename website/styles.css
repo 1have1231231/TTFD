@@ -56,6 +56,39 @@ body {
     color: #FFFFFF;
 }
 
+/* Language Switcher */
+.language-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.lang-btn {
+    background: transparent;
+    border: none;
+    color: #AAAAAA;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.1rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    padding: 0.5rem 0.8rem;
+}
+
+.lang-btn:hover {
+    color: #FFFFFF;
+}
+
+.lang-btn.active {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.lang-divider {
+    color: #333333;
+    font-size: 0.9rem;
+}
+
 /* Hero Section */
 .hero {
     height: 100vh;
