@@ -1348,8 +1348,6 @@ async def setup_slash_commands(bot, db):
         await interaction.followup.send(embed=embed, ephemeral=True)
     
     
-    print(f"✅ Slash команды зарегистрированы ({len(bot.tree.get_commands())} команд)")
-
     # ==================== ChatGPT команды ====================
     
     @bot.tree.command(name="ask", description="Задать вопрос ChatGPT")
@@ -1453,5 +1451,10 @@ async def setup_slash_commands(bot, db):
             ),
             inline=False
         )
+        
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+    
+    print(f"✅ Slash команды зарегистрированы ({len(bot.tree.get_commands())} команд)")
         
         await interaction.response.send_message(embed=embed, ephemeral=True)
