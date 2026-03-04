@@ -295,19 +295,32 @@ async def on_ready():
     
     # Синхронизация ВСЕХ slash команд с Discord (ВАЖНО: в самом конце после всех регистраций!)
     print("🔄 Синхронизация slash команд с Discord...")
+    
+    # Выводим список всех зарегистрированных команд
+    all_commands = bot.tree.get_commands()
+    print(f"📋 Всего зарегистрировано команд: {len(all_commands)}")
+    print("📝 Список команд:")
+    for cmd in all_commands:
+        print(f"   - /{cmd.name}: {cmd.description}")
+    
     try:
-        # Используем GLOBAL sync для всех команд (работает везде, но обновляется до 1 часа)
-        synced = await bot.tree.sync()
-        print(f"✅ Синхронизировано {len(synced)} slash команд с Discord (global sync)")
-        print("⏰ Команды появятся в течение 1 часа")
-        
-        # Также синхронизируем с guild для мгновенного появления на сервере
+        # Сначала синхронизируем с guild для мгновенного появления на сервере
         try:
             guild = discord.Object(id=config.GUILD_ID)
             synced_guild = await bot.tree.sync(guild=guild)
-            print(f"✅ Синхронизировано {len(synced_guild)} slash команд с guild (мгновенно)")
+            print(f"✅ Синхронизировано {len(synced_guild)} slash команд с guild {config.GUILD_ID} (мгновенно)")
+            print("📝 Синхронизированные команды:")
+            for cmd in synced_guild:
+                print(f"   - /{cmd.name}")
         except Exception as guild_error:
-            print(f"⚠️ Guild sync не удался (команды всё равно появятся через global sync): {guild_error}")
+            print(f"⚠️ Guild sync не удался: {guild_error}")
+            import traceback
+            traceback.print_exc()
+        
+        # Также делаем GLOBAL sync для всех команд (работает везде, но обновляется до 1 часа)
+        synced = await bot.tree.sync()
+        print(f"✅ Синхронизировано {len(synced)} slash команд с Discord (global sync)")
+        print("⏰ Глобальные команды появятся в течение 1 часа")
     except Exception as e:
         print(f"❌ Ошибка синхронизации команд: {e}")
         import traceback

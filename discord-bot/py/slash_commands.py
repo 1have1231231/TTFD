@@ -1455,4 +1455,52 @@ async def setup_slash_commands(bot, db):
         await interaction.response.send_message(embed=embed, ephemeral=True)
     
     
+    # ==================== Команда синхронизации (для админов) ====================
+    
+    @bot.tree.command(name="sync", description="Синхронизировать команды бота (только для админов)")
+    async def sync_slash(interaction: discord.Interaction):
+        """Принудительная синхронизация команд"""
+        # Проверка прав администратора
+        if not interaction.user.guild_permissions.administrator:
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ нет прав"),
+                description=convert_to_font("только администраторы могут синхронизировать команды"),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
+        await interaction.response.defer(ephemeral=True)
+        
+        try:
+            # Синхронизация с текущим сервером
+            synced = await bot.tree.sync(guild=interaction.guild)
+            
+            embed = BotTheme.create_embed(
+                title=convert_to_font("✅ команды синхронизированы"),
+                description=convert_to_font(f"синхронизировано {len(synced)} команд с сервером"),
+                embed_type='success'
+            )
+            
+            # Список команд
+            cmd_list = "\n".join([f"• /{cmd.name}" for cmd in synced[:20]])  # Первые 20
+            if len(synced) > 20:
+                cmd_list += f"\n... и ещё {len(synced) - 20} команд"
+            
+            embed.add_field(
+                name=convert_to_font("📝 команды"),
+                value=cmd_list,
+                inline=False
+            )
+            
+            await interaction.followup.send(embed=embed, ephemeral=True)
+        except Exception as e:
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка синхронизации"),
+                description=convert_to_font(f"ошибка: {str(e)}"),
+                embed_type='error'
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+    
+    
     print(f"✅ Slash команды зарегистрированы ({len(bot.tree.get_commands())} команд)")
