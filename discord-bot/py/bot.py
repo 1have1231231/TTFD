@@ -55,7 +55,7 @@ import rank_roles
 import game_integration
 import slash_commands
 import views
-import chatgpt_system
+# import chatgpt_system  # ChatGPT отключен
 import private_channels_system
 
 print("✅ Используется JSON база данных")
@@ -280,9 +280,6 @@ async def on_ready():
         print(f"❌ Ошибка инициализации войса: {e}")
         import traceback
         traceback.print_exc()
-    
-    # ChatGPT команды теперь регистрируются в setup_slash_commands
-    print(f"✅ ChatGPT настроен (канал: {chatgpt_system.CHATGPT_CHANNEL_ID})")
     
     # Настройка приватных каналов
     try:
@@ -716,11 +713,6 @@ async def on_message(message):
     
     bot.stats['messages_seen'] += 1
     
-    # Проверяем канал ChatGPT (обрабатываем ДО команд)
-    if chatgpt_system.is_chatgpt_channel(message.channel.id):
-        await chatgpt_system.on_message_chatgpt(message, bot)
-        return  # Не обрабатываем как обычное сообщение
-    
     # Обычное сообщение - начисляем XP
     if voice_tracking.can_earn_message_xp(message.author.id):
         # Рассчитываем XP за сообщение
@@ -751,6 +743,8 @@ async def on_message(message):
             # Логируем
             print(f"💬 {message.author.name} получил {xp_reward} XP за сообщение ({len(message.content)} символов)")
     
+    await bot.process_commands(message)
+
     await bot.process_commands(message)
 
 
