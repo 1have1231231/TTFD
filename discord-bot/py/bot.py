@@ -304,9 +304,11 @@ async def on_ready():
         print(f"   - /{cmd.name}: {cmd.description}")
     
     try:
-        # Сначала синхронизируем с guild для мгновенного появления на сервере
+        # Сначала копируем глобальные команды в guild и синхронизируем для мгновенного появления
         try:
             guild = discord.Object(id=config.GUILD_ID)
+            # ВАЖНО: копируем глобальные команды в guild
+            bot.tree.copy_global_to(guild=guild)
             synced_guild = await bot.tree.sync(guild=guild)
             print(f"✅ Синхронизировано {len(synced_guild)} slash команд с guild {config.GUILD_ID} (мгновенно)")
             print("📝 Синхронизированные команды:")
