@@ -152,7 +152,7 @@ class PostgresDatabase:
         conn.close()
         print("✅ Таблицы PostgreSQL инициализированы")
     
-    def get_user(self, user_id):
+    def get_user(self, user_id, username=None):
         """Получить пользователя"""
         conn = self.get_connection()
         cur = conn.cursor()
@@ -163,11 +163,13 @@ class PostgresDatabase:
         if not user:
             # Создаём нового пользователя
             daily_tasks = self._generate_daily_tasks()
+            if username is None:
+                username = 'Unknown'
             cur.execute("""
                 INSERT INTO users (id, username, daily_tasks)
                 VALUES (%s, %s, %s)
                 RETURNING *
-            """, (str(user_id), 'Unknown', json.dumps(daily_tasks)))
+            """, (str(user_id), username, json.dumps(daily_tasks)))
             user = cur.fetchone()
             conn.commit()
         
