@@ -106,6 +106,7 @@
     "добавлены ChatGPT команды в register_slash_commands",
     "удалён магазин из Discord бота, команда /shop показывает сообщение, добавлена /exchange",
     "добавлена покупка ролей через /buyrole и обновлён /shop",
-    "исправлена регистрация ChatGPT команд - перенесены в setup_slash_commands"
+    "исправлена регистрация ChatGPT команд - перенесены в setup_slash_commands",
+    "исправлено: ChatGPT команды теперь внутри setup_slash_commands, удалены дубликаты"
   ]
 }

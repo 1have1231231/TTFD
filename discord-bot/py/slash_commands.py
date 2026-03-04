@@ -1456,5 +1456,3 @@ async def setup_slash_commands(bot, db):
     
     
     print(f"✅ Slash команды зарегистрированы ({len(bot.tree.get_commands())} команд)")
-        
-        await interaction.response.send_message(embed=embed, ephemeral=True)
