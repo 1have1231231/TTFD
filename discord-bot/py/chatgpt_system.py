@@ -144,18 +144,28 @@ async def ask_chatgpt(user_id, question):
                 elif response.status == 401:
                     return {
                         'success': False,
-                        'error': 'Неверный API ключ OpenAI'
+                        'error': 'Неверный API ключ OpenAI. Проверь переменную OPENAI_API_KEY в Railway.'
                     }
                 elif response.status == 429:
-                    return {
-                        'success': False,
-                        'error': 'Превышен лимит запросов к OpenAI API'
-                    }
+                    error_data = await response.json()
+                    error_message = error_data.get('error', {}).get('message', 'Превышен лимит запросов')
+                    
+                    # Проверяем тип ошибки
+                    if 'quota' in error_message.lower() or 'insufficient' in error_message.lower():
+                        return {
+                            'success': False,
+                            'error': '❌ Недостаточно средств на аккаунте OpenAI\n\n💡 Пополни баланс на https://platform.openai.com/account/billing'
+                        }
+                    else:
+                        return {
+                            'success': False,
+                            'error': f'⏰ Превышен лимит запросов к OpenAI API\n\n{error_message}\n\n💡 Подожди немного и попробуй снова'
+                        }
                 else:
                     error_text = await response.text()
                     return {
                         'success': False,
-                        'error': f'Ошибка API: {response.status} - {error_text}'
+                        'error': f'Ошибка API: {response.status}\n{error_text}'
                     }
     
     except asyncio.TimeoutError:
