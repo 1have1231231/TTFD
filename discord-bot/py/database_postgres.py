@@ -136,6 +136,12 @@ class PostgresDatabase:
             ADD COLUMN IF NOT EXISTS last_coinflip TIMESTAMP
         """)
         
+        # Добавляем колонку username если её нет (миграция)
+        cur.execute("""
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS username TEXT
+        """)
+        
         # Создаём индекс для быстрого поиска по telegram_id
         cur.execute("""
             CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id)
