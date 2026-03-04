@@ -142,6 +142,17 @@ class PostgresDatabase:
             ADD COLUMN IF NOT EXISTS username TEXT
         """)
         
+        # Добавляем колонки games_played и games_won если их нет (миграция)
+        cur.execute("""
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS games_played INTEGER DEFAULT 0
+        """)
+        
+        cur.execute("""
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS games_won INTEGER DEFAULT 0
+        """)
+        
         # Создаём индекс для быстрого поиска по telegram_id
         cur.execute("""
             CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id)
