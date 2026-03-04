@@ -357,6 +357,16 @@ async def on_ready():
         import traceback
         traceback.print_exc()
     
+    # Обновление списка команд в канале
+    print("📝 Обновление списка команд в канале...")
+    try:
+        await update_commands_list()
+        print("✅ Список команд обновлён")
+    except Exception as e:
+        print(f"❌ Ошибка обновления списка команд: {e}")
+        import traceback
+        traceback.print_exc()
+    
     # Запуск фоновых задач
     if not update_bot_status.is_running():
         update_bot_status.start()
