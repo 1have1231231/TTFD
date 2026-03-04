@@ -149,22 +149,46 @@ async def setup_slash_commands(bot, db):
         
         await interaction.response.send_message(embed=embed)
     
-    @bot.tree.command(name="shop", description="Открыть магазин")
+    @bot.tree.command(name="shop", description="Открыть магазин ролей")
     async def shop_slash(interaction: discord.Interaction):
-        """Slash команда для магазина - временно недоступен"""
+        """Slash команда для магазина ролей"""
+        user_data = db.get_user(str(interaction.user.id))
+        
+        # Роли в магазине
+        roles_data = [
+            {"role_id": 1478224551287590983, "price": 20000, "emoji": "💎", "name": "Премиум"},
+            {"role_id": 1478208144319582312, "price": 15000, "emoji": "👑", "name": "VIP"},
+            {"role_id": 1478222910794502335, "price": 15000, "emoji": "⭐", "name": "Звезда"},
+            {"role_id": 1478226541094637628, "price": 5000, "emoji": "🎯", "name": "Саппорт"},
+        ]
+        
         embed = BotTheme.create_embed(
-            title=convert_to_font("🏪 магазин"),
-            description=convert_to_font("магазин временно недоступен\n\nиспользуй /exchange для обмена XP на монеты"),
+            title=convert_to_font("🏪 магазин ролей"),
+            description=convert_to_font(f"твой баланс: {user_data.get('coins', 0)} монет"),
             embed_type='info'
         )
         
+        for role_data in roles_data:
+            role = interaction.guild.get_role(role_data["role_id"])
+            if role:
+                has_role = role in interaction.user.roles
+                status = "✅ куплено" if has_role else f"{role_data['price']} монет"
+                
+                embed.add_field(
+                    name=f"{role_data['emoji']} {role_data['name']}",
+                    value=convert_to_font(f"{role.mention}\n{status}"),
+                    inline=True
+                )
+        
         embed.add_field(
-            name=convert_to_font("💱 обмен"),
-            value=convert_to_font("1 XP = 5 монет"),
+            name=convert_to_font("💱 обмен XP"),
+            value=convert_to_font("используй /exchange для обмена XP на монеты\n1 XP = 5 монет"),
             inline=False
         )
         
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        embed.set_footer(text=convert_to_font("используй /buyrole [id роли] для покупки"))
+        
+        await interaction.response.send_message(embed=embed)
     
     @bot.tree.command(name="exchange", description="Обменять XP на монеты")
     @app_commands.describe(xp_amount="Количество XP для обмена (1 XP = 5 монет)")
@@ -489,16 +513,90 @@ async def setup_slash_commands(bot, db):
         )
         await interaction.response.send_message(embed=embed)
     
-    @bot.tree.command(name="buy", description="Купить предмет из магазина")
-    @app_commands.describe(item_id="ID предмета из магазина")
-    async def buy_slash(interaction: discord.Interaction, item_id: str):
-        """Slash команда для покупки - временно недоступна"""
-        embed = BotTheme.create_embed(
-            title=convert_to_font("❌ недоступно"),
-            description=convert_to_font("покупка предметов временно недоступна\n\nиспользуй /exchange для обмена XP на монеты"),
-            embed_type='error'
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+    @bot.tree.command(name="buyrole", description="Купить роль за монеты")
+    @app_commands.describe(role="Роль которую хочешь купить")
+    async def buyrole_slash(interaction: discord.Interaction, role: discord.Role):
+        """Slash команда для покупки роли"""
+        # Роли в магазине с ценами
+        roles_prices = {
+            1478224551287590983: {"price": 20000, "emoji": "💎", "name": "Премиум"},
+            1478208144319582312: {"price": 15000, "emoji": "👑", "name": "VIP"},
+            1478222910794502335: {"price": 15000, "emoji": "⭐", "name": "Звезда"},
+            1478226541094637628: {"price": 5000, "emoji": "🎯", "name": "Саппорт"},
+        }
+        
+        # Проверяем что роль есть в магазине
+        if role.id not in roles_prices:
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font("эта роль не продаётся в магазине"),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
+        # Проверяем что роль ещё не куплена
+        if role in interaction.user.roles:
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font("у тебя уже есть эта роль!"),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
+        role_info = roles_prices[role.id]
+        price = role_info["price"]
+        
+        user_data = db.get_user(str(interaction.user.id))
+        
+        # Проверяем баланс
+        if user_data.get('coins', 0) < price:
+            needed = price - user_data.get('coins', 0)
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ недостаточно монет"),
+                description=convert_to_font(f"нужно: {price} монет\nу тебя: {user_data.get('coins', 0)} монет\nне хватает: {needed} монет"),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
+        # Покупка
+        user_data['coins'] -= price
+        db.save_user(str(interaction.user.id), user_data)
+        
+        # Выдаём роль
+        try:
+            await interaction.user.add_roles(role)
+            
+            embed = BotTheme.create_embed(
+                title=convert_to_font("✅ покупка успешна!"),
+                description=convert_to_font(f"ты купил роль {role.mention}"),
+                embed_type='success'
+            )
+            embed.add_field(
+                name=convert_to_font("💰 потрачено"),
+                value=convert_to_font(f"{price} монет"),
+                inline=True
+            )
+            embed.add_field(
+                name=convert_to_font("💰 осталось"),
+                value=convert_to_font(f"{user_data['coins']} монет"),
+                inline=True
+            )
+            
+            await interaction.response.send_message(embed=embed)
+        except discord.Forbidden:
+            # Возвращаем монеты если не удалось выдать роль
+            user_data['coins'] += price
+            db.save_user(str(interaction.user.id), user_data)
+            
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font("не удалось выдать роль. монеты возвращены."),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
     
     @bot.tree.command(name="pay", description="Перевести монеты другому пользователю")
     @app_commands.describe(member="Кому перевести", amount="Сумма")
