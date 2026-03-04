@@ -183,12 +183,6 @@ class PostgresDatabase:
                 if isinstance(user_dict[json_field], str):
                     user_dict[json_field] = json.loads(user_dict[json_field])
         
-        # Добавляем поля для совместимости
-        if 'daily_streak' not in user_dict:
-            user_dict['daily_streak'] = 0
-        if 'last_daily_date' not in user_dict:
-            user_dict['last_daily_date'] = None
-        
         return user_dict
     
     def save_user(self, user_id, user_data):
@@ -196,16 +190,25 @@ class PostgresDatabase:
         conn = self.get_connection()
         cur = conn.cursor()
         
+        # Список допустимых колонок (исключаем те которых нет в таблице)
+        allowed_columns = [
+            'username', 'xp', 'coins', 'clicks', 'tasks_completed', 'rank_id',
+            'last_daily', 'daily_streak', 'last_daily_date', 'games_played', 'games_won',
+            'last_dice', 'last_coinflip', 'last_work', 'daily_tasks', 'achievements',
+            'inventory', 'active_boosts', 'game_stats', 'telegram_id',
+            'voice_streak', 'last_voice_date'
+        ]
+        
         # Подготавливаем JSON поля
         for json_field in ['daily_tasks', 'achievements', 'inventory', 'active_boosts', 'game_stats']:
             if json_field in user_data and not isinstance(user_data[json_field], str):
                 user_data[json_field] = json.dumps(user_data[json_field])
         
-        # Формируем UPDATE запрос
+        # Формируем UPDATE запрос только для допустимых колонок
         fields = []
         values = []
         for key, value in user_data.items():
-            if key != 'id' and key != 'last_active':  # Исключаем last_active из user_data
+            if key != 'id' and key != 'last_active' and key in allowed_columns:
                 fields.append(f"{key} = %s")
                 values.append(value)
         
