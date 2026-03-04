@@ -172,11 +172,11 @@ async def setup_slash_commands(bot, db):
             role = interaction.guild.get_role(role_data["role_id"])
             if role:
                 has_role = role in interaction.user.roles
-                status = "✅ куплено" if has_role else f"{role_data['price']} монет"
+                status = "✅ куплено" if has_role else f"💰 {role_data['price']} монет"
                 
                 embed.add_field(
-                    name=f"{role_data['emoji']} {role_data['name']}",
-                    value=convert_to_font(f"{role.mention}\n{status}"),
+                    name=role.name,
+                    value=convert_to_font(status),
                     inline=True
                 )
         
