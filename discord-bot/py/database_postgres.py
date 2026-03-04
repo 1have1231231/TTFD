@@ -109,6 +109,17 @@ class PostgresDatabase:
             ADD COLUMN IF NOT EXISTS telegram_id TEXT
         """)
         
+        # Добавляем колонки для системы стриков (миграция)
+        cur.execute("""
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS voice_streak INTEGER DEFAULT 0
+        """)
+        
+        cur.execute("""
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS last_voice_date DATE
+        """)
+        
         # Создаём индекс для быстрого поиска по telegram_id
         cur.execute("""
             CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id)
