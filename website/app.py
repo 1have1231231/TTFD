@@ -39,19 +39,26 @@ def get_stats():
         stats_file = os.path.join(BASE_DIR, 'discord_stats.json')
         
         if os.path.exists(stats_file):
-            with open(stats_file, 'r') as f:
+            with open(stats_file, 'r', encoding='utf-8') as f:
                 stats = json.load(f)
                 return jsonify(stats)
         else:
+            # Возвращаем пустые данные если файл не существует
             return jsonify({
                 'online_members': 0,
                 'total_members': 0,
-                'last_update': None
+                'top_players': [],
+                'last_update': None,
+                'error': 'Stats file not found - bot may not be running'
             })
     except Exception as e:
+        print(f"Error in /api/stats: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'online_members': 0,
             'total_members': 0,
+            'top_players': [],
             'error': str(e)
         }), 500
 

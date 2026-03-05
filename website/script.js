@@ -190,6 +190,18 @@ function updateMembersGrid(players) {
     // Очищаем сетку
     grid.innerHTML = '';
     
+    // Если нет игроков, показываем сообщение
+    if (!players || players.length === 0) {
+        const message = document.createElement('div');
+        message.style.gridColumn = '1 / -1';
+        message.style.textAlign = 'center';
+        message.style.padding = '3rem';
+        message.style.color = '#666';
+        message.textContent = 'NO PLAYERS DATA AVAILABLE';
+        grid.appendChild(message);
+        return;
+    }
+    
     // Создаём карточки для каждого игрока
     players.forEach((player, index) => {
         const card = document.createElement('div');
@@ -203,6 +215,10 @@ function updateMembersGrid(players) {
             const img = document.createElement('img');
             img.src = player.avatar_url;
             img.alt = player.name;
+            img.onerror = function() {
+                // Если аватарка не загрузилась, показываем пустой квадрат
+                this.style.display = 'none';
+            };
             avatar.appendChild(img);
         }
         
@@ -214,7 +230,7 @@ function updateMembersGrid(players) {
         // Ранг
         const role = document.createElement('p');
         role.className = 'member-role';
-        role.textContent = player.rank;
+        role.textContent = player.rank || 'F';
         
         // Статус
         const status = document.createElement('span');
@@ -233,7 +249,7 @@ function updateMembersGrid(players) {
         xpInfo.style.color = '#666';
         xpInfo.style.fontSize = '0.85rem';
         xpInfo.style.marginTop = '0.5rem';
-        xpInfo.textContent = `${player.xp.toLocaleString()} XP`;
+        xpInfo.textContent = `${(player.xp || 0).toLocaleString()} XP`;
         
         // Собираем карточку
         card.appendChild(avatar);
