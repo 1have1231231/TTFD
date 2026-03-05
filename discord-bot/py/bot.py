@@ -376,8 +376,11 @@ async def on_ready():
     
     # Запуск HTTP API для статистики
     print("🌐 Запуск Stats API сервера...")
+    print(f"🔍 DEBUG: stats_api module = {stats_api}")
+    print(f"🔍 DEBUG: start_api_server function = {stats_api.start_api_server}")
     try:
         stats_api.start_api_server()
+        print("✅ Stats API запущен успешно!")
     except Exception as e:
         print(f"❌ Ошибка запуска Stats API: {e}")
         import traceback
