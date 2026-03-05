@@ -1,21 +1,12 @@
 // Language translations
 const translations = {
     en: {
-        'nav.about': 'ABOUT',
         'nav.members': 'MEMBERS',
         'nav.stats': 'STATS',
-        'nav.apply': 'APPLY',
+        'nav.discord': 'DISCORD',
         'hero.subtitle': 'DOMINATE. CONTROL. WIN.',
         'hero.join': 'JOIN CLAN',
         'hero.view': 'VIEW MEMBERS',
-        'about.title': 'ABOUT CLAN',
-        'about.description': 'TTFD is an elite Minecraft clan built on dominance, strategy, and excellence. We are not just players — we are competitors who set the standard.',
-        'about.elite.title': 'ELITE',
-        'about.elite.desc': 'Only the best join our ranks',
-        'about.competitive.title': 'COMPETITIVE',
-        'about.competitive.desc': 'Victory is our only option',
-        'about.professional.title': 'PROFESSIONAL',
-        'about.professional.desc': 'Discipline and skill define us',
         'members.title': 'ROSTER',
         'members.leader': 'LEADER',
         'members.officer': 'OFFICER',
@@ -25,33 +16,15 @@ const translations = {
         'members.offline': 'OFFLINE',
         'stats.title': 'STATISTICS',
         'stats.members': 'TOTAL MEMBERS',
-        'stats.wins': 'CLAN WINS',
-        'stats.kills': 'TOTAL KILLS',
-        'stats.online': 'ONLINE NOW',
-        'apply.title': 'JOIN TTFD',
-        'apply.nickname': 'NICKNAME',
-        'apply.age': 'AGE',
-        'apply.experience': 'EXPERIENCE',
-        'apply.discord': 'DISCORD',
-        'apply.why': 'WHY DO YOU WANT TO JOIN TTFD?',
-        'apply.submit': 'SUBMIT APPLICATION'
+        'stats.online': 'ONLINE NOW'
     },
     ru: {
-        'nav.about': 'О НАС',
         'nav.members': 'УЧАСТНИКИ',
         'nav.stats': 'СТАТИСТИКА',
-        'nav.apply': 'ВСТУПИТЬ',
+        'nav.discord': 'DISCORD',
         'hero.subtitle': 'ДОМИНИРУЙ. КОНТРОЛИРУЙ. ПОБЕЖДАЙ.',
         'hero.join': 'ВСТУПИТЬ В КЛАН',
         'hero.view': 'УЧАСТНИКИ',
-        'about.title': 'О КЛАНЕ',
-        'about.description': 'TTFD — элитный Minecraft клан, построенный на доминировании, стратегии и превосходстве. Мы не просто игроки — мы конкуренты, которые устанавливают стандарты.',
-        'about.elite.title': 'ЭЛИТА',
-        'about.elite.desc': 'Только лучшие вступают в наши ряды',
-        'about.competitive.title': 'КОНКУРЕНТНЫЕ',
-        'about.competitive.desc': 'Победа — наш единственный вариант',
-        'about.professional.title': 'ПРОФЕССИОНАЛЫ',
-        'about.professional.desc': 'Дисциплина и навыки определяют нас',
         'members.title': 'СОСТАВ',
         'members.leader': 'ЛИДЕР',
         'members.officer': 'ОФИЦЕР',
@@ -61,16 +34,7 @@ const translations = {
         'members.offline': 'НЕ В СЕТИ',
         'stats.title': 'СТАТИСТИКА',
         'stats.members': 'ВСЕГО УЧАСТНИКОВ',
-        'stats.wins': 'ПОБЕД КЛАНА',
-        'stats.kills': 'ВСЕГО УБИЙСТВ',
-        'stats.online': 'СЕЙЧАС В СЕТИ',
-        'apply.title': 'ВСТУПИТЬ В TTFD',
-        'apply.nickname': 'НИКНЕЙМ',
-        'apply.age': 'ВОЗРАСТ',
-        'apply.experience': 'ОПЫТ',
-        'apply.discord': 'DISCORD',
-        'apply.why': 'ПОЧЕМУ ВЫ ХОТИТЕ ВСТУПИТЬ В TTFD?',
-        'apply.submit': 'ОТПРАВИТЬ ЗАЯВКУ'
+        'stats.online': 'СЕЙЧАС В СЕТИ'
     }
 };
 
@@ -156,24 +120,6 @@ document.querySelectorAll('.section').forEach(section => {
     section.style.transform = 'translateY(30px)';
     section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
     observer.observe(section);
-});
-
-// Form submission handler
-document.querySelector('.apply-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Get form data
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData);
-    
-    // Here you would typically send data to your backend
-    console.log('Application submitted:', data);
-    
-    // Show success message
-    alert('APPLICATION SUBMITTED SUCCESSFULLY!\nWe will review your application and contact you soon.');
-    
-    // Reset form
-    this.reset();
 });
 
 // Nav background on scroll
