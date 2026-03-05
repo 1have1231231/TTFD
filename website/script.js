@@ -21,7 +21,10 @@ function setLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('language', lang);
     
-    document.getElementById('currentLang').textContent = lang.toUpperCase();
+    const currentLangElement = document.getElementById('currentLang');
+    if (currentLangElement) {
+        currentLangElement.textContent = lang.toUpperCase();
+    }
     
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
@@ -30,28 +33,37 @@ function setLanguage(lang) {
         }
     });
     
-    document.getElementById('langDropdown').classList.remove('active');
-    document.getElementById('langToggle').classList.remove('active');
+    const langDropdown = document.getElementById('langDropdown');
+    const langToggle = document.getElementById('langToggle');
+    
+    if (langDropdown) langDropdown.classList.remove('active');
+    if (langToggle) langToggle.classList.remove('active');
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 DOM loaded');
+    
     setLanguage(currentLang);
     
     // Language toggle
     const langToggle = document.getElementById('langToggle');
     const langDropdown = document.getElementById('langDropdown');
     
-    langToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        langDropdown.classList.toggle('active');
-        langToggle.classList.toggle('active');
-    });
-    
-    document.addEventListener('click', () => {
-        langDropdown.classList.remove('active');
-        langToggle.classList.remove('active');
-    });
+    if (langToggle && langDropdown) {
+        langToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langDropdown.classList.toggle('active');
+            langToggle.classList.toggle('active');
+        });
+        
+        document.addEventListener('click', () => {
+            langDropdown.classList.remove('active');
+            langToggle.classList.remove('active');
+        });
+    } else {
+        console.warn('⚠️ Language selector elements not found');
+    }
     
     // Update stats
     updateDiscordStats();
