@@ -344,6 +344,7 @@ async def on_ready():
     print("🔄 Настройка кнопки тикетов...")
     try:
         await tickets_system.setup_ticket_button(bot)
+        print("✅ Кнопка тикетов настроена")
     except Exception as e:
         print(f"❌ Ошибка настройки кнопки тикетов: {e}")
         import traceback
@@ -353,6 +354,7 @@ async def on_ready():
     print("🔄 Проверка автообновления...")
     try:
         await updates_system.check_auto_update(bot)
+        print("✅ Автообновление проверено")
     except Exception as e:
         print(f"❌ Ошибка проверки автообновления: {e}")
         import traceback
@@ -368,11 +370,14 @@ async def on_ready():
         import traceback
         traceback.print_exc()
     
+    print("🚀 Запуск фоновых задач...")
     # Запуск фоновых задач
     if not update_bot_status.is_running():
         update_bot_status.start()
+        print("✅ update_bot_status запущен")
     if not update_website_stats.is_running():
         update_website_stats.start()
+        print("✅ update_website_stats запущен")
     
     # Запуск HTTP API для статистики
     print("🌐 Запуск Stats API сервера...")

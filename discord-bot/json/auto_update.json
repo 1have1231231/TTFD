@@ -136,6 +136,7 @@
     "fix: Add error handling and test data for members loading",
     "add detailed console logging for debugging members loading",
     "add detailed console logging for debugging members loadingit statusg",
-    "add Flask to discord-bot requirements"
+    "add Flask to discord-bot requirements",
+    "add debug logging for Stats API startup"
   ]
 }
