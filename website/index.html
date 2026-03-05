@@ -38,30 +38,13 @@
     <section id="members" class="section members">
         <div class="container">
             <h2 class="section-title" data-i18n="members.title">ROSTER</h2>
-            <div class="members-grid">
-                <div class="member-card">
+            <div class="members-grid" id="members-grid">
+                <!-- Карточки игроков будут загружены динамически -->
+                <div class="member-card loading">
                     <div class="member-avatar"></div>
-                    <h3 class="member-name">PLAYER_NAME</h3>
-                    <p class="member-role" data-i18n="members.leader">FREAK</p>
-                    <span class="member-status online" data-i18n="members.online">ONLINE</span>
-                </div>
-                <div class="member-card">
-                    <div class="member-avatar"></div>
-                    <h3 class="member-name">PLAYER_NAME</h3>
-                    <p class="member-role" data-i18n="members.officer">the fuck</p>
-                    <span class="member-status online" data-i18n="members.online">ONLINE</span>
-                </div>
-                <div class="member-card">
-                    <div class="member-avatar"></div>
-                    <h3 class="member-name">PLAYER_NAME</h3>
-                    <p class="member-role" data-i18n="members.fighter">fool</p>
-                    <span class="member-status offline" data-i18n="members.offline">OFFLINE</span>
-                </div>
-                <div class="member-card">
-                    <div class="member-avatar"></div>
-                    <h3 class="member-name">PLAYER_NAME</h3>
-                    <p class="member-role" data-i18n="members.recruit">The shit eater</p>
-                    <span class="member-status online" data-i18n="members.online">ONLINE</span>
+                    <h3 class="member-name">LOADING...</h3>
+                    <p class="member-role">...</p>
+                    <span class="member-status">...</span>
                 </div>
             </div>
         </div>

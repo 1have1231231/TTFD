@@ -129,6 +129,7 @@
     "update: Change shop prices and buyrole to dropdown selection, remove /claim command",
     "fix: Change buyrole to numbered selection (1-4) instead of role picker",
     "add language switcher (EN/RU) to website",
-    "add real-time Discord stats to website (online members count)"
+    "add real-time Discord stats to website (online members count)",
+    "remove About and Apply sections from website, add Discord link to nav"
   ]
 }

@@ -450,9 +450,39 @@ async def update_website_stats():
         
         total_count = sum(1 for member in guild.members if not member.bot)
         
+        # Получаем топ игроков по XP
+        all_users = db.get_all_users()
+        top_players = []
+        
+        for user_id, user_data in sorted(all_users.items(), key=lambda x: x[1].get('xp', 0), reverse=True)[:10]:
+            try:
+                member = guild.get_member(int(user_id))
+                if member and not member.bot:
+                    # Определяем ранг
+                    rank_id = user_data.get('rank_id', 1)
+                    from database_postgres import RANKS
+                    rank_name = RANKS[rank_id - 1]['name'] if rank_id <= len(RANKS) else 'Новичок'
+                    
+                    # Статус онлайн
+                    is_online = member.status != discord.Status.offline
+                    
+                    top_players.append({
+                        'id': user_id,
+                        'name': member.name,
+                        'display_name': member.display_name,
+                        'avatar_url': str(member.display_avatar.url),
+                        'rank': rank_name,
+                        'xp': user_data.get('xp', 0),
+                        'online': is_online
+                    })
+            except Exception as e:
+                print(f"Ошибка обработки пользователя {user_id}: {e}")
+                continue
+        
         stats = {
             'online_members': online_count,
             'total_members': total_count,
+            'top_players': top_players,
             'last_update': datetime.now().isoformat()
         }
         
@@ -461,11 +491,13 @@ async def update_website_stats():
         os.makedirs(os.path.dirname(stats_file), exist_ok=True)
         
         with open(stats_file, 'w') as f:
-            json.dump(stats, f)
+            json.dump(stats, f, ensure_ascii=False, indent=2)
         
-        print(f"📊 Статистика для сайта обновлена: {online_count}/{total_count} онлайн")
+        print(f"📊 Статистика для сайта обновлена: {online_count}/{total_count} онлайн, топ игроков: {len(top_players)}")
     except Exception as e:
         print(f"❌ Ошибка обновления статистики для сайта: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 # ==================== Обновление списка команд ====================

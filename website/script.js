@@ -171,10 +171,79 @@ async function updateDiscordStats() {
             onlineNowElement.textContent = data.online_members;
         }
         
+        // Обновляем карточки игроков
+        if (data.top_players && data.top_players.length > 0) {
+            updateMembersGrid(data.top_players);
+        }
+        
         console.log('📊 Статистика обновлена:', data);
     } catch (error) {
         console.error('❌ Ошибка загрузки статистики:', error);
     }
+}
+
+// Обновление карточек игроков
+function updateMembersGrid(players) {
+    const grid = document.getElementById('members-grid');
+    if (!grid) return;
+    
+    // Очищаем сетку
+    grid.innerHTML = '';
+    
+    // Создаём карточки для каждого игрока
+    players.forEach((player, index) => {
+        const card = document.createElement('div');
+        card.className = 'member-card';
+        card.style.animation = `fadeInUp 0.6s ease ${index * 0.1}s both`;
+        
+        // Аватарка
+        const avatar = document.createElement('div');
+        avatar.className = 'member-avatar';
+        if (player.avatar_url) {
+            const img = document.createElement('img');
+            img.src = player.avatar_url;
+            img.alt = player.name;
+            avatar.appendChild(img);
+        }
+        
+        // Имя
+        const name = document.createElement('h3');
+        name.className = 'member-name';
+        name.textContent = player.display_name || player.name;
+        
+        // Ранг
+        const role = document.createElement('p');
+        role.className = 'member-role';
+        role.textContent = player.rank;
+        
+        // Статус
+        const status = document.createElement('span');
+        status.className = `member-status ${player.online ? 'online' : 'offline'}`;
+        
+        // Переводим статус
+        const currentLang = localStorage.getItem('language') || 'en';
+        const statusText = player.online ? 
+            (currentLang === 'ru' ? 'В СЕТИ' : 'ONLINE') : 
+            (currentLang === 'ru' ? 'НЕ В СЕТИ' : 'OFFLINE');
+        status.textContent = statusText;
+        
+        // XP (опционально, можно добавить)
+        const xpInfo = document.createElement('p');
+        xpInfo.className = 'member-xp';
+        xpInfo.style.color = '#666';
+        xpInfo.style.fontSize = '0.85rem';
+        xpInfo.style.marginTop = '0.5rem';
+        xpInfo.textContent = `${player.xp.toLocaleString()} XP`;
+        
+        // Собираем карточку
+        card.appendChild(avatar);
+        card.appendChild(name);
+        card.appendChild(role);
+        card.appendChild(xpInfo);
+        card.appendChild(status);
+        
+        grid.appendChild(card);
+    });
 }
 
 // Обновляем статистику при загрузке и каждые 30 секунд
