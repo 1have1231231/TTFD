@@ -1,22 +1,24 @@
-// Language translations
+// ===== TRANSLATIONS =====
 const translations = {
     en: {
-        'members.title': 'ROSTER',
+        'topxp.title': 'TOP XP',
+        'topxp.subtitle': 'TOP 3 PLAYERS BY EXPERIENCE',
         'stats.title': 'STATISTICS',
-        'stats.members': 'TOTAL MEMBERS',
+        'stats.total': 'TOTAL MEMBERS',
         'stats.online': 'ONLINE NOW'
     },
     ru: {
-        'members.title': 'СОСТАВ',
+        'topxp.title': 'ТОП XP',
+        'topxp.subtitle': 'ТОП 3 ИГРОКА ПО ОПЫТУ',
         'stats.title': 'СТАТИСТИКА',
-        'stats.members': 'ВСЕГО УЧАСТНИКОВ',
+        'stats.total': 'ВСЕГО УЧАСТНИКОВ',
         'stats.online': 'СЕЙЧАС В СЕТИ'
     }
 };
 
-// Language switcher
 let currentLang = localStorage.getItem('language') || 'en';
 
+// ===== LANGUAGE SWITCHER =====
 function setLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('language', lang);
@@ -28,7 +30,7 @@ function setLanguage(lang) {
     
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
-        if (translations[lang][key]) {
+        if (translations[lang] && translations[lang][key]) {
             element.textContent = translations[lang][key];
         }
     });
@@ -38,11 +40,16 @@ function setLanguage(lang) {
     
     if (langDropdown) langDropdown.classList.remove('active');
     if (langToggle) langToggle.classList.remove('active');
+    
+    // Update active state on lang options
+    document.querySelectorAll('.lang-option').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
 }
 
-// Initialize
+// ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 DOM loaded');
+    console.log('🚀 TTFD Elite Site Initialized');
     
     setLanguage(currentLang);
     
@@ -61,126 +68,219 @@ document.addEventListener('DOMContentLoaded', () => {
             langDropdown.classList.remove('active');
             langToggle.classList.remove('active');
         });
-    } else {
-        console.warn('⚠️ Language selector elements not found');
+        
+        langDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
     }
     
-    // Update stats
-    updateDiscordStats();
-    setInterval(updateDiscordStats, 180000);
+    // Language options
+    document.querySelectorAll('.lang-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const lang = btn.getAttribute('data-lang');
+            setLanguage(lang);
+        });
+    });
+    
+    // Load data
+    loadTopXP();
+    loadStats();
+    
+    // Refresh every 3 minutes
+    setInterval(() => {
+        loadTopXP();
+        loadStats();
+    }, 180000);
 });
 
-// Fetch Discord stats
-async function updateDiscordStats() {
-    console.log('🔄 Loading stats...');
+// ===== LOAD TOP XP =====
+async function loadTopXP() {
+    console.log('📊 Loading TOP XP...');
+    
+    const grid = document.getElementById('topXpGrid');
+    if (!grid) return;
+    
     try {
         const response = await fetch('/api/stats');
-        console.log('📡 Response:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
         
         const data = await response.json();
-        console.log('📊 Data:', data);
+        console.log('✅ Data received:', data);
         
-        const totalMembersElement = document.querySelector('.stats-grid .stat-card:nth-child(1) .stat-number');
-        const onlineNowElement = document.querySelector('.stats-grid .stat-card:nth-child(2) .stat-number');
-        
-        if (totalMembersElement && data.total_members !== undefined) {
-            totalMembersElement.textContent = data.total_members;
-            console.log('✅ Updated total_members:', data.total_members);
+        // Get top 3 players sorted by XP
+        let topPlayers = [];
+        if (data.top_players && Array.isArray(data.top_players)) {
+            topPlayers = data.top_players
+                .sort((a, b) => (b.xp || 0) - (a.xp || 0))
+                .slice(0, 3);
         }
         
-        if (onlineNowElement && data.online_members !== undefined) {
-            onlineNowElement.textContent = data.online_members;
-            console.log('✅ Updated online_members:', data.online_members);
+        if (topPlayers.length === 0) {
+            renderEmptyState(grid);
+            return;
         }
         
-        if (data.top_players) {
-            console.log('👥 Players:', data.top_players.length);
-            updateMembersGrid(data.top_players);
-        } else {
-            console.warn('⚠️ No top_players in data');
+        renderTopXP(grid, topPlayers);
+        
+    } catch (error) {
+        console.error('❌ Error loading TOP XP:', error);
+        renderErrorState(grid, error.message);
+    }
+}
+
+// ===== RENDER TOP XP =====
+function renderTopXP(grid, players) {
+    grid.innerHTML = '';
+    
+    players.forEach((player, index) => {
+        const rank = index + 1;
+        const card = document.createElement('div');
+        card.className = `top-card rank-${rank}`;
+        
+        // Rank badge
+        const rankBadge = document.createElement('div');
+        rankBadge.className = 'rank-badge';
+        rankBadge.textContent = `#${rank}`;
+        
+        // Avatar
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        if (player.avatar_url) {
+            const img = document.createElement('img');
+            img.src = player.avatar_url;
+            img.alt = player.name || player.display_name || 'Player';
+            img.onerror = () => {
+                img.style.display = 'none';
+            };
+            avatar.appendChild(img);
         }
+        
+        // Username
+        const username = document.createElement('div');
+        username.className = 'username';
+        username.textContent = player.display_name || player.name || 'Unknown';
+        
+        // Role (if exists)
+        let roleElement = null;
+        if (player.rank) {
+            roleElement = document.createElement('div');
+            roleElement.className = 'user-role';
+            roleElement.textContent = player.rank;
+        }
+        
+        // XP
+        const xpValue = document.createElement('div');
+        xpValue.className = 'xp-value';
+        xpValue.textContent = (player.xp || 0).toLocaleString();
+        
+        const xpLabel = document.createElement('div');
+        xpLabel.className = 'xp-label';
+        xpLabel.textContent = 'XP';
+        
+        // Status pill
+        const statusPill = document.createElement('div');
+        statusPill.className = `status-pill ${player.online ? 'online' : 'offline'}`;
+        statusPill.textContent = player.online ? 
+            (currentLang === 'ru' ? 'В СЕТИ' : 'ONLINE') : 
+            (currentLang === 'ru' ? 'НЕ В СЕТИ' : 'OFFLINE');
+        
+        // View profile button
+        const viewBtn = document.createElement('a');
+        viewBtn.href = player.profileUrl || `/cabinet.html`;
+        viewBtn.className = 'btn btn-secondary view-profile-btn';
+        viewBtn.textContent = currentLang === 'ru' ? 'ПРОФИЛЬ' : 'VIEW PROFILE';
+        
+        // Assemble card
+        card.appendChild(rankBadge);
+        card.appendChild(avatar);
+        card.appendChild(username);
+        if (roleElement) card.appendChild(roleElement);
+        card.appendChild(xpValue);
+        card.appendChild(xpLabel);
+        card.appendChild(statusPill);
+        card.appendChild(viewBtn);
+        
+        grid.appendChild(card);
+    });
+    
+    console.log(`✅ Rendered ${players.length} TOP XP cards`);
+}
+
+// ===== EMPTY STATE =====
+function renderEmptyState(grid) {
+    grid.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <div class="empty-state-title">NO DATA YET</div>
+            <div class="empty-state-text">Leaderboard will appear once players earn XP</div>
+        </div>
+    `;
+}
+
+// ===== ERROR STATE =====
+function renderErrorState(grid, errorMsg) {
+    grid.innerHTML = `
+        <div class="error-state">
+            <div class="error-state-icon">⚠️</div>
+            <div class="error-state-title">FAILED TO LOAD LEADERBOARD</div>
+            <div class="error-state-text">${errorMsg || 'Please try again later'}</div>
+            <button class="btn btn-secondary" onclick="loadTopXP()">RETRY</button>
+        </div>
+    `;
+}
+
+// ===== LOAD STATS =====
+async function loadStats() {
+    console.log('📈 Loading stats...');
+    
+    try {
+        const response = await fetch('/api/stats');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        const totalMembersEl = document.getElementById('totalMembers');
+        const onlineMembersEl = document.getElementById('onlineMembers');
+        
+        if (totalMembersEl && data.total_members !== undefined) {
+            animateCounter(totalMembersEl, data.total_members);
+        }
+        
+        if (onlineMembersEl && data.online_members !== undefined) {
+            animateCounter(onlineMembersEl, data.online_members);
+        }
+        
+        console.log('✅ Stats updated');
+        
     } catch (error) {
         console.error('❌ Error loading stats:', error);
     }
 }
 
-// Update members grid
-function updateMembersGrid(players) {
-    console.log('🎮 updateMembersGrid called with', players.length, 'players');
+// ===== COUNTER ANIMATION =====
+function animateCounter(element, target) {
+    const current = parseInt(element.textContent) || 0;
+    if (current === target) return;
     
-    const grid = document.getElementById('members-grid');
-    if (!grid) {
-        console.error('❌ members-grid not found!');
-        return;
-    }
+    const duration = 1000;
+    const steps = 30;
+    const increment = (target - current) / steps;
+    let step = 0;
     
-    console.log('✅ members-grid found');
-    grid.innerHTML = '';
-    
-    if (!players || players.length === 0) {
-        console.warn('⚠️ No players to display');
-        const message = document.createElement('div');
-        message.style.gridColumn = '1 / -1';
-        message.style.textAlign = 'center';
-        message.style.padding = '3rem';
-        message.style.color = '#666';
-        message.textContent = 'NO PLAYERS DATA AVAILABLE';
-        grid.appendChild(message);
-        return;
-    }
-    
-    console.log('👥 Creating cards for', players.length, 'players');
-    
-    players.forEach((player, index) => {
-        console.log(`📝 Creating card ${index + 1}:`, player.name);
+    const timer = setInterval(() => {
+        step++;
+        const value = Math.round(current + (increment * step));
+        element.textContent = value;
         
-        const card = document.createElement('div');
-        card.className = 'member-card';
-        card.style.animation = `fadeInUp 0.6s ease ${index * 0.1}s both`;
-        
-        const avatar = document.createElement('div');
-        avatar.className = 'member-avatar';
-        if (player.avatar_url) {
-            const img = document.createElement('img');
-            img.src = player.avatar_url;
-            img.alt = player.name;
-            img.onerror = function() {
-                console.warn('⚠️ Failed to load avatar for', player.name);
-                this.style.display = 'none';
-            };
-            avatar.appendChild(img);
+        if (step >= steps) {
+            element.textContent = target;
+            clearInterval(timer);
         }
-        
-        const name = document.createElement('h3');
-        name.className = 'member-name';
-        name.textContent = player.display_name || player.name;
-        
-        const role = document.createElement('p');
-        role.className = 'member-role';
-        role.textContent = player.rank || 'F';
-        
-        const status = document.createElement('span');
-        status.className = `member-status ${player.online ? 'online' : 'offline'}`;
-        const statusText = player.online ? 
-            (currentLang === 'ru' ? 'В СЕТИ' : 'ONLINE') : 
-            (currentLang === 'ru' ? 'НЕ В СЕТИ' : 'OFFLINE');
-        status.textContent = statusText;
-        
-        const xpInfo = document.createElement('p');
-        xpInfo.className = 'member-xp';
-        xpInfo.style.color = '#666';
-        xpInfo.style.fontSize = '0.85rem';
-        xpInfo.style.marginTop = '0.5rem';
-        xpInfo.textContent = `${(player.xp || 0).toLocaleString()} XP`;
-        
-        card.appendChild(avatar);
-        card.appendChild(name);
-        card.appendChild(role);
-        card.appendChild(xpInfo);
-        card.appendChild(status);
-        
-        grid.appendChild(card);
-    });
-    
-    console.log('✅ All cards created');
+    }, duration / steps);
 }
