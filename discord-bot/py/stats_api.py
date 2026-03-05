@@ -83,7 +83,15 @@ def exchange_code():
 def get_user(user_id):
     """Get user data"""
     try:
-        from database_postgres import db, RANKS
+        import sys
+        import os
+        
+        # Add parent directory to path
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        from database_postgres import PostgresDatabase, RANKS
+        db = PostgresDatabase()
+        
         user = db.get_user(user_id)
         
         if user:
@@ -114,7 +122,14 @@ def play_roulette():
     """Play roulette"""
     try:
         import random
-        from database_postgres import db
+        import sys
+        import os
+        
+        # Add parent directory to path
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        from database_postgres import PostgresDatabase
+        db = PostgresDatabase()
         
         data = request.get_json()
         user_id = data.get('user_id')
