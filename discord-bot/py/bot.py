@@ -341,46 +341,7 @@ async def on_ready():
         import traceback
         traceback.print_exc()
     
-    # Настройка кнопки тикетов (ВРЕМЕННО ОТКЛЮЧЕНО - зависает)
-    # print("🔄 Настройка кнопки тикетов...")
-    # try:
-    #     await tickets_system.setup_ticket_button(bot)
-    #     print("✅ Кнопка тикетов настроена")
-    # except Exception as e:
-    #     print(f"❌ Ошибка настройки кнопки тикетов: {e}")
-    #     import traceback
-    #     traceback.print_exc()
-    
-    # Проверка автообновления (ВРЕМЕННО ОТКЛЮЧЕНО)
-    # print("🔄 Проверка автообновления...")
-    # try:
-    #     await updates_system.check_auto_update(bot)
-    #     print("✅ Автообновление проверено")
-    # except Exception as e:
-    #     print(f"❌ Ошибка проверки автообновления: {e}")
-    #     import traceback
-    #     traceback.print_exc()
-    
-    # Обновление списка команд в канале (ВРЕМЕННО ОТКЛЮЧЕНО)
-    # print("📝 Обновление списка команд в канале...")
-    # try:
-    #     await update_commands_list()
-    #     print("✅ Список команд обновлён")
-    # except Exception as e:
-    #     print(f"❌ Ошибка обновления списка команд: {e}")
-    #     import traceback
-    #     traceback.print_exc()
-    
-    print("🚀 Запуск фоновых задач...")
-    # Запуск фоновых задач
-    if not update_bot_status.is_running():
-        update_bot_status.start()
-        print("✅ update_bot_status запущен")
-    if not update_website_stats.is_running():
-        update_website_stats.start()
-        print("✅ update_website_stats запущен")
-    
-    # Запуск HTTP API для статистики
+    # Запуск HTTP API для статистики (ЗАПУСКАЕМ РАНЬШЕ!)
     print("🌐 Запуск Stats API сервера...")
     print(f"🔍 DEBUG: stats_api module = {stats_api}")
     print(f"🔍 DEBUG: start_api_server function = {stats_api.start_api_server}")
@@ -389,6 +350,26 @@ async def on_ready():
         print("✅ Stats API запущен успешно!")
     except Exception as e:
         print(f"❌ Ошибка запуска Stats API: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    print("🚀 Запуск фоновых задач...")
+    # Запуск фоновых задач
+    try:
+        if not update_bot_status.is_running():
+            update_bot_status.start()
+            print("✅ update_bot_status запущен")
+    except Exception as e:
+        print(f"❌ Ошибка запуска update_bot_status: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    try:
+        if not update_website_stats.is_running():
+            update_website_stats.start()
+            print("✅ update_website_stats запущен")
+    except Exception as e:
+        print(f"❌ Ошибка запуска update_website_stats: {e}")
         import traceback
         traceback.print_exc()
 
