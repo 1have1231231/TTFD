@@ -139,6 +139,7 @@
     "add Flask to discord-bot requirements",
     "add debug logging for Stats API startup",
     "add more debug logging to track on_ready execution",
-    "temporarily disable hanging functions to test Stats API"
+    "temporarily disable hanging functions to test Stats API",
+    "move Stats API startup before background tasks"
   ]
 }

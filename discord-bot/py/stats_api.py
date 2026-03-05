@@ -5,9 +5,14 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import threading
 import os
+import logging
 
 app = Flask(__name__)
 CORS(app)
+
+# Отключаем логи Flask
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 # Глобальная переменная для хранения статистики
 stats_data = {
@@ -31,14 +36,18 @@ def update_stats(data):
     """Обновить статистику"""
     global stats_data
     stats_data = data
+    print(f"📊 Статистика обновлена: {data.get('online_members', 0)}/{data.get('total_members', 0)} онлайн, игроков: {len(data.get('top_players', []))}")
 
 def run_api():
     """Запустить API сервер"""
     port = int(os.getenv('STATS_API_PORT', 8080))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    print(f"🌐 Flask API запускается на порту {port}...")
+    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
 
 def start_api_server():
     """Запустить API в отдельном потоке"""
+    print("🚀 Создание потока для Stats API...")
     thread = threading.Thread(target=run_api, daemon=True)
     thread.start()
-    print(f"✅ Stats API запущен на порту 8080")
+    print(f"✅ Stats API поток запущен (порт 8080)")
+
