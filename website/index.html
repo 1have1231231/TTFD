@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TTFD Gaming</title>
+    <title>TTFD - Gaming Community</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,316 +13,125 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0e27;
-            color: #e0e0e0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
             min-height: 100vh;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        /* Navbar */
+        .navbar {
+            background: #161b22;
+            border-bottom: 1px solid #21262d;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            border: 1px solid #2a3f5f;
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            height: 60px;
         }
 
         .logo {
-            font-size: 28px;
-            font-weight: bold;
-            background: linear-gradient(45deg, #00d4ff, #7b2ff7);
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #58a6ff, #a371f7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .nav {
+        .nav-links {
             display: flex;
+            gap: 5px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            color: #8b949e;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(88, 166, 255, 0.1);
+            color: #58a6ff;
+        }
+
+        .nav-link.active {
+            background: rgba(88, 166, 255, 0.15);
+            color: #58a6ff;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
             gap: 10px;
-        }
-
-        .nav-btn {
-            padding: 10px 20px;
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid #00d4ff;
-            color: #00d4ff;
-            border-radius: 8px;
+            padding: 6px 12px;
+            background: #21262d;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
-        .nav-btn:hover, .nav-btn.active {
-            background: #00d4ff;
-            color: #0a0e27;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        .user-info:hover {
+            background: #30363d;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #58a6ff;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-coins {
+            font-size: 12px;
+            color: #ffa657;
+            font-weight: 600;
         }
 
         .login-btn {
-            padding: 10px 25px;
-            background: linear-gradient(45deg, #7b2ff7, #f107a3);
-            border: none;
+            padding: 8px 16px;
+            background: #238636;
             color: white;
-            border-radius: 8px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
         .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(123, 47, 247, 0.5);
+            background: #2ea043;
         }
 
-        /* Profile Section */
-        .profile-card {
-            background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
-            padding: 30px;
-            border-radius: 15px;
-            border: 1px solid #2a3f5f;
-            margin-bottom: 30px;
-        }
-
-        .profile-header {
-            display: flex;
-            gap: 25px;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 3px solid #00d4ff;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-        }
-
-        .profile-info h2 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-
-        .profile-tag {
-            color: #7b2ff7;
-            font-size: 14px;
-        }
-
-        .xp-bar {
-            background: rgba(0, 0, 0, 0.3);
-            height: 25px;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-top: 15px;
-            border: 1px solid #2a3f5f;
-        }
-
-        .xp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
-            transition: width 0.5s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        /* Stats Grid */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .stat-box {
-            background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #2a3f5f;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .stat-box:hover {
-            border-color: #00d4ff;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-            transform: translateY(-3px);
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            background: linear-gradient(45deg, #00d4ff, #7b2ff7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-label {
-            color: #888;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        /* Leaderboard */
-        .leaderboard {
-            display: grid;
-            gap: 15px;
-        }
-
-        .player-item {
-            background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #2a3f5f;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            transition: all 0.3s;
-        }
-
-        .player-item:hover {
-            border-color: #00d4ff;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-        }
-
-        .player-rank {
-            font-size: 24px;
-            font-weight: bold;
-            color: #00d4ff;
-            min-width: 40px;
-        }
-
-        .player-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 2px solid #00d4ff;
-        }
-
-        .player-info {
-            flex: 1;
-        }
-
-        .player-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .player-xp {
-            color: #7b2ff7;
-            font-size: 14px;
-        }
-
-        /* Roulette */
-        .roulette-container {
-            max-width: 600px;
+        /* Main */
+        .main {
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 30px 20px;
         }
 
-        .roulette-wheel {
-            width: 200px;
-            height: 200px;
-            margin: 30px auto;
-            background: linear-gradient(45deg, #00d4ff, #7b2ff7);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 64px;
-            font-weight: bold;
-            box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
-            transition: transform 0.5s;
-        }
-
-        .roulette-wheel.spin {
-            animation: spin 2s ease-out;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(1080deg); }
-        }
-
-        .bet-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .bet-input {
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #2a3f5f;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            text-align: center;
-        }
-
-        .bet-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .bet-btn {
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .bet-btn.red {
-            background: #ff4757;
-        }
-
-        .bet-btn.green {
-            background: #2ed573;
-        }
-
-        .bet-btn.black {
-            background: #2f3542;
-        }
-
-        .bet-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .result.win {
-            background: rgba(46, 213, 115, 0.2);
-            border: 1px solid #2ed573;
-            color: #2ed573;
-        }
-
-        .result.lose {
-            background: rgba(255, 71, 87, 0.2);
-            border: 1px solid #ff4757;
-            color: #ff4757;
-        }
-
-        /* Section */
         .section {
             display: none;
         }
@@ -332,121 +142,505 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .section-title {
-            font-size: 28px;
+        /* Profile Hero */
+        .profile-hero {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 12px;
+            padding: 30px;
             margin-bottom: 20px;
-            background: linear-gradient(45deg, #00d4ff, #7b2ff7);
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+        }
+
+        .avatar-container {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            border: 3px solid #58a6ff;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+        }
+
+        .level-badge {
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #58a6ff, #a371f7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            border: 3px solid #161b22;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .profile-tag {
+            color: #8b949e;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .xp-container {
+            max-width: 500px;
+        }
+
+        .xp-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .xp-label {
+            color: #8b949e;
+            font-weight: 600;
+        }
+
+        .xp-value {
+            color: #58a6ff;
+            font-weight: 700;
+        }
+
+        .xp-bar {
+            height: 10px;
+            background: #21262d;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #58a6ff, #a371f7);
+            transition: width 0.5s;
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: #58a6ff;
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #58a6ff, #a371f7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
         }
 
-        .auth-message {
+        .stat-label {
+            color: #8b949e;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        /* Top Players */
+        .top-players {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .player-card {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 12px;
+            padding: 25px;
             text-align: center;
-            padding: 60px 20px;
-            color: #888;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .player-card:hover {
+            border-color: #58a6ff;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .player-card.top-1 {
+            padding: 30px;
+            border-color: #ffa657;
+            box-shadow: 0 0 30px rgba(255, 166, 87, 0.3);
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #58a6ff, #a371f7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            border: 3px solid #0d1117;
+        }
+
+        .player-card.top-1 .rank-badge {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffa657, #ff7b72);
+            font-size: 16px;
+        }
+
+        .player-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            border: 3px solid #58a6ff;
+        }
+
+        .player-card.top-1 .player-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-color: #ffa657;
+            box-shadow: 0 0 20px rgba(255, 166, 87, 0.5);
+        }
+
+        .player-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .player-card.top-1 .player-name {
+            font-size: 22px;
+        }
+
+        .player-level {
+            color: #8b949e;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .player-xp {
+            font-size: 24px;
+            font-weight: 800;
+            color: #58a6ff;
+        }
+
+        .player-card.top-1 .player-xp {
+            font-size: 28px;
+            color: #ffa657;
+        }
+
+        /* Roulette */
+        .roulette-box {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .auth-msg {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            color: #8b949e;
+        }
+
+        .balance-display {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 20px;
+        }
+
+        .balance-amount {
+            color: #ffa657;
+            font-weight: 800;
+            font-size: 28px;
+            margin: 0 8px;
+        }
+
+        .wheel-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .wheel {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #58a6ff, #a371f7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            font-weight: 900;
+            box-shadow: 0 0 40px rgba(88, 166, 255, 0.5);
+            transition: transform 0.5s;
+        }
+
+        .wheel.spinning {
+            animation: spin 2s ease-in-out;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(1080deg); }
+        }
+
+        .bet-input {
+            width: 100%;
+            padding: 15px;
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            color: #c9d1d9;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .bet-input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .bet-btns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bet-btn {
+            padding: 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bet-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .bet-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .bet-btn.red {
+            background: #da3633;
+            color: white;
+        }
+
+        .bet-btn.green {
+            background: #238636;
+            color: white;
+        }
+
+        .bet-btn.black {
+            background: #21262d;
+            color: white;
+        }
+
+        .result-box {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .result-box.win {
+            background: rgba(35, 134, 54, 0.2);
+            border: 1px solid #238636;
+            color: #3fb950;
+        }
+
+        .result-box.lose {
+            background: rgba(218, 54, 51, 0.2);
+            border: 1px solid #da3633;
+            color: #ff7b72;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .stats {
+            .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .nav {
+            .top-players {
+                grid-template-columns: 1fr;
+            }
+            
+            .player-card.top-1 {
+                order: -1;
+            }
+            
+            .nav-links {
                 display: none;
             }
             
             .profile-header {
                 flex-direction: column;
+                align-items: center;
                 text-align: center;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
             <div class="logo">TTFD</div>
-            <div class="nav">
-                <button class="nav-btn active" onclick="showSection('profile')">Профиль</button>
-                <button class="nav-btn" onclick="showSection('leaderboard')">Лидеры</button>
-                <button class="nav-btn" onclick="showSection('roulette')">Рулетка</button>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" onclick="showSection('profile')">Профиль</a>
+                <a href="#" class="nav-link" onclick="showSection('leaderboard')">Лидеры</a>
+                <a href="#" class="nav-link" onclick="showSection('roulette')">Рулетка</a>
             </div>
-            <button class="login-btn" id="loginBtn" onclick="login()">Войти</button>
+            <div class="user-section">
+                <button class="login-btn" id="loginBtn" onclick="login()">Войти через Discord</button>
+            </div>
         </div>
+    </nav>
 
-        <!-- Profile Section -->
-        <div id="profile" class="section active">
-            <div class="profile-card">
+    <!-- Main -->
+    <main class="main">
+        <!-- Profile -->
+        <section id="profile" class="section active">
+            <div class="profile-hero">
                 <div class="profile-header">
-                    <img id="avatar" class="avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar">
-                    <div class="profile-info">
-                        <h2 id="username">Гость</h2>
-                        <div class="profile-tag" id="tag">Войдите для просмотра профиля</div>
-                        <div class="xp-bar">
-                            <div class="xp-fill" id="xpBar" style="width: 0%">
-                                <span id="xpText">0 / 100 XP</span>
+                    <div class="avatar-container">
+                        <img id="profileAvatar" class="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar">
+                        <div class="level-badge" id="levelBadge">1</div>
+                    </div>
+                    <div class="profile-details">
+                        <h1 class="profile-name" id="profileName">Гость</h1>
+                        <div class="profile-tag" id="profileTag">Войдите для просмотра профиля</div>
+                        <div class="xp-container">
+                            <div class="xp-header">
+                                <span class="xp-label">Уровень <span id="currentLevel">1</span></span>
+                                <span class="xp-value"><span id="currentXP">0</span> / <span id="nextXP">100</span> XP</span>
+                            </div>
+                            <div class="xp-bar">
+                                <div class="xp-fill" id="xpFill" style="width: 0%"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="stats">
-                <div class="stat-box">
-                    <div class="stat-value" id="coins">0</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="statCoins">0</div>
                     <div class="stat-label">Монеты</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="xp">0</div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statXP">0</div>
                     <div class="stat-label">Опыт</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="level">1</div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statLevel">1</div>
                     <div class="stat-label">Уровень</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="rank">F</div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statRank">F</div>
                     <div class="stat-label">Ранг</div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Leaderboard Section -->
-        <div id="leaderboard" class="section">
+        <!-- Leaderboard -->
+        <section id="leaderboard" class="section">
             <h2 class="section-title">Топ игроков</h2>
-            <div class="leaderboard" id="leaderboardList">
-                <div class="auth-message">Загрузка...</div>
+            <div class="top-players" id="topPlayers">
+                <div class="auth-msg">Загрузка...</div>
             </div>
-        </div>
+        </section>
 
-        <!-- Roulette Section -->
-        <div id="roulette" class="section">
+        <!-- Roulette -->
+        <section id="roulette" class="section">
             <h2 class="section-title">Рулетка</h2>
-            <div class="roulette-container">
-                <div id="rouletteAuth" class="auth-message">
+            <div class="roulette-box">
+                <div id="rouletteAuth" class="auth-msg">
                     Войдите через Discord для доступа к рулетке
                 </div>
                 <div id="rouletteGame" style="display: none;">
-                    <div class="roulette-wheel" id="wheel">?</div>
-                    <div class="bet-controls">
-                        <input type="number" id="betAmount" class="bet-input" placeholder="Ставка" min="10" value="100">
-                        <div class="bet-buttons">
-                            <button class="bet-btn red" onclick="placeBet('red')">Красное x2</button>
-                            <button class="bet-btn green" onclick="placeBet('green')">Зелёное x14</button>
-                            <button class="bet-btn black" onclick="placeBet('black')">Чёрное x2</button>
-                        </div>
+                    <div class="balance-display">
+                        Баланс: <span class="balance-amount" id="rouletteBalance">0</span> монет
                     </div>
-                    <div id="result" class="result" style="display: none;"></div>
+                    <div class="wheel-container">
+                        <div class="wheel" id="wheel">?</div>
+                    </div>
+                    <input type="number" id="betAmount" class="bet-input" placeholder="Ставка" min="10" value="100">
+                    <div class="bet-btns">
+                        <button class="bet-btn red" onclick="placeBet('red')">Красное x2</button>
+                        <button class="bet-btn green" onclick="placeBet('green')">Зелёное x14</button>
+                        <button class="bet-btn black" onclick="placeBet('black')">Чёрное x2</button>
+                    </div>
+                    <div id="result" class="result-box" style="display: none;"></div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=4"></script>
 </body>
 </html>

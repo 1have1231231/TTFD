@@ -1,24 +1,21 @@
 let currentUser = null;
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     loadLeaderboard();
 });
 
-// Show section
-function showSection(sectionId) {
+function showSection(id) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(sectionId).classList.add('active');
+    document.getElementById(id).classList.add('active');
     
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     event.target.classList.add('active');
     
-    if (sectionId === 'leaderboard') loadLeaderboard();
-    if (sectionId === 'roulette') loadRoulette();
+    if (id === 'leaderboard') loadLeaderboard();
+    if (id === 'roulette') loadRoulette();
 }
 
-// Check auth
 async function checkAuth() {
     try {
         const res = await fetch('/api/me', { credentials: 'include' });
@@ -35,7 +32,6 @@ async function checkAuth() {
     }
 }
 
-// Update UI
 function updateUI() {
     if (!currentUser) return;
     
@@ -43,13 +39,22 @@ function updateUI() {
         ? `https://cdn.discordapp.com/avatars/${currentUser.id}/${currentUser.avatar}.png`
         : 'https://cdn.discordapp.com/embed/avatars/0.png';
     
-    document.getElementById('avatar').src = avatar;
-    document.getElementById('username').textContent = currentUser.username;
-    document.getElementById('tag').textContent = `${currentUser.username}#${currentUser.discriminator}`;
-    document.getElementById('loginBtn').textContent = 'Профиль';
+    document.getElementById('profileAvatar').src = avatar;
+    document.getElementById('profileName').textContent = currentUser.username;
+    document.getElementById('profileTag').textContent = `${currentUser.username}#${currentUser.discriminator}`;
+    
+    const userSection = document.querySelector('.user-section');
+    userSection.innerHTML = `
+        <div class="user-info">
+            <img src="${avatar}" class="user-avatar" alt="Avatar">
+            <div>
+                <div class="user-name">${currentUser.username}</div>
+                <div class="user-coins" id="headerCoins">0 монет</div>
+            </div>
+        </div>
+    `;
 }
 
-// Load profile
 async function loadProfile() {
     if (!currentUser) return;
     
@@ -61,46 +66,60 @@ async function loadProfile() {
             const user = data.user;
             const level = Math.floor(user.xp / 100) + 1;
             const xpInLevel = user.xp % 100;
-            const progress = xpInLevel;
             
-            document.getElementById('coins').textContent = user.coins || 0;
-            document.getElementById('xp').textContent = user.xp || 0;
-            document.getElementById('level').textContent = level;
-            document.getElementById('rank').textContent = (user.rank_name || 'F-ранг').charAt(0);
-            document.getElementById('xpBar').style.width = progress + '%';
-            document.getElementById('xpText').textContent = `${xpInLevel} / 100 XP`;
+            document.getElementById('statCoins').textContent = user.coins || 0;
+            document.getElementById('statXP').textContent = user.xp || 0;
+            document.getElementById('statLevel').textContent = level;
+            document.getElementById('statRank').textContent = (user.rank_name || 'F-ранг').charAt(0);
+            
+            document.getElementById('levelBadge').textContent = level;
+            document.getElementById('currentLevel').textContent = level;
+            document.getElementById('currentXP').textContent = xpInLevel;
+            document.getElementById('nextXP').textContent = 100;
+            document.getElementById('xpFill').style.width = xpInLevel + '%';
+            
+            const headerCoins = document.getElementById('headerCoins');
+            if (headerCoins) headerCoins.textContent = `${user.coins || 0} монет`;
         }
     } catch (e) {
         console.error(e);
     }
 }
 
-// Load leaderboard
 async function loadLeaderboard() {
+    const container = document.getElementById('topPlayers');
+    container.innerHTML = '<div class="auth-msg">Загрузка...</div>';
+    
     try {
         const res = await fetch('/api/top/xp');
         const data = await res.json();
         
         if (data.success && data.players.length > 0) {
-            document.getElementById('leaderboardList').innerHTML = data.players.map(p => `
-                <div class="player-item">
-                    <div class="player-rank">#${p.rank}</div>
-                    <img class="player-avatar" src="${p.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" alt="${p.username}">
-                    <div class="player-info">
+            const top3 = data.players.slice(0, 3);
+            const ordered = top3.length === 3 ? [top3[1], top3[0], top3[2]] : top3;
+            
+            container.innerHTML = ordered.map(p => {
+                const isTop1 = p.rank === 1;
+                return `
+                    <div class="player-card ${isTop1 ? 'top-1' : ''}">
+                        <div class="rank-badge">#${p.rank}</div>
+                        <img src="${p.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
+                             class="player-avatar-large" alt="${p.username}">
                         <div class="player-name">${p.username}</div>
-                        <div class="player-xp">${p.xp.toLocaleString()} XP • ${p.rank_name}</div>
+                        <div class="player-level">${p.rank_name}</div>
+                        <div class="player-xp">${p.xp.toLocaleString()} XP</div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         } else {
-            document.getElementById('leaderboardList').innerHTML = '<div class="auth-message">Нет данных</div>';
+            container.innerHTML = '<div class="auth-msg">Нет данных</div>';
         }
     } catch (e) {
         console.error(e);
+        container.innerHTML = '<div class="auth-msg">Ошибка загрузки</div>';
     }
 }
 
-// Load roulette
 function loadRoulette() {
     if (!currentUser) {
         document.getElementById('rouletteAuth').style.display = 'block';
@@ -108,10 +127,22 @@ function loadRoulette() {
     } else {
         document.getElementById('rouletteAuth').style.display = 'none';
         document.getElementById('rouletteGame').style.display = 'block';
+        updateRouletteBalance();
     }
 }
 
-// Place bet
+async function updateRouletteBalance() {
+    try {
+        const res = await fetch(`/api/user/${currentUser.id}`);
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('rouletteBalance').textContent = data.user.coins || 0;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
 async function placeBet(color) {
     const bet = parseInt(document.getElementById('betAmount').value);
     if (!bet || bet < 10) {
@@ -120,7 +151,10 @@ async function placeBet(color) {
     }
     
     const wheel = document.getElementById('wheel');
-    wheel.classList.add('spin');
+    const buttons = document.querySelectorAll('.bet-btn');
+    buttons.forEach(btn => btn.disabled = true);
+    
+    wheel.classList.add('spinning');
     wheel.textContent = '?';
     
     try {
@@ -134,35 +168,41 @@ async function placeBet(color) {
         const data = await res.json();
         
         setTimeout(() => {
-            wheel.classList.remove('spin');
+            wheel.classList.remove('spinning');
+            
             if (data.success) {
                 wheel.textContent = data.number;
+                
                 if (data.win) {
                     showResult(`🎉 Выигрыш! +${data.win_amount} монет`, 'win');
                 } else {
                     showResult(`😢 Проигрыш! -${bet} монет`, 'lose');
                 }
+                
+                updateRouletteBalance();
                 loadProfile();
             } else {
                 showResult(data.error || 'Ошибка', 'lose');
             }
+            
+            buttons.forEach(btn => btn.disabled = false);
         }, 2000);
     } catch (e) {
-        wheel.classList.remove('spin');
+        console.error(e);
+        wheel.classList.remove('spinning');
         showResult('Ошибка сервера', 'lose');
+        buttons.forEach(btn => btn.disabled = false);
     }
 }
 
-// Show result
 function showResult(msg, type) {
     const result = document.getElementById('result');
     result.textContent = msg;
-    result.className = `result ${type}`;
+    result.className = `result-box ${type}`;
     result.style.display = 'block';
     setTimeout(() => result.style.display = 'none', 5000);
 }
 
-// Login
 function login() {
     if (currentUser) {
         showSection('profile');
