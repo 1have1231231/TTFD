@@ -37,22 +37,28 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load leaderboard
 async function loadLeaderboard() {
     const leaderboard = document.querySelector('.leaderboard');
+    leaderboard.innerHTML = '<div class="loading">Загрузка...</div>';
     
-    // Mock data for now
-    const mockPlayers = [
-        { rank: 1, name: 'Player One', xp: 15000, avatar: '' },
-        { rank: 2, name: 'Player Two', xp: 12500, avatar: '' },
-        { rank: 3, name: 'Player Three', xp: 10000, avatar: '' }
-    ];
-    
-    leaderboard.innerHTML = mockPlayers.map(player => `
-        <div class="player-card">
-            <div class="player-rank">#${player.rank}</div>
-            <div class="player-avatar"></div>
-            <div class="player-info">
-                <div class="player-name">${player.name}</div>
-                <div class="player-xp">${player.xp.toLocaleString()} XP</div>
-            </div>
-        </div>
-    `).join('');
+    try {
+        const response = await fetch('/api/top/xp');
+        const data = await response.json();
+        
+        if (data.success && data.players.length > 0) {
+            leaderboard.innerHTML = data.players.map(player => `
+                <div class="player-card">
+                    <div class="player-rank">#${player.rank}</div>
+                    <div class="player-avatar" style="background-image: url('${player.avatar || ''}')"></div>
+                    <div class="player-info">
+                        <div class="player-name">${player.username}</div>
+                        <div class="player-xp">${player.xp.toLocaleString()} XP • ${player.rank_name}</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            leaderboard.innerHTML = '<div class="loading">Нет данных</div>';
+        }
+    } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        leaderboard.innerHTML = '<div class="loading">Ошибка загрузки</div>';
+    }
 }

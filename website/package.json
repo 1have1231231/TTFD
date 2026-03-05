@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "TTFD Elite Gaming Community Website",
   "scripts": {
-    "start": "npx http-server -p ${PORT:-8080}"
-  },
-  "dependencies": {
-    "http-server": "^14.1.1"
+    "start": "python api.py"
   }
 }
