@@ -458,10 +458,13 @@ async def update_website_stats():
             try:
                 member = guild.get_member(int(user_id))
                 if member and not member.bot:
-                    # Определяем ранг
+                    # Определяем ранг (только букву)
                     rank_id = user_data.get('rank_id', 1)
                     from database_postgres import RANKS
-                    rank_name = RANKS[rank_id - 1]['name'] if rank_id <= len(RANKS) else 'Новичок'
+                    if rank_id <= len(RANKS):
+                        rank_tier = RANKS[rank_id - 1]['tier']  # Получаем только букву (F, E, D и т.д.)
+                    else:
+                        rank_tier = 'F'
                     
                     # Статус онлайн
                     is_online = member.status != discord.Status.offline
@@ -471,7 +474,7 @@ async def update_website_stats():
                         'name': member.name,
                         'display_name': member.display_name,
                         'avatar_url': str(member.display_avatar.url),
-                        'rank': rank_name,
+                        'rank': rank_tier,
                         'xp': user_data.get('xp', 0),
                         'online': is_online
                     })
