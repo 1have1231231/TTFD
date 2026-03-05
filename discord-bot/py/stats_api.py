@@ -46,8 +46,14 @@ def run_api():
 
 def start_api_server():
     """Запустить API в отдельном потоке"""
-    print("🚀 Создание потока для Stats API...")
-    thread = threading.Thread(target=run_api, daemon=True)
-    thread.start()
-    print(f"✅ Stats API поток запущен (порт 8080)")
+    try:
+        print("🚀 Создание потока для Stats API...")
+        thread = threading.Thread(target=run_api, daemon=True)
+        print("✅ Поток создан, запускаем...")
+        thread.start()
+        print(f"✅ Stats API поток запущен (порт 8080)")
+    except Exception as e:
+        print(f"❌ Ошибка создания потока Stats API: {e}")
+        import traceback
+        traceback.print_exc()
 
