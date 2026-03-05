@@ -159,6 +159,7 @@
     "исправлена ошибка rank_tier",
     "добавлена Discord OAuth2 авторизация",
     "discord OAuth через бот как прокси (обход Cloudflare)",
-    "новый Steam-style Gaming UI дизайн"
+    "новый Steam-style Gaming UI дизайн",
+    "обновлён JavaScript для нового UI"
   ]
 }
