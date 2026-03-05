@@ -140,6 +140,13 @@ function renderTopXP(grid, players) {
         const card = document.createElement('div');
         card.className = `top-card rank-${rank}`;
         
+        // Field mapping for compatibility
+        const avatarUrl = player.avatar_url || player.avatarUrl || player.avatar || null;
+        const displayName = player.display_name || player.displayName || player.name || player.username || 'Unknown';
+        const userRank = player.rank || player.role || null;
+        const xpValue = player.xp || player.experience || 0;
+        const isOnline = player.online || player.isOnline || false;
+        
         // Rank badge
         const rankBadge = document.createElement('div');
         rankBadge.className = 'rank-badge';
@@ -148,10 +155,10 @@ function renderTopXP(grid, players) {
         // Avatar
         const avatar = document.createElement('div');
         avatar.className = 'avatar';
-        if (player.avatar_url) {
+        if (avatarUrl) {
             const img = document.createElement('img');
-            img.src = player.avatar_url;
-            img.alt = player.name || player.display_name || 'Player';
+            img.src = avatarUrl;
+            img.alt = displayName;
             img.onerror = () => {
                 img.style.display = 'none';
             };
@@ -161,20 +168,20 @@ function renderTopXP(grid, players) {
         // Username
         const username = document.createElement('div');
         username.className = 'username';
-        username.textContent = player.display_name || player.name || 'Unknown';
+        username.textContent = displayName;
         
         // Role (if exists)
         let roleElement = null;
-        if (player.rank) {
+        if (userRank) {
             roleElement = document.createElement('div');
             roleElement.className = 'user-role';
-            roleElement.textContent = player.rank;
+            roleElement.textContent = userRank;
         }
         
         // XP
-        const xpValue = document.createElement('div');
-        xpValue.className = 'xp-value';
-        xpValue.textContent = (player.xp || 0).toLocaleString();
+        const xpValueEl = document.createElement('div');
+        xpValueEl.className = 'xp-value';
+        xpValueEl.textContent = xpValue.toLocaleString();
         
         const xpLabel = document.createElement('div');
         xpLabel.className = 'xp-label';
@@ -182,14 +189,14 @@ function renderTopXP(grid, players) {
         
         // Status pill
         const statusPill = document.createElement('div');
-        statusPill.className = `status-pill ${player.online ? 'online' : 'offline'}`;
-        statusPill.textContent = player.online ? 
+        statusPill.className = `status-pill ${isOnline ? 'online' : 'offline'}`;
+        statusPill.textContent = isOnline ? 
             (currentLang === 'ru' ? 'В СЕТИ' : 'ONLINE') : 
             (currentLang === 'ru' ? 'НЕ В СЕТИ' : 'OFFLINE');
         
         // View profile button
         const viewBtn = document.createElement('a');
-        viewBtn.href = player.profileUrl || `/cabinet.html`;
+        viewBtn.href = player.profileUrl || player.profile_url || `/cabinet.html`;
         viewBtn.className = 'btn btn-secondary view-profile-btn';
         viewBtn.textContent = currentLang === 'ru' ? 'ПРОФИЛЬ' : 'VIEW PROFILE';
         
@@ -198,7 +205,7 @@ function renderTopXP(grid, players) {
         card.appendChild(avatar);
         card.appendChild(username);
         if (roleElement) card.appendChild(roleElement);
-        card.appendChild(xpValue);
+        card.appendChild(xpValueEl);
         card.appendChild(xpLabel);
         card.appendChild(statusPill);
         card.appendChild(viewBtn);
