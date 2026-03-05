@@ -184,6 +184,42 @@ def get_me():
         }
     })
 
+@app.route('/api/user/<user_id>')
+def get_user(user_id):
+    """Get user data from Discord bot"""
+    try:
+        response = requests.get(f'{DISCORD_BOT_API}/api/user/{user_id}', timeout=5)
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({'success': False, 'error': 'User not found'}), 404
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/roulette/play', methods=['POST'])
+def play_roulette():
+    """Play roulette"""
+    user = session.get('user')
+    
+    if not user:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    
+    try:
+        response = requests.post(
+            f'{DISCORD_BOT_API}/api/roulette/play',
+            json=data,
+            timeout=10
+        )
+        
+        return jsonify(response.json()), response.status_code
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))
     print(f"🚀 Starting TTFD Website API on port {port}...")

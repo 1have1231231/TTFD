@@ -3,43 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TTFD</title>
+    <title>TTFD - Gaming Community</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">Y
-            <div class="logo">TTFD</div>
-            <nav class="nav">
-                <a href="#home" class="nav-link active">Главная</a>
-                <a href="#leaderboard" class="nav-link">Топ игроков</a>
-                <a href="#roulette" class="nav-link">Рулетка</a>
-            </nav>
-            <button class="login-btn" id="loginBtn">Войти через Discord</button>
-        </header>
-
-        <main class="main">
-            <section id="home" class="section active">
-                <div class="hero">
-                    <h1 class="hero-title">Добро пожаловать в TTFD</h1>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-left">
+                <div class="logo">TTFD</div>
+            </div>
+            
+            <div class="navbar-center">
+                <a href="#profile" class="nav-item active" data-section="profile">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Профиль</span>
+                </a>
+                <a href="#leaderboard" class="nav-item" data-section="leaderboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 16v-3a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3M8 16v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6M4 16h16"></path>
+                    </svg>
+                    <span>Лидеры</span>
+                </a>
+                <a href="#roulette" class="nav-item" data-section="roulette">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 2v10l4 4"></path>
+                    </svg>
+                    <span>Рулетка</span>
+                </a>
+                <a href="#activity" class="nav-item" data-section="activity">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    <span>Активность</span>
+                </a>
+            </div>
+            
+            <div class="navbar-right">
+                <div class="user-block" id="userBlock">
+                    <button class="login-btn" id="loginBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+                        </svg>
+                        Войти через Discord
+                    </button>
                 </div>
-            </section>
+            </div>
+        </div>
+    </nav>
 
-            <section id="leaderboard" class="section">
-                <h2 class="section-title">TOP XP</h2>
-                <div class="leaderboard">
-                    <div class="loading">Загрузка...</div>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Profile Section -->
+        <section id="profile" class="section active">
+            <div class="profile-hero">
+                <div class="profile-header">
+                    <div class="profile-avatar-container">
+                        <img id="profileAvatar" class="profile-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar">
+                        <div class="profile-level-badge" id="profileLevel">1</div>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <h1 class="profile-username" id="profileUsername">Гость</h1>
+                        <div class="profile-meta">
+                            <span class="profile-tag" id="profileTag">Войдите для просмотра профиля</span>
+                        </div>
+                        
+                        <div class="xp-bar-container">
+                            <div class="xp-bar-header">
+                                <span class="xp-label">Уровень <span id="currentLevel">1</span></span>
+                                <span class="xp-value"><span id="currentXP">0</span> / <span id="nextLevelXP">100</span> XP</span>
+                            </div>
+                            <div class="xp-bar">
+                                <div class="xp-bar-fill" id="xpBarFill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </section>
+            </div>
 
-            <section id="roulette" class="section">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon coins">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v12M9 9h6"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statCoins">0</div>
+                        <div class="stat-label">Монеты</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon xp">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statXP">0</div>
+                        <div class="stat-label">Опыт</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon level">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statLevel">1</div>
+                        <div class="stat-label">Уровень</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon rank">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 16v-3a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statRank">-</div>
+                        <div class="stat-label">Ранг</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Leaderboard Section -->
+        <section id="leaderboard" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Топ игроков</h2>
+                <p class="section-subtitle">Лучшие участники сервера по опыту</p>
+            </div>
+
+            <div class="top-players" id="topPlayers">
+                <div class="loading-spinner"></div>
+            </div>
+        </section>
+
+        <!-- Roulette Section -->
+        <section id="roulette" class="section">
+            <div class="section-header">
                 <h2 class="section-title">Рулетка</h2>
-                <div class="roulette-container">
-                    <p class="info-text">Войдите через Discord для доступа к рулетке</p>
+                <p class="section-subtitle">Испытай удачу и выиграй монеты</p>
+            </div>
+
+            <div class="roulette-container">
+                <div class="roulette-auth" id="rouletteAuth">
+                    <div class="auth-message">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <p>Войдите через Discord для доступа к рулетке</p>
+                    </div>
                 </div>
-            </section>
-        </main>
-    </div>
+
+                <div class="roulette-game" id="rouletteGame" style="display: none;">
+                    <div class="roulette-balance">
+                        <span class="balance-label">Баланс:</span>
+                        <span class="balance-value" id="rouletteBalance">0</span>
+                        <span class="balance-currency">монет</span>
+                    </div>
+
+                    <div class="roulette-wheel-container">
+                        <div class="roulette-wheel" id="rouletteWheel">
+                            <div class="roulette-number" id="rouletteNumber">?</div>
+                        </div>
+                    </div>
+
+                    <div class="roulette-controls">
+                        <input type="number" id="betAmount" class="bet-input" placeholder="Ставка" min="10" value="100">
+                        
+                        <div class="bet-buttons">
+                            <button class="bet-btn red" onclick="placeBet('red')">
+                                <span class="bet-label">Красное</span>
+                                <span class="bet-multiplier">x2</span>
+                            </button>
+                            <button class="bet-btn green" onclick="placeBet('green')">
+                                <span class="bet-label">Зелёное</span>
+                                <span class="bet-multiplier">x14</span>
+                            </button>
+                            <button class="bet-btn black" onclick="placeBet('black')">
+                                <span class="bet-label">Чёрное</span>
+                                <span class="bet-multiplier">x2</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="roulette-result" id="rouletteResult"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Activity Section -->
+        <section id="activity" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Активность</h2>
+                <p class="section-subtitle">Последние действия на сервере</p>
+            </div>
+
+            <div class="activity-container">
+                <div class="activity-auth" id="activityAuth">
+                    <div class="auth-message">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        <p>Войдите через Discord для просмотра активности</p>
+                    </div>
+                </div>
+
+                <div class="activity-list" id="activityList" style="display: none;">
+                    <!-- Activity items will be loaded here -->
+                </div>
+            </div>
+        </section>
+    </main>
 
     <script src="script.js"></script>
 </body>

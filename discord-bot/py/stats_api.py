@@ -79,6 +79,104 @@ def exchange_code():
         print(f"❌ OAuth exchange error: {e}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/user/<user_id>')
+def get_user(user_id):
+    """Get user data"""
+    try:
+        from database_postgres import db, RANKS
+        user = db.get_user(user_id)
+        
+        if user:
+            rank_id = user.get('rank_id', 1)
+            rank_name = RANKS[rank_id - 1]['name'] if rank_id <= len(RANKS) else 'F-ранг'
+            
+            return jsonify({
+                'success': True,
+                'user': {
+                    'id': str(user['id']),
+                    'username': user.get('username', 'Unknown'),
+                    'xp': user.get('xp', 0),
+                    'coins': user.get('coins', 0),
+                    'clicks': user.get('clicks', 0),
+                    'rank_id': rank_id,
+                    'rank_name': rank_name
+                }
+            })
+        else:
+            return jsonify({'success': False, 'error': 'User not found'}), 404
+            
+    except Exception as e:
+        print(f"❌ Error getting user: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/roulette/play', methods=['POST'])
+def play_roulette():
+    """Play roulette"""
+    try:
+        import random
+        from database_postgres import db
+        
+        data = request.get_json()
+        user_id = data.get('user_id')
+        bet = data.get('bet')
+        color = data.get('color')
+        
+        if not user_id or not bet or not color:
+            return jsonify({'success': False, 'error': 'Missing parameters'}), 400
+        
+        bet = int(bet)
+        
+        # Get user
+        user = db.get_user(user_id)
+        
+        if user['coins'] < bet:
+            return jsonify({'success': False, 'error': 'Недостаточно монет'}), 400
+        
+        # Generate number (0-14)
+        number = random.randint(0, 14)
+        
+        # Determine color
+        if number == 0:
+            result_color = 'green'
+        elif number % 2 == 0:
+            result_color = 'black'
+        else:
+            result_color = 'red'
+        
+        # Check win
+        win = False
+        win_amount = 0
+        
+        if color == result_color:
+            win = True
+            if color == 'green':
+                win_amount = bet * 14
+            else:
+                win_amount = bet * 2
+        
+        # Update balance
+        if win:
+            new_coins = user['coins'] + win_amount - bet
+        else:
+            new_coins = user['coins'] - bet
+        
+        db.update_user(user_id, coins=new_coins)
+        
+        return jsonify({
+            'success': True,
+            'number': number,
+            'color': result_color,
+            'win': win,
+            'win_amount': win_amount if win else 0,
+            'new_balance': new_coins
+        })
+        
+    except Exception as e:
+        print(f"❌ Roulette error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 def update_stats(data):
     """Обновить статистику"""
     global stats_data

@@ -157,6 +157,7 @@
     "добавлен nixpacks.toml для Python",
     "обновил Python до 3.11.9",
     "исправлена ошибка rank_tier",
-    "добавлена Discord OAuth2 авторизация"
+    "добавлена Discord OAuth2 авторизация",
+    "discord OAuth через бот как прокси (обход Cloudflare)"
   ]
 }
