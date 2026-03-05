@@ -1,8 +1,5 @@
 {
   "name": "ttfd-website",
   "version": "1.0.0",
-  "description": "TTFD Elite Gaming Community Website",
-  "scripts": {
-    "start": "python api.py"
-  }
+  "description": "TTFD Elite Gaming Community Website"
 }
