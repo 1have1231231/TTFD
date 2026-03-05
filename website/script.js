@@ -155,43 +155,73 @@ function animateCounter(element, target, duration = 2000) {
 
 // Fetch Discord stats from API
 async function updateDiscordStats() {
+    console.log('🔄 Загрузка статистики...');
     try {
         const response = await fetch('/api/stats');
+        console.log('📡 Ответ получен:', response.status);
+        
         const data = await response.json();
+        console.log('📊 Данные:', data);
         
         // Обновляем статистику на странице
         const totalMembersElement = document.querySelector('.stats-grid .stat-card:nth-child(1) .stat-number');
         const onlineNowElement = document.querySelector('.stats-grid .stat-card:nth-child(2) .stat-number');
         
-        if (totalMembersElement && data.total_members) {
+        if (totalMembersElement && data.total_members !== undefined) {
             totalMembersElement.textContent = data.total_members;
+            console.log('✅ Обновлено total_members:', data.total_members);
         }
         
-        if (onlineNowElement && data.online_members) {
+        if (onlineNowElement && data.online_members !== undefined) {
             onlineNowElement.textContent = data.online_members;
+            console.log('✅ Обновлено online_members:', data.online_members);
         }
         
         // Обновляем карточки игроков
-        if (data.top_players && data.top_players.length > 0) {
+        console.log('👥 Игроков в данных:', data.top_players ? data.top_players.length : 0);
+        if (data.top_players) {
             updateMembersGrid(data.top_players);
+        } else {
+            console.warn('⚠️ Нет данных top_players');
+            updateMembersGrid([]);
         }
         
-        console.log('📊 Статистика обновлена:', data);
+        console.log('✅ Статистика обновлена успешно');
     } catch (error) {
         console.error('❌ Ошибка загрузки статистики:', error);
+        // Показываем сообщение об ошибке
+        const grid = document.getElementById('members-grid');
+        if (grid) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #ff4444;">
+                    <h3>ERROR LOADING DATA</h3>
+                    <p style="color: #666; margin-top: 1rem;">${error.message}</p>
+                    <p style="color: #666; margin-top: 0.5rem;">Check console for details</p>
+                </div>
+            `;
+        }
     }
 }
 
 // Обновление карточек игроков
 function updateMembersGrid(players) {
+    console.log('🎮 updateMembersGrid вызвана с', players.length, 'игроками');
+    
     const grid = document.getElementById('members-grid');
-    if (!grid) return;
+    if (!grid) {
+        console.error('❌ Элемент members-grid не найден!');
+        return;
+    }
+    
+    console.log('✅ Элемент members-grid найден');
     
     // Очищаем сетку
     grid.innerHTML = '';
+    console.log('🗑️ Сетка очищена');
     
     // Если нет игроков, показываем сообщение
     if (!players || players.length === 0) {
+        console.warn('⚠️ Нет игроков для отображения');
         const message = document.createElement('div');
         message.style.gridColumn = '1 / -1';
         message.style.textAlign = 'center';
@@ -202,8 +232,12 @@ function updateMembersGrid(players) {
         return;
     }
     
+    console.log('👥 Создаём карточки для', players.length, 'игроков');
+    
     // Создаём карточки для каждого игрока
     players.forEach((player, index) => {
+        console.log(`📝 Создаём карточку ${index + 1}:`, player.name);
+        
         const card = document.createElement('div');
         card.className = 'member-card';
         card.style.animation = `fadeInUp 0.6s ease ${index * 0.1}s both`;
@@ -216,7 +250,7 @@ function updateMembersGrid(players) {
             img.src = player.avatar_url;
             img.alt = player.name;
             img.onerror = function() {
-                // Если аватарка не загрузилась, показываем пустой квадрат
+                console.warn('⚠️ Не удалось загрузить аватар для', player.name);
                 this.style.display = 'none';
             };
             avatar.appendChild(img);
@@ -243,7 +277,7 @@ function updateMembersGrid(players) {
             (currentLang === 'ru' ? 'НЕ В СЕТИ' : 'OFFLINE');
         status.textContent = statusText;
         
-        // XP (опционально, можно добавить)
+        // XP
         const xpInfo = document.createElement('p');
         xpInfo.className = 'member-xp';
         xpInfo.style.color = '#666';
@@ -260,6 +294,8 @@ function updateMembersGrid(players) {
         
         grid.appendChild(card);
     });
+    
+    console.log('✅ Все карточки созданы и добавлены');
 }
 
 // Обновляем статистику при загрузке и каждые 30 секунд
