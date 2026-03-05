@@ -142,6 +142,7 @@
     "temporarily disable hanging functions to test Stats API",
     "move Stats API startup before background tasks",
     "add detailed logging and disable Flask werkzeug logs",
-    "add error handling to start_api_server"
+    "add error handling to start_api_server",
+    "change Stats API port to 5555 to avoid conflict with gunicorn"
   ]
 }
