@@ -143,6 +143,19 @@
     "move Stats API startup before background tasks",
     "add detailed logging and disable Flask werkzeug logs",
     "add error handling to start_api_server",
-    "change Stats API port to 5555 to avoid conflict with gunicorn"
+    "change Stats API port to 5555 to avoid conflict with gunicorn",
+    "rESTORE: Clean working version of website (no broken nav buttons)",
+    "add Casino, Cabinet, Login buttons + debug logging for stats",
+    "fix: Add null checks for language selector elements",
+    "rEDESIGN: Elite Minimal UI with TOP-3 XP leaderboard, premium layout, perfect alignment",
+    "fIX: Correct HTML structure - fix lang-switcher nesting and add field mapping for API compatibility",
+    "nEW: Complete Next.js app with Discord OAuth, PostgreSQL, XP leaderboard, roulette - ready for Railway",
+    "add Railway deployment guide",
+    "создан простой HTML/CSS/JS сайт для TTFD",
+    "добавлен Flask API для получения топов игроков из Discord бота",
+    "убрал npm start для Railway",
+    "добавлен nixpacks.toml для Python",
+    "обновил Python до 3.11.9",
+    "исправлена ошибка rank_tier"
   ]
 }
