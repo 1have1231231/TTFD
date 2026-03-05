@@ -1,7 +1,7 @@
 """
 HTTP API для отдачи статистики Discord сервера
 """
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import threading
 import os
@@ -31,6 +31,53 @@ def get_stats():
 def health():
     """Health check"""
     return jsonify({'status': 'ok'})
+
+@app.route('/api/auth/exchange', methods=['POST'])
+def exchange_code():
+    """Exchange Discord OAuth code for user info"""
+    try:
+        data = request.get_json()
+        code = data.get('code')
+        redirect_uri = data.get('redirect_uri')
+        
+        if not code or not redirect_uri:
+            return jsonify({'error': 'Missing code or redirect_uri'}), 400
+        
+        # Exchange code for token
+        import requests as req
+        token_url = 'https://discord.com/api/v10/oauth2/token'
+        token_data = {
+            'client_id': os.getenv('DISCORD_CLIENT_ID'),
+            'client_secret': os.getenv('DISCORD_CLIENT_SECRET'),
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': redirect_uri
+        }
+        
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        
+        token_response = req.post(token_url, data=token_data, headers=headers)
+        token_response.raise_for_status()
+        token_json = token_response.json()
+        
+        access_token = token_json['access_token']
+        
+        # Get user info
+        user_response = req.get(
+            'https://discord.com/api/v10/users/@me',
+            headers={'Authorization': f"Bearer {access_token}"}
+        )
+        user_response.raise_for_status()
+        user_data = user_response.json()
+        
+        return jsonify({
+            'success': True,
+            'user': user_data
+        })
+        
+    except Exception as e:
+        print(f"❌ OAuth exchange error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 def update_stats(data):
     """Обновить статистику"""

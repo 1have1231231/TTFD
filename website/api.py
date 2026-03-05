@@ -110,15 +110,16 @@ def discord_login():
     if not DISCORD_CLIENT_ID or not DISCORD_REDIRECT_URI:
         return jsonify({'error': 'Discord OAuth not configured'}), 500
     
-    oauth_url = f"{DISCORD_API_ENDPOINT}/oauth2/authorize"
+    oauth_url = f"https://discord.com/oauth2/authorize"
     params = {
         'client_id': DISCORD_CLIENT_ID,
         'redirect_uri': DISCORD_REDIRECT_URI,
         'response_type': 'code',
-        'scope': 'identify guilds'
+        'scope': 'identify'
     }
     
-    auth_url = f"{oauth_url}?{'&'.join([f'{k}={v}' for k, v in params.items()])}"
+    from urllib.parse import urlencode
+    auth_url = f"{oauth_url}?{urlencode(params)}"
     return redirect(auth_url)
 
 @app.route('/api/auth/discord/callback')
@@ -129,44 +130,32 @@ def discord_callback():
     if not code:
         return redirect('/?error=no_code')
     
-    # Exchange code for token
-    token_url = f"{DISCORD_API_ENDPOINT}/oauth2/token"
-    data = {
-        'client_id': DISCORD_CLIENT_ID,
-        'client_secret': DISCORD_CLIENT_SECRET,
-        'grant_type': 'authorization_code',
-        'code': code,
-        'redirect_uri': DISCORD_REDIRECT_URI
-    }
-    
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    
+    # Send code to Discord bot for processing
     try:
-        response = requests.post(token_url, data=data, headers=headers)
-        response.raise_for_status()
-        token_data = response.json()
-        
-        access_token = token_data['access_token']
-        
-        # Get user info
-        user_response = requests.get(
-            f"{DISCORD_API_ENDPOINT}/users/@me",
-            headers={'Authorization': f"Bearer {access_token}"}
+        response = requests.post(
+            f'{DISCORD_BOT_API}/api/auth/exchange',
+            json={
+                'code': code,
+                'redirect_uri': DISCORD_REDIRECT_URI
+            },
+            timeout=10
         )
-        user_response.raise_for_status()
-        user_data = user_response.json()
         
-        # Save to session
-        session['user'] = {
-            'id': user_data['id'],
-            'username': user_data['username'],
-            'discriminator': user_data.get('discriminator', '0'),
-            'avatar': user_data.get('avatar'),
-            'access_token': access_token
-        }
-        
-        return redirect('/')
-        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Save to session
+            session['user'] = {
+                'id': data['user']['id'],
+                'username': data['user']['username'],
+                'discriminator': data['user'].get('discriminator', '0'),
+                'avatar': data['user'].get('avatar')
+            }
+            
+            return redirect('/')
+        else:
+            return redirect('/?error=auth_failed')
+            
     except Exception as e:
         print(f"❌ Discord OAuth error: {e}")
         return redirect('/?error=auth_failed')
