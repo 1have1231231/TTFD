@@ -133,6 +133,7 @@
     "remove About and Apply sections from website, add Discord link to nav",
     "add real-time top players by XP with avatars and ranks to website",
     "fix: Show only rank tier letter (F, E, D, etc) without level numbers",
-    "fix: Add error handling and test data for members loading"
+    "fix: Add error handling and test data for members loading",
+    "add detailed console logging for debugging members loading"
   ]
 }

@@ -57,6 +57,7 @@ import slash_commands
 import views
 # import chatgpt_system  # ChatGPT отключен
 import private_channels_system
+import stats_api
 
 print("✅ Используется JSON база данных")
 
@@ -372,6 +373,15 @@ async def on_ready():
         update_bot_status.start()
     if not update_website_stats.is_running():
         update_website_stats.start()
+    
+    # Запуск HTTP API для статистики
+    print("🌐 Запуск Stats API сервера...")
+    try:
+        stats_api.start_api_server()
+    except Exception as e:
+        print(f"❌ Ошибка запуска Stats API: {e}")
+        import traceback
+        traceback.print_exc()
 
 @bot.event
 async def on_command(ctx):
@@ -435,7 +445,7 @@ async def update_bot_status():
 
 @tasks.loop(minutes=1)
 async def update_website_stats():
-    """Обновление статистики для сайта"""
+    """Обновление статистики для сайта через HTTP API"""
     try:
         import json
         from datetime import datetime
@@ -489,16 +499,13 @@ async def update_website_stats():
             'last_update': datetime.now().isoformat()
         }
         
-        # Сохраняем в файл для сайта
-        stats_file = os.path.join(os.path.dirname(__file__), '..', '..', 'website', 'discord_stats.json')
-        os.makedirs(os.path.dirname(stats_file), exist_ok=True)
+        # Обновляем данные в stats_api
+        import stats_api
+        stats_api.update_stats(stats)
         
-        with open(stats_file, 'w') as f:
-            json.dump(stats, f, ensure_ascii=False, indent=2)
-        
-        print(f"📊 Статистика для сайта обновлена: {online_count}/{total_count} онлайн, топ игроков: {len(top_players)}")
+        print(f"📊 Статистика обновлена: {online_count}/{total_count} онлайн, топ игроков: {len(top_players)}")
     except Exception as e:
-        print(f"❌ Ошибка обновления статистики для сайта: {e}")
+        print(f"❌ Ошибка обновления статистики: {e}")
         import traceback
         traceback.print_exc()
 
