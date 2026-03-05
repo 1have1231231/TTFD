@@ -158,6 +158,7 @@
     "обновил Python до 3.11.9",
     "исправлена ошибка rank_tier",
     "добавлена Discord OAuth2 авторизация",
-    "discord OAuth через бот как прокси (обход Cloudflare)"
+    "discord OAuth через бот как прокси (обход Cloudflare)",
+    "новый Steam-style Gaming UI дизайн"
   ]
 }
