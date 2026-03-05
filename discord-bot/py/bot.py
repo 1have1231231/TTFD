@@ -335,40 +335,41 @@ async def on_ready():
     print("🔄 Настройка системы верификации...")
     try:
         await verification_system.setup_verification(bot)
+        print("✅ Верификация настроена")
     except Exception as e:
         print(f"❌ Ошибка настройки верификации: {e}")
         import traceback
         traceback.print_exc()
     
-    # Настройка кнопки тикетов
-    print("🔄 Настройка кнопки тикетов...")
-    try:
-        await tickets_system.setup_ticket_button(bot)
-        print("✅ Кнопка тикетов настроена")
-    except Exception as e:
-        print(f"❌ Ошибка настройки кнопки тикетов: {e}")
-        import traceback
-        traceback.print_exc()
+    # Настройка кнопки тикетов (ВРЕМЕННО ОТКЛЮЧЕНО - зависает)
+    # print("🔄 Настройка кнопки тикетов...")
+    # try:
+    #     await tickets_system.setup_ticket_button(bot)
+    #     print("✅ Кнопка тикетов настроена")
+    # except Exception as e:
+    #     print(f"❌ Ошибка настройки кнопки тикетов: {e}")
+    #     import traceback
+    #     traceback.print_exc()
     
-    # Проверка автообновления
-    print("🔄 Проверка автообновления...")
-    try:
-        await updates_system.check_auto_update(bot)
-        print("✅ Автообновление проверено")
-    except Exception as e:
-        print(f"❌ Ошибка проверки автообновления: {e}")
-        import traceback
-        traceback.print_exc()
+    # Проверка автообновления (ВРЕМЕННО ОТКЛЮЧЕНО)
+    # print("🔄 Проверка автообновления...")
+    # try:
+    #     await updates_system.check_auto_update(bot)
+    #     print("✅ Автообновление проверено")
+    # except Exception as e:
+    #     print(f"❌ Ошибка проверки автообновления: {e}")
+    #     import traceback
+    #     traceback.print_exc()
     
-    # Обновление списка команд в канале
-    print("📝 Обновление списка команд в канале...")
-    try:
-        await update_commands_list()
-        print("✅ Список команд обновлён")
-    except Exception as e:
-        print(f"❌ Ошибка обновления списка команд: {e}")
-        import traceback
-        traceback.print_exc()
+    # Обновление списка команд в канале (ВРЕМЕННО ОТКЛЮЧЕНО)
+    # print("📝 Обновление списка команд в канале...")
+    # try:
+    #     await update_commands_list()
+    #     print("✅ Список команд обновлён")
+    # except Exception as e:
+    #     print(f"❌ Ошибка обновления списка команд: {e}")
+    #     import traceback
+    #     traceback.print_exc()
     
     print("🚀 Запуск фоновых задач...")
     # Запуск фоновых задач
