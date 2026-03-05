@@ -462,9 +462,9 @@ async def update_website_stats():
                     rank_id = user_data.get('rank_id', 1)
                     from database_postgres import RANKS
                     if rank_id <= len(RANKS):
-                        rank_tier = RANKS[rank_id - 1]['tier']  # Получаем только букву (F, E, D и т.д.)
+                        rank_name = RANKS[rank_id - 1]['name']  # Получаем полное имя (F-ранг, E-ранг и т.д.)
                     else:
-                        rank_tier = 'F'
+                        rank_name = 'F-ранг'
                     
                     # Статус онлайн
                     is_online = member.status != discord.Status.offline
@@ -474,7 +474,7 @@ async def update_website_stats():
                         'name': member.name,
                         'display_name': member.display_name,
                         'avatar_url': str(member.display_avatar.url),
-                        'rank': rank_tier,
+                        'rank': rank_name,
                         'xp': user_data.get('xp', 0),
                         'online': is_online
                     })
