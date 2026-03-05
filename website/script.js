@@ -60,37 +60,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Fetch Discord stats
 async function updateDiscordStats() {
+    console.log('🔄 Loading stats...');
     try {
         const response = await fetch('/api/stats');
+        console.log('📡 Response:', response.status);
+        
         const data = await response.json();
+        console.log('📊 Data:', data);
         
         const totalMembersElement = document.querySelector('.stats-grid .stat-card:nth-child(1) .stat-number');
         const onlineNowElement = document.querySelector('.stats-grid .stat-card:nth-child(2) .stat-number');
         
         if (totalMembersElement && data.total_members !== undefined) {
             totalMembersElement.textContent = data.total_members;
+            console.log('✅ Updated total_members:', data.total_members);
         }
         
         if (onlineNowElement && data.online_members !== undefined) {
             onlineNowElement.textContent = data.online_members;
+            console.log('✅ Updated online_members:', data.online_members);
         }
         
         if (data.top_players) {
+            console.log('👥 Players:', data.top_players.length);
             updateMembersGrid(data.top_players);
+        } else {
+            console.warn('⚠️ No top_players in data');
         }
     } catch (error) {
-        console.error('Error loading stats:', error);
+        console.error('❌ Error loading stats:', error);
     }
 }
 
 // Update members grid
 function updateMembersGrid(players) {
-    const grid = document.getElementById('members-grid');
-    if (!grid) return;
+    console.log('🎮 updateMembersGrid called with', players.length, 'players');
     
+    const grid = document.getElementById('members-grid');
+    if (!grid) {
+        console.error('❌ members-grid not found!');
+        return;
+    }
+    
+    console.log('✅ members-grid found');
     grid.innerHTML = '';
     
     if (!players || players.length === 0) {
+        console.warn('⚠️ No players to display');
         const message = document.createElement('div');
         message.style.gridColumn = '1 / -1';
         message.style.textAlign = 'center';
@@ -101,7 +117,11 @@ function updateMembersGrid(players) {
         return;
     }
     
+    console.log('👥 Creating cards for', players.length, 'players');
+    
     players.forEach((player, index) => {
+        console.log(`📝 Creating card ${index + 1}:`, player.name);
+        
         const card = document.createElement('div');
         card.className = 'member-card';
         card.style.animation = `fadeInUp 0.6s ease ${index * 0.1}s both`;
@@ -113,6 +133,7 @@ function updateMembersGrid(players) {
             img.src = player.avatar_url;
             img.alt = player.name;
             img.onerror = function() {
+                console.warn('⚠️ Failed to load avatar for', player.name);
                 this.style.display = 'none';
             };
             avatar.appendChild(img);
@@ -148,4 +169,6 @@ function updateMembersGrid(players) {
         
         grid.appendChild(card);
     });
+    
+    console.log('✅ All cards created');
 }

@@ -45,6 +45,53 @@ body {
     text-decoration: none;
 }
 
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.nav-btn.primary {
+    background: #FFFFFF;
+    color: #0A0A0A;
+    border-color: #FFFFFF;
+}
+
+.nav-btn.primary:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.nav-btn.cabinet {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: #FFD700;
+    color: #FFD700;
+}
+
+.nav-btn.cabinet:hover {
+    background: rgba(255, 215, 0, 0.2);
+}
+
 /* Language Selector */
 .language-selector {
     position: relative;
