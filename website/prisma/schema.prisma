@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  discordId     String   @unique @map("discord_id")
+  username      String
+  discriminator String?
+  globalName    String?  @map("global_name")
+  avatarHash    String?  @map("avatar_hash")
+  accessToken   String?  @map("access_token")
+  refreshToken  String?  @map("refresh_token")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  wallet       Wallet?
+  xp           XP?
+  transactions Transaction[]
+  rouletteRounds RouletteRound[]
+
+  @@map("users")
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  balance   BigInt   @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallets")
+}
+
+model XP {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  xp        BigInt   @default(0)
+  level     Int      @default(1)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("xp")
+}
+
+enum TransactionType {
+  ROULETTE_BET
+  ROULETTE_WIN
+  ADMIN_ADJUST
+  BOT_REWARD
+  SITE_REWARD
+  DAILY_REWARD
+  TRANSFER
+
+  @@map("transaction_type")
+}
+
+model Transaction {
+  id        String          @id @default(uuid())
+  userId    String          @map("user_id")
+  type      TransactionType
+  amount    BigInt
+  meta      Json?
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("transactions")
+}
+
+enum RouletteResult {
+  WIN
+  LOSE
+
+  @@map("roulette_result")
+}
+
+model RouletteRound {
+  id             String         @id @default(uuid())
+  userId         String         @map("user_id")
+  bet            BigInt
+  result         RouletteResult
+  payout         BigInt
+  clientSeed     String?        @map("client_seed")
+  serverSeedHash String?        @map("server_seed_hash")
+  serverSeed     String?        @map("server_seed")
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("roulette_rounds")
+}
