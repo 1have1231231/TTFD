@@ -160,6 +160,7 @@
     "добавлена Discord OAuth2 авторизация",
     "discord OAuth через бот как прокси (обход Cloudflare)",
     "новый Steam-style Gaming UI дизайн",
-    "обновлён JavaScript для нового UI"
+    "обновлён JavaScript для нового UI",
+    "добавлена версионность для обхода кеша"
   ]
 }

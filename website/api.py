@@ -29,7 +29,20 @@ def index():
 @app.route('/<path:path>')
 def serve_static(path):
     """Serve static files"""
-    return send_from_directory('.', path)
+    try:
+        # Set correct MIME types
+        if path.endswith('.css'):
+            response = send_from_directory('.', path)
+            response.headers['Content-Type'] = 'text/css'
+            return response
+        elif path.endswith('.js'):
+            response = send_from_directory('.', path)
+            response.headers['Content-Type'] = 'application/javascript'
+            return response
+        else:
+            return send_from_directory('.', path)
+    except:
+        return send_from_directory('.', 'index.html')
 
 @app.route('/api/top/xp')
 def get_top_xp():
