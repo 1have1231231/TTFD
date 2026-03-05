@@ -40,7 +40,7 @@ def update_stats(data):
 
 def run_api():
     """Запустить API сервер"""
-    port = int(os.getenv('STATS_API_PORT', 8080))
+    port = int(os.getenv('STATS_API_PORT', 5555))  # Изменён порт на 5555
     print(f"🌐 Flask API запускается на порту {port}...")
     app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
 
@@ -51,7 +51,7 @@ def start_api_server():
         thread = threading.Thread(target=run_api, daemon=True)
         print("✅ Поток создан, запускаем...")
         thread.start()
-        print(f"✅ Stats API поток запущен (порт 8080)")
+        print(f"✅ Stats API поток запущен (порт 5555)")
     except Exception as e:
         print(f"❌ Ошибка создания потока Stats API: {e}")
         import traceback
