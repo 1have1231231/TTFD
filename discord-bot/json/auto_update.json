@@ -167,6 +167,8 @@
     "новый киберпанк дизайн со встроенным CSS",
     "gitHub-style Gaming UI со встроенным CSS",
     "исправлен импорт PostgresDatabase в stats_api",
-    "добавлена обработка ошибок БД в рулетке"
+    "добавлена обработка ошибок БД в рулетке",
+    "прямое обновление БД без метода update_user",
+    "fix rank display and add roulette wheel image"
   ]
 }

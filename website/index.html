@@ -641,9 +641,32 @@
                     </div>
                     <div class="wheel-container">
                         <div class="wheel" id="wheel">
-                            <img src="https://i.imgur.com/roulette-wheel.png" 
-                                 onerror="this.src='https://cdn-icons-png.flaticon.com/512/2917/2917242.png'" 
-                                 class="wheel-image" alt="Roulette">
+                            <svg class="wheel-image" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <radialGradient id="wheelGrad">
+                                        <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+                                    </radialGradient>
+                                </defs>
+                                <!-- Outer rim -->
+                                <circle cx="100" cy="100" r="95" fill="url(#wheelGrad)" stroke="#FFD700" stroke-width="3"/>
+                                <!-- Red/Black segments -->
+                                <g id="segments">
+                                    <path d="M100,100 L100,10 A90,90 0 0,1 163.64,36.36 Z" fill="#DC143C"/>
+                                    <path d="M100,100 L163.64,36.36 A90,90 0 0,1 190,100 Z" fill="#000"/>
+                                    <path d="M100,100 L190,100 A90,90 0 0,1 163.64,163.64 Z" fill="#DC143C"/>
+                                    <path d="M100,100 L163.64,163.64 A90,90 0 0,1 100,190 Z" fill="#000"/>
+                                    <path d="M100,100 L100,190 A90,90 0 0,1 36.36,163.64 Z" fill="#DC143C"/>
+                                    <path d="M100,100 L36.36,163.64 A90,90 0 0,1 10,100 Z" fill="#000"/>
+                                    <path d="M100,100 L10,100 A90,90 0 0,1 36.36,36.36 Z" fill="#DC143C"/>
+                                    <path d="M100,100 L36.36,36.36 A90,90 0 0,1 100,10 Z" fill="#000"/>
+                                </g>
+                                <!-- Green zero -->
+                                <circle cx="100" cy="100" r="25" fill="#228B22" stroke="#FFD700" stroke-width="2"/>
+                                <text x="100" y="110" text-anchor="middle" fill="white" font-size="20" font-weight="bold">0</text>
+                                <!-- Center -->
+                                <circle cx="100" cy="100" r="15" fill="#FFD700"/>
+                            </svg>
                             <div class="wheel-number" id="wheelNumber">?</div>
                         </div>
                     </div>
