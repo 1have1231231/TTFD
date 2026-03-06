@@ -211,6 +211,73 @@ async function placeBet(color) {
         buttons.forEach(btn => btn.disabled = false);
     }
 }
+        showResult('Минимальная ставка: 10 монет', 'lose');
+        return;
+    }
+    
+    const wheel = document.getElementById('wheel');
+    const wheelResult = document.getElementById('wheelResult');
+    const resultNumber = document.getElementById('resultNumber');
+    const buttons = document.querySelectorAll('.bet-btn');
+    buttons.forEach(btn => btn.disabled = true);
+    
+    // Скрыть предыдущий результат
+    wheelResult.style.display = 'none';
+    
+    try {
+        const res = await fetch('/api/roulette/play', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ user_id: currentUser.id, bet, color })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            // Вычисляем угол для остановки на выигрышном числе
+            // 15 секторов, каждый 24°, 0 находится сверху
+            // Стрелка внизу, поэтому нужно повернуть на 180° + угол сектора
+            const sectorAngle = 24; // градусов на сектор
+            const numberAngle = data.number * sectorAngle; // угол числа от 0
+            const targetAngle = 180 - numberAngle; // чтобы число оказалось внизу
+            const spins = 5; // количество полных оборотов
+            const finalAngle = (360 * spins) + targetAngle;
+            
+            // Применяем вращение
+            wheel.style.transition = 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+            wheel.style.transform = `rotate(${finalAngle}deg)`;
+            
+            setTimeout(() => {
+                // Показать результат
+                resultNumber.textContent = data.number;
+                wheelResult.style.display = 'flex';
+                
+                // Скрыть результат через 2 секунды
+                setTimeout(() => {
+                    wheelResult.style.display = 'none';
+                }, 2500);
+                
+                if (data.win) {
+                    showResult(`🎉 Выигрыш! +${data.win_amount} монет`, 'win');
+                } else {
+                    showResult(`😢 Проигрыш! -${bet} монет`, 'lose');
+                }
+                
+                updateRouletteBalance();
+                loadProfile();
+                buttons.forEach(btn => btn.disabled = false);
+            }, 3000);
+        } else {
+            showResult(data.error || 'Ошибка', 'lose');
+            buttons.forEach(btn => btn.disabled = false);
+        }
+    } catch (e) {
+        console.error(e);
+        showResult('Ошибка сервера', 'lose');
+        buttons.forEach(btn => btn.disabled = false);
+    }
+}
 
 function showResult(msg, type) {
     const result = document.getElementById('result');
@@ -259,7 +326,7 @@ async function loadShopItems() {
     container.innerHTML = '<div class="auth-msg">Загрузка...</div>';
     
     try {
-        const res = await fetch(`/api/shop/roles?user_id=${currentUser.id}`);
+        const res = await fetch('/api/shop/roles');
         const data = await res.json();
         
         if (data.success && data.roles.length > 0) {

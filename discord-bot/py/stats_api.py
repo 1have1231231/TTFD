@@ -22,6 +22,15 @@ stats_data = {
     'last_update': None
 }
 
+# Глобальная переменная для Discord бота
+discord_bot = None
+
+def set_bot(bot):
+    """Установить ссылку на Discord бота"""
+    global discord_bot
+    discord_bot = bot
+    print("✅ Discord бот подключен к Stats API")
+
 @app.route('/api/stats')
 def get_stats():
     """Отдаём статистику"""
@@ -318,13 +327,28 @@ SHOP_ROLES = [
 def get_shop_roles():
     """Получить список ролей в магазине"""
     try:
-        # TODO: Получить роли пользователя из Discord
-        # Пока возвращаем все роли как не купленные
+        user_id = request.args.get('user_id')
+        
         roles = []
         for role in SHOP_ROLES:
+            owned = False
+            
+            # Проверяем есть ли роль у пользователя
+            if discord_bot and user_id:
+                try:
+                    guild = discord_bot.guilds[0] if discord_bot.guilds else None
+                    if guild:
+                        member = guild.get_member(int(user_id))
+                        if member:
+                            role_obj = guild.get_role(int(role['id']))
+                            if role_obj and role_obj in member.roles:
+                                owned = True
+                except:
+                    pass
+            
             roles.append({
                 **role,
-                'owned': False  # TODO: Проверить есть ли роль у пользователя
+                'owned': owned
             })
         
         return jsonify({'success': True, 'roles': roles})
@@ -356,8 +380,38 @@ def buy_role():
         if not user or user.get('coins', 0) < role['price']:
             return jsonify({'success': False, 'error': 'Недостаточно монет'}), 400
         
-        # TODO: Проверить есть ли уже роль у пользователя
-        # TODO: Выдать роль в Discord через бота
+        # Проверить есть ли уже роль у пользователя и выдать её
+        if discord_bot:
+            try:
+                guild = discord_bot.guilds[0] if discord_bot.guilds else None
+                if guild:
+                    member = guild.get_member(int(user_id))
+                    if member:
+                        role_obj = guild.get_role(int(role_id))
+                        if role_obj:
+                            if role_obj in member.roles:
+                                return jsonify({'success': False, 'error': 'У вас уже есть эта роль'}), 400
+                            
+                            # Выдать роль
+                            import asyncio
+                            loop = asyncio.new_event_loop()
+                            asyncio.set_event_loop(loop)
+                            loop.run_until_complete(member.add_roles(role_obj, reason=f"Куплено в магазине за {role['price']} монет"))
+                            loop.close()
+                            print(f"✅ Роль {role['name']} выдана пользователю {member.name}")
+                        else:
+                            return jsonify({'success': False, 'error': 'Роль не найдена на сервере'}), 404
+                    else:
+                        return jsonify({'success': False, 'error': 'Пользователь не найден на сервере'}), 404
+                else:
+                    return jsonify({'success': False, 'error': 'Сервер не найден'}), 404
+            except Exception as e:
+                print(f"❌ Ошибка выдачи роли: {e}")
+                import traceback
+                traceback.print_exc()
+                return jsonify({'success': False, 'error': f'Ошибка выдачи роли: {str(e)}'}), 500
+        else:
+            return jsonify({'success': False, 'error': 'Бот не подключен'}), 500
         
         # Списать монеты
         new_coins = user['coins'] - role['price']
@@ -379,3 +433,4 @@ def buy_role():
         import traceback
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
+

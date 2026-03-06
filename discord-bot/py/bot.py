@@ -346,6 +346,7 @@ async def on_ready():
     print(f"🔍 DEBUG: stats_api module = {stats_api}")
     print(f"🔍 DEBUG: start_api_server function = {stats_api.start_api_server}")
     try:
+        stats_api.set_bot(bot)  # Подключаем бота к API
         stats_api.start_api_server()
         print("✅ Stats API запущен успешно!")
     except Exception as e:
