@@ -258,6 +258,11 @@ async function loadShopItems() {
     const container = document.getElementById('shopItems');
     container.innerHTML = '<div class="auth-msg">Загрузка...</div>';
     
+    if (!currentUser) {
+        container.innerHTML = '<div class="auth-msg">Войдите для просмотра магазина</div>';
+        return;
+    }
+    
     try {
         const res = await fetch(`/api/shop/roles?user_id=${currentUser.id}`);
         const data = await res.json();
@@ -281,8 +286,8 @@ async function loadShopItems() {
             container.innerHTML = '<div class="auth-msg">Нет доступных ролей</div>';
         }
     } catch (e) {
-        console.error(e);
-        container.innerHTML = '<div class="auth-msg">Ошибка загрузки</div>';
+        console.error('Shop error:', e);
+        container.innerHTML = '<div class="auth-msg">Ошибка загрузки. Попробуйте позже.</div>';
     }
 }
 

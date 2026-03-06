@@ -176,6 +176,7 @@
     "fix roulette: equal sectors, arrow points to winning number",
     "add Wheel of Fortune game with multipliers",
     "revert to roulette, fix rank display, add shop with roles",
-    "fix duplicate code in script.js"
+    "fix duplicate code in script.js",
+    "integrate shop with Discord bot - roles are given on purchase"
   ]
 }
