@@ -170,6 +170,7 @@
     "добавлена обработка ошибок БД в рулетке",
     "прямое обновление БД без метода update_user",
     "fix rank display and add roulette wheel image",
-    "add SVG roulette wheel and fix rank display"
+    "add SVG roulette wheel and fix rank display",
+    "add realistic roulette wheel with pointer and animations"
   ]
 }
