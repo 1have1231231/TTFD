@@ -277,6 +277,50 @@ def buy_role():
         print(f"❌ Buy role error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/shop/colors')
+def get_shop_colors():
+    """Get gradient colors from Discord bot"""
+    user_id = request.args.get('user_id')
+    
+    try:
+        response = requests.get(
+            f'{DISCORD_BOT_API}/api/shop/colors',
+            params={'user_id': user_id} if user_id else {},
+            timeout=5
+        )
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({'success': False, 'error': 'Colors unavailable'}), response.status_code
+            
+    except Exception as e:
+        print(f"❌ Shop colors error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/shop/buy-color', methods=['POST'])
+def buy_color():
+    """Buy gradient color from shop"""
+    user = session.get('user')
+    
+    if not user:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    
+    try:
+        response = requests.post(
+            f'{DISCORD_BOT_API}/api/shop/buy-color',
+            json=data,
+            timeout=10
+        )
+        
+        return jsonify(response.json()), response.status_code
+        
+    except Exception as e:
+        print(f"❌ Buy color error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))
     print(f"🚀 Starting TTFD Website API on port {port}...")

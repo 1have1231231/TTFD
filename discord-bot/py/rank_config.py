@@ -17,31 +17,17 @@ RANK_TIERS = {
 # Порядок рангов
 RANK_ORDER = ['F', 'E', 'D', 'C', 'B', 'A', 'S']
 
-# Допустимые цвета для команды /color (включая градиенты)
-ALLOWED_COLORS = {
-    # Основные цвета
+# Допустимые цвета для команды /color (только для ранга S, 5 основных цветов)
+BASIC_COLORS = {
     'red': 0xFF0000,
     'blue': 0x0000FF,
     'green': 0x00FF00,
-    'yellow': 0xFFFF00,
     'purple': 0x800080,
-    'pink': 0xFFC0CB,
-    'orange': 0xFFA500,
-    'cyan': 0x00FFFF,
-    'white': 0xFFFFFF,
-    'black': 0x000000,
-    'gold': 0xFFD700,
-    'silver': 0xC0C0C0,
-    'brown': 0x8B4513,
-    'lime': 0x00FF00,
-    'navy': 0x000080,
-    'teal': 0x008080,
-    'magenta': 0xFF00FF,
-    'crimson': 0xDC143C,
-    'indigo': 0x4B0082,
-    'violet': 0xEE82EE,
-    
-    # Градиентные цвета (эмуляция через яркие оттенки)
+    'gold': 0xFFD700
+}
+
+# Градиентные цвета для покупки на сайте
+GRADIENT_COLORS = {
     'sunset': 0xFF6B35,      # Оранжево-красный градиент
     'ocean': 0x006994,       # Сине-голубой градиент  
     'forest': 0x228B22,      # Зелено-темно-зеленый
@@ -53,6 +39,12 @@ ALLOWED_COLORS = {
     'aurora': 0x00CED1,      # Бирюзово-зеленый
     'cosmic': 0x9370DB,      # Фиолетово-синий космос
 }
+
+# Все цвета вместе (для проверок)
+ALL_COLORS = {**BASIC_COLORS, **GRADIENT_COLORS}
+
+# Старое определение для совместимости
+ALLOWED_COLORS = BASIC_COLORS
 
 # ID кастомной цветной роли (создается ботом)
 CUSTOM_COLOR_ROLE_NAME = "Custom Color"

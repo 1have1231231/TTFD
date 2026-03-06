@@ -36,7 +36,8 @@ COMMANDS_LIST = {
         ('/pay [@игрок] [сумма]', 'перевести монеты'),
     ],
     '🎨 кастомизация': [
-        ('/color [цвет]', 'изменить цвет своего никнейма'),
+        ('/color [цвет]', 'изменить цвет никнейма (только ранг S)'),
+        ('/unsetcolor', 'убрать цвет никнейма'),
     ],
     '🔗 интеграция': [
         ('/getcode', 'получить код для привязки Telegram'),
@@ -88,7 +89,8 @@ def get_commands_text():
     text_parts.extend([
         convert_to_font('━━━━━━━━━━━━━━━━━━'),
         convert_to_font('🏆 ранговая система: F → E → D → C → B → A → S'),
-        convert_to_font('🎨 доступные цвета: red, blue, green, yellow, purple, pink, orange, cyan, white, black, gold, silver, brown, lime, navy, teal, magenta, crimson, indigo, violet, sunset, ocean, forest, galaxy, fire, ice, neon, plasma, aurora, cosmic'),
+        convert_to_font('🎨 доступные цвета (ранг S): red, blue, green, purple, gold'),
+        convert_to_font('🌈 градиентные цвета: покупаются на сайте за монеты'),
         convert_to_font('🎮 играй в игры на сайте и получай ранги!'),
         convert_to_font(f'📅 обновлено: {date_str}')
     ])

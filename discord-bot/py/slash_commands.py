@@ -1484,32 +1484,43 @@ async def setup_slash_commands(bot, db):
     
     # ==================== Команда /color ====================
     
-    @bot.tree.command(name="color", description="Изменить цвет своего никнейма")
+    @bot.tree.command(name="color", description="Изменить цвет своего никнейма (только ранг S)")
     @app_commands.describe(color="Выбери цвет из списка")
     async def color_slash(interaction: discord.Interaction, color: str):
-        """Команда для изменения цвета никнейма"""
-        from rank_config import ALLOWED_COLORS, CUSTOM_COLOR_ROLE_NAME, CUSTOM_COLOR_ROLE_PERMISSIONS
+        """Команда для изменения цвета никнейма (только ранг S)"""
+        from rank_config import BASIC_COLORS, CUSTOM_COLOR_ROLE_NAME, CUSTOM_COLOR_ROLE_PERMISSIONS, get_rank_by_xp
         
-        # Проверяем что цвет допустим
-        if color.lower() not in ALLOWED_COLORS:
-            available_colors = ", ".join(ALLOWED_COLORS.keys())
+        # Проверяем ранг пользователя
+        user_data = db.get_user(str(interaction.user.id))
+        user_xp = user_data.get('xp', 0)
+        user_rank = get_rank_by_xp(user_xp)
+        
+        if user_rank != 'S':
             embed = BotTheme.create_embed(
-                title=convert_to_font("❌ неверный цвет"),
-                description=convert_to_font(f"доступные цвета:\n{available_colors}"),
+                title=convert_to_font("❌ недостаточный ранг"),
+                description=convert_to_font(f"команда /color доступна только с ранга S\nтвой ранг: {user_rank}\nнужно: S (42500+ XP)"),
                 embed_type='error'
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
         
-        # Проверяем есть ли у пользователя право на смену цвета
-        # Для начала разрешим всем, потом можно добавить проверку на специальную роль
+        # Проверяем что цвет допустим
+        if color.lower() not in BASIC_COLORS:
+            available_colors = ", ".join(BASIC_COLORS.keys())
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ неверный цвет"),
+                description=convert_to_font(f"доступные цвета для ранга S:\n{available_colors}"),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
         
         await interaction.response.defer()
         
         try:
             guild = interaction.guild
             member = interaction.user
-            color_value = ALLOWED_COLORS[color.lower()]
+            color_value = BASIC_COLORS[color.lower()]
             
             # Ищем существующую кастомную цветную роль пользователя
             existing_color_role = None
@@ -1582,14 +1593,70 @@ async def setup_slash_commands(bot, db):
     @color_slash.autocomplete('color')
     async def color_autocomplete(interaction: discord.Interaction, current: str):
         """Автокомплит для цветов"""
-        from rank_config import ALLOWED_COLORS
+        from rank_config import BASIC_COLORS
         
         choices = []
-        for color_name in ALLOWED_COLORS.keys():
+        for color_name in BASIC_COLORS.keys():
             if current.lower() in color_name.lower():
                 choices.append(app_commands.Choice(name=color_name.capitalize(), value=color_name))
         
         return choices[:25]  # Discord ограничивает до 25 вариантов
+    
+    @bot.tree.command(name="unsetcolor", description="Убрать цвет никнейма")
+    async def unsetcolor_slash(interaction: discord.Interaction):
+        """Команда для удаления цвета никнейма"""
+        from rank_config import CUSTOM_COLOR_ROLE_NAME
+        
+        await interaction.response.defer()
+        
+        try:
+            guild = interaction.guild
+            member = interaction.user
+            
+            # Ищем кастомную цветную роль пользователя
+            existing_color_role = None
+            for role in member.roles:
+                if role.name.startswith(CUSTOM_COLOR_ROLE_NAME):
+                    existing_color_role = role
+                    break
+            
+            if not existing_color_role:
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("❌ нет цветной роли"),
+                    description=convert_to_font("у тебя нет кастомного цвета никнейма"),
+                    embed_type='error'
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+            
+            # Удаляем роль
+            try:
+                await member.remove_roles(existing_color_role, reason="Удаление кастомного цвета")
+                await existing_color_role.delete(reason="Удаление кастомной роли")
+                
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("✅ цвет удалён"),
+                    description=convert_to_font("кастомный цвет никнейма убран"),
+                    embed_type='success'
+                )
+                await interaction.followup.send(embed=embed)
+                
+            except discord.Forbidden:
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("❌ нет прав"),
+                    description=convert_to_font("у бота нет прав для удаления роли"),
+                    embed_type='error'
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                
+        except Exception as e:
+            print(f"❌ Ошибка в /unsetcolor: {e}")
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font(f"произошла ошибка: {str(e)}"),
+                embed_type='error'
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
     
     
     print(f"✅ Slash команды зарегистрированы ({len(bot.tree.get_commands())} команд)")

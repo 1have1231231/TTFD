@@ -325,6 +325,90 @@ SHOP_ROLES = [
     }
 ]
 
+# Градиентные цвета для покупки на сайте
+GRADIENT_COLORS_SHOP = [
+    {
+        'id': 'sunset',
+        'name': 'Sunset Gradient',
+        'price': 2000,
+        'color': '#FF6B35',
+        'emoji': '🌅',
+        'gradient': 'linear-gradient(45deg, #FF6B35, #F7931E)'
+    },
+    {
+        'id': 'ocean',
+        'name': 'Ocean Gradient',
+        'price': 2000,
+        'color': '#006994',
+        'emoji': '🌊',
+        'gradient': 'linear-gradient(45deg, #006994, #00A8CC)'
+    },
+    {
+        'id': 'forest',
+        'name': 'Forest Gradient',
+        'price': 2000,
+        'color': '#228B22',
+        'emoji': '🌲',
+        'gradient': 'linear-gradient(45deg, #228B22, #32CD32)'
+    },
+    {
+        'id': 'galaxy',
+        'name': 'Galaxy Gradient',
+        'price': 2500,
+        'color': '#4B0082',
+        'emoji': '🌌',
+        'gradient': 'linear-gradient(45deg, #4B0082, #8A2BE2)'
+    },
+    {
+        'id': 'fire',
+        'name': 'Fire Gradient',
+        'price': 2500,
+        'color': '#FF4500',
+        'emoji': '🔥',
+        'gradient': 'linear-gradient(45deg, #FF4500, #FF6347)'
+    },
+    {
+        'id': 'ice',
+        'name': 'Ice Gradient',
+        'price': 2000,
+        'color': '#87CEEB',
+        'emoji': '❄️',
+        'gradient': 'linear-gradient(45deg, #87CEEB, #B0E0E6)'
+    },
+    {
+        'id': 'neon',
+        'name': 'Neon Gradient',
+        'price': 3000,
+        'color': '#39FF14',
+        'emoji': '💚',
+        'gradient': 'linear-gradient(45deg, #39FF14, #00FF7F)'
+    },
+    {
+        'id': 'plasma',
+        'name': 'Plasma Gradient',
+        'price': 3000,
+        'color': '#FF1493',
+        'emoji': '💖',
+        'gradient': 'linear-gradient(45deg, #FF1493, #FF69B4)'
+    },
+    {
+        'id': 'aurora',
+        'name': 'Aurora Gradient',
+        'price': 2500,
+        'color': '#00CED1',
+        'emoji': '🌈',
+        'gradient': 'linear-gradient(45deg, #00CED1, #40E0D0)'
+    },
+    {
+        'id': 'cosmic',
+        'name': 'Cosmic Gradient',
+        'price': 3500,
+        'color': '#9370DB',
+        'emoji': '🚀',
+        'gradient': 'linear-gradient(45deg, #9370DB, #BA55D3)'
+    }
+]
+
 @app.route('/api/shop/roles', methods=['GET'])
 def get_shop_roles():
     """Получить список ролей в магазине"""
@@ -449,6 +533,158 @@ def buy_role():
         
     except Exception as e:
         print(f"❌ Buy role error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/shop/colors', methods=['GET'])
+def get_shop_colors():
+    """Получить список градиентных цветов в магазине"""
+    try:
+        user_id = request.args.get('user_id')
+        
+        print(f"🎨 Colors shop request for user: {user_id}")
+        
+        colors = []
+        for color in GRADIENT_COLORS_SHOP:
+            owned = False
+            
+            # Проверяем есть ли цвет у пользователя (через кастомную роль)
+            if discord_bot and user_id:
+                try:
+                    guild = discord_bot.guilds[0] if discord_bot.guilds else None
+                    if guild:
+                        member = guild.get_member(int(user_id))
+                        if member:
+                            # Ищем роль с градиентным цветом
+                            for role in member.roles:
+                                if role.name.startswith("Custom Color") and role.color.value == int(color['color'].replace('#', '0x'), 16):
+                                    owned = True
+                                    break
+                except Exception as e:
+                    print(f"⚠️ Error checking color {color['name']}: {e}")
+            
+            colors.append({
+                **color,
+                'owned': owned
+            })
+        
+        print(f"✅ Returning {len(colors)} gradient colors")
+        return jsonify({'success': True, 'colors': colors})
+        
+    except Exception as e:
+        print(f"❌ Shop colors error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/shop/buy-color', methods=['POST'])
+def buy_color():
+    """Купить градиентный цвет"""
+    try:
+        try:
+            from database_postgres import PostgresDatabase
+            db = PostgresDatabase()
+        except Exception as db_error:
+            print(f"⚠️ PostgreSQL unavailable: {db_error}")
+            return jsonify({'success': False, 'error': 'База данных временно недоступна'}), 503
+        
+        data = request.json
+        user_id = data.get('user_id')
+        color_id = data.get('color_id')
+        
+        if not user_id or not color_id:
+            return jsonify({'success': False, 'error': 'Неверные данные'}), 400
+        
+        # Найти цвет
+        color = next((c for c in GRADIENT_COLORS_SHOP if c['id'] == color_id), None)
+        if not color:
+            return jsonify({'success': False, 'error': 'Цвет не найден'}), 404
+        
+        # Получить пользователя
+        user = db.get_user(user_id)
+        if not user or user.get('coins', 0) < color['price']:
+            return jsonify({'success': False, 'error': 'Недостаточно монет'}), 400
+        
+        # Проверить есть ли уже цвет у пользователя и выдать его
+        if discord_bot:
+            try:
+                guild = discord_bot.guilds[0] if discord_bot.guilds else None
+                if guild:
+                    member = guild.get_member(int(user_id))
+                    if member:
+                        color_value = int(color['color'].replace('#', '0x'), 16)
+                        
+                        # Проверяем есть ли уже такой цвет
+                        for role in member.roles:
+                            if role.name.startswith("Custom Color") and role.color.value == color_value:
+                                return jsonify({'success': False, 'error': 'У вас уже есть этот цвет'}), 400
+                        
+                        # Создаём роль с градиентным цветом
+                        import asyncio
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        
+                        # Удаляем старую цветную роль если есть
+                        for role in member.roles:
+                            if role.name.startswith("Custom Color"):
+                                try:
+                                    loop.run_until_complete(member.remove_roles(role, reason="Смена градиентного цвета"))
+                                    loop.run_until_complete(role.delete(reason="Старая кастомная роль"))
+                                except:
+                                    pass
+                        
+                        # Создаём новую роль
+                        new_role = loop.run_until_complete(guild.create_role(
+                            name=f"Custom Color - {member.name}",
+                            color=discord.Color(color_value),
+                            reason=f"Куплен градиентный цвет {color['name']} за {color['price']} монет"
+                        ))
+                        
+                        # Устанавливаем высокий приоритет
+                        bot_member = guild.get_member(discord_bot.user.id)
+                        if bot_member and bot_member.top_role:
+                            target_position = min(bot_member.top_role.position - 1, len(guild.roles) - 1)
+                            try:
+                                loop.run_until_complete(new_role.edit(position=target_position))
+                            except:
+                                pass
+                        
+                        # Выдаём роль
+                        loop.run_until_complete(member.add_roles(new_role, reason=f"Покупка градиентного цвета {color['name']}"))
+                        loop.close()
+                        
+                        print(f"✅ Градиентный цвет {color['name']} выдан пользователю {member.name}")
+                    else:
+                        return jsonify({'success': False, 'error': 'Пользователь не найден на сервере'}), 404
+                else:
+                    return jsonify({'success': False, 'error': 'Сервер не найден'}), 404
+            except Exception as e:
+                print(f"❌ Ошибка выдачи градиентного цвета: {e}")
+                import traceback
+                traceback.print_exc()
+                return jsonify({'success': False, 'error': f'Ошибка выдачи цвета: {str(e)}'}), 500
+        else:
+            return jsonify({'success': False, 'error': 'Бот не подключен'}), 500
+        
+        # Списать монеты
+        new_coins = user['coins'] - color['price']
+        conn = db.get_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET coins = %s WHERE id = %s", (new_coins, str(user_id)))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'new_balance': new_coins,
+            'color_name': color['name']
+        })
+        
+    except Exception as e:
+        print(f"❌ Buy color error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
