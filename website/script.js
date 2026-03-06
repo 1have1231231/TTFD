@@ -161,9 +161,6 @@ async function placeBet(color) {
     // Скрыть предыдущий результат
     wheelResult.style.display = 'none';
     
-    // Запустить вращение
-    wheel.classList.add('spinning');
-    
     try {
         const res = await fetch('/api/roulette/play', {
             method: 'POST',
@@ -174,10 +171,21 @@ async function placeBet(color) {
         
         const data = await res.json();
         
-        setTimeout(() => {
-            wheel.classList.remove('spinning');
+        if (data.success) {
+            // Вычисляем угол для остановки на выигрышном числе
+            // 15 секторов, каждый 24°, 0 находится сверху
+            // Стрелка внизу, поэтому нужно повернуть на 180° + угол сектора
+            const sectorAngle = 24; // градусов на сектор
+            const numberAngle = data.number * sectorAngle; // угол числа от 0
+            const targetAngle = 180 - numberAngle; // чтобы число оказалось внизу
+            const spins = 5; // количество полных оборотов
+            const finalAngle = (360 * spins) + targetAngle;
             
-            if (data.success) {
+            // Применяем вращение
+            wheel.style.transition = 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+            wheel.style.transform = `rotate(${finalAngle}deg)`;
+            
+            setTimeout(() => {
                 // Показать результат
                 resultNumber.textContent = data.number;
                 wheelResult.style.display = 'flex';
@@ -185,7 +193,7 @@ async function placeBet(color) {
                 // Скрыть результат через 2 секунды
                 setTimeout(() => {
                     wheelResult.style.display = 'none';
-                }, 2000);
+                }, 2500);
                 
                 if (data.win) {
                     showResult(`🎉 Выигрыш! +${data.win_amount} монет`, 'win');
@@ -195,16 +203,14 @@ async function placeBet(color) {
                 
                 updateRouletteBalance();
                 loadProfile();
-            } else {
-                showResult(data.error || 'Ошибка', 'lose');
-            }
-            
+                buttons.forEach(btn => btn.disabled = false);
+            }, 3000);
+        } else {
+            showResult(data.error || 'Ошибка', 'lose');
             buttons.forEach(btn => btn.disabled = false);
-        }, 3000);
+        }
     } catch (e) {
         console.error(e);
-        wheel.classList.remove('spinning');
-        wheelResult.style.display = 'none';
         showResult('Ошибка сервера', 'lose');
         buttons.forEach(btn => btn.disabled = false);
     }
