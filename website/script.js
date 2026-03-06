@@ -70,7 +70,9 @@ async function loadProfile() {
             document.getElementById('statCoins').textContent = user.coins || 0;
             document.getElementById('statXP').textContent = user.xp || 0;
             document.getElementById('statLevel').textContent = level;
-            document.getElementById('statRank').textContent = (user.rank_name || 'F-ранг').charAt(0);
+            const rankName = user.rank_name || 'F-ранг';
+            const rankLetter = rankName.includes('-') ? rankName.split('-')[0] : rankName.charAt(0);
+            document.getElementById('statRank').textContent = rankLetter;
             
             document.getElementById('levelBadge').textContent = level;
             document.getElementById('currentLevel').textContent = level;
@@ -151,11 +153,12 @@ async function placeBet(color) {
     }
     
     const wheel = document.getElementById('wheel');
+    const wheelNumber = document.getElementById('wheelNumber');
     const buttons = document.querySelectorAll('.bet-btn');
     buttons.forEach(btn => btn.disabled = true);
     
     wheel.classList.add('spinning');
-    wheel.textContent = '?';
+    wheelNumber.textContent = '?';
     
     try {
         const res = await fetch('/api/roulette/play', {
@@ -171,7 +174,7 @@ async function placeBet(color) {
             wheel.classList.remove('spinning');
             
             if (data.success) {
-                wheel.textContent = data.number;
+                wheelNumber.textContent = data.number;
                 
                 if (data.win) {
                     showResult(`🎉 Выигрыш! +${data.win_amount} монет`, 'win');
@@ -190,6 +193,7 @@ async function placeBet(color) {
     } catch (e) {
         console.error(e);
         wheel.classList.remove('spinning');
+        wheelNumber.textContent = '?';
         showResult('Ошибка сервера', 'lose');
         buttons.forEach(btn => btn.disabled = false);
     }
