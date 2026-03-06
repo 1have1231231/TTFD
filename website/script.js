@@ -3,6 +3,7 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     loadLeaderboard();
+    checkAdminAccess();
 });
 
 function showSection(id) {
@@ -15,6 +16,7 @@ function showSection(id) {
     if (id === 'leaderboard') loadLeaderboard();
     if (id === 'roulette') loadRoulette();
     if (id === 'shop') loadShop();
+    if (id === 'admin') loadAdmin();
 }
 
 async function checkAuth() {
@@ -238,6 +240,7 @@ function loadShop() {
         document.getElementById('shopAuth').style.display = 'none';
         document.getElementById('shopContent').style.display = 'block';
         loadShopItems();
+        loadGradientColors();
         updateShopBalance();
     }
 }
@@ -291,6 +294,50 @@ async function loadShopItems() {
     }
 }
 
+async function loadGradientColors() {
+    const container = document.getElementById('gradientColors');
+    if (!container) return; // Если элемент не найден, пропускаем
+    
+    container.innerHTML = '<div class="auth-msg">Загрузка градиентных цветов...</div>';
+    
+    if (!currentUser) {
+        container.innerHTML = '<div class="auth-msg">Войдите для просмотра цветов</div>';
+        return;
+    }
+    
+    try {
+        const res = await fetch(`/api/shop/colors?user_id=${currentUser.id}`);
+        const data = await res.json();
+        
+        if (data.success && data.colors.length > 0) {
+            container.innerHTML = `
+                <h3 style="color: #58a6ff; margin-bottom: 20px;">🌈 Градиентные цвета</h3>
+                <div class="colors-grid">
+                    ${data.colors.map(color => `
+                        <div class="color-item">
+                            <div class="color-preview" style="background: ${color.gradient};">
+                                <span class="color-emoji">${color.emoji}</span>
+                            </div>
+                            <div class="color-name">${color.name}</div>
+                            <div class="color-price">${color.price} монет</div>
+                            <button class="buy-btn ${color.owned ? (color.active ? 'active' : 'owned') : ''}" 
+                                    onclick="${color.owned ? `activateColor('${color.id}')` : `buyColor('${color.id}')`}" 
+                                    ${color.active ? 'disabled' : ''}>
+                                ${color.active ? '✨ Активен' : color.owned ? '🎨 Активировать' : 'Купить'}
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            container.innerHTML = '<div class="auth-msg">Нет доступных градиентных цветов</div>';
+        }
+    } catch (e) {
+        console.error('Gradient colors error:', e);
+        container.innerHTML = '<div class="auth-msg">Ошибка загрузки цветов. Попробуйте позже.</div>';
+    }
+}
+
 async function buyRole(roleId) {
     try {
         const res = await fetch('/api/shop/buy', {
@@ -315,3 +362,246 @@ async function buyRole(roleId) {
         showResult('Ошибка сервера', 'lose');
     }
 }
+
+async function buyColor(colorId) {
+    try {
+        const res = await fetch('/api/shop/buy-color', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ user_id: currentUser.id, color_id: colorId })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            if (data.was_purchased) {
+                showResult(`🌈 Градиентный цвет "${data.color_name}" куплен и активирован!`, 'win');
+            } else {
+                showResult(`✨ Градиентный цвет "${data.color_name}" активирован!`, 'win');
+            }
+            loadGradientColors();
+            updateShopBalance();
+            loadProfile();
+        } else {
+            showResult(data.error || 'Ошибка покупки цвета', 'lose');
+        }
+    } catch (e) {
+        console.error(e);
+        showResult('Ошибка сервера', 'lose');
+    }
+}
+
+async function activateColor(colorId) {
+    // Активация уже купленного цвета
+    await buyColor(colorId);
+}
+
+function loadAdmin() {
+    // Admin panel is always loaded, just clear any previous results
+    document.getElementById('userSearchResults').innerHTML = '';
+    document.getElementById('adminResult').style.display = 'none';
+    
+    // Clear form fields
+    document.getElementById('userSearch').value = '';
+    document.getElementById('xpUserId').value = '';
+    document.getElementById('xpAmount').value = '';
+    document.getElementById('coinsUserId').value = '';
+    document.getElementById('coinsAmount').value = '';
+}
+
+// ==================== ADMIN FUNCTIONS ====================
+
+async function checkAdminAccess() {
+    if (!currentUser) return;
+    
+    try {
+        const res = await fetch('/api/admin/check', { credentials: 'include' });
+        const data = await res.json();
+        
+        if (data.is_admin) {
+            document.getElementById('adminLink').style.display = 'block';
+            console.log('✅ Admin access granted');
+        }
+    } catch (e) {
+        console.error('Admin check error:', e);
+    }
+}
+
+async function searchUser() {
+    const query = document.getElementById('userSearch').value.trim();
+    const resultsContainer = document.getElementById('userSearchResults');
+    
+    if (!query) {
+        showAdminResult('Введите Discord ID или имя пользователя', 'error');
+        return;
+    }
+    
+    resultsContainer.innerHTML = '<div style="color: #8b949e;">Поиск...</div>';
+    
+    try {
+        const res = await fetch(`/api/admin/get-user?query=${encodeURIComponent(query)}`, {
+            credentials: 'include'
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            if (data.user) {
+                // Single user result
+                displayUserResult([data.user], resultsContainer);
+            } else if (data.users) {
+                // Multiple users result
+                displayUserResult(data.users, resultsContainer);
+            }
+        } else {
+            resultsContainer.innerHTML = `<div style="color: #da3633;">${data.error}</div>`;
+        }
+    } catch (e) {
+        console.error('Search error:', e);
+        resultsContainer.innerHTML = '<div style="color: #da3633;">Ошибка поиска</div>';
+    }
+}
+
+function displayUserResult(users, container) {
+    container.innerHTML = users.map(user => `
+        <div class="user-result">
+            <div class="user-info-admin">
+                <div class="user-name-admin">${user.username}</div>
+                <div class="user-stats-admin">
+                    ID: ${user.id} | XP: ${user.xp} | Монеты: ${user.coins} | Ранг: ${user.rank_id} | Игр: ${user.games_played}/${user.games_won}
+                </div>
+            </div>
+            <div class="user-actions">
+                <button class="copy-btn" onclick="copyToXP('${user.id}')">→ XP</button>
+                <button class="copy-btn" onclick="copyToCoins('${user.id}')">→ Монеты</button>
+                <button class="copy-btn" onclick="copyUserId('${user.id}')">Копировать ID</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function copyToXP(userId) {
+    document.getElementById('xpUserId').value = userId;
+    document.getElementById('xpAmount').focus();
+}
+
+function copyToCoins(userId) {
+    document.getElementById('coinsUserId').value = userId;
+    document.getElementById('coinsAmount').focus();
+}
+
+function copyUserId(userId) {
+    navigator.clipboard.writeText(userId).then(() => {
+        showAdminResult('ID скопирован в буфер обмена', 'success');
+    }).catch(() => {
+        showAdminResult('Не удалось скопировать ID', 'error');
+    });
+}
+
+async function giveXP() {
+    const userId = document.getElementById('xpUserId').value.trim();
+    const xpAmount = parseInt(document.getElementById('xpAmount').value);
+    
+    if (!userId || !xpAmount || xpAmount <= 0) {
+        showAdminResult('Введите корректный Discord ID и количество XP', 'error');
+        return;
+    }
+    
+    try {
+        const res = await fetch('/api/admin/give-xp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ user_id: userId, xp_amount: xpAmount })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            let message = `✅ Выдано ${data.xp_added} XP пользователю ${userId}\n`;
+            message += `XP: ${data.old_xp} → ${data.new_xp}`;
+            
+            if (data.rank_up) {
+                message += `\n🎉 Повышение ранга: ${data.old_rank_id} → ${data.new_rank_id}`;
+            }
+            
+            showAdminResult(message, 'success');
+            
+            // Clear form
+            document.getElementById('xpUserId').value = '';
+            document.getElementById('xpAmount').value = '';
+        } else {
+            showAdminResult(`❌ Ошибка: ${data.error}`, 'error');
+        }
+    } catch (e) {
+        console.error('Give XP error:', e);
+        showAdminResult('❌ Ошибка сервера', 'error');
+    }
+}
+
+async function giveCoins() {
+    const userId = document.getElementById('coinsUserId').value.trim();
+    const coinsAmount = parseInt(document.getElementById('coinsAmount').value);
+    
+    if (!userId || isNaN(coinsAmount) || coinsAmount === 0) {
+        showAdminResult('Введите корректный Discord ID и количество монет', 'error');
+        return;
+    }
+    
+    try {
+        const res = await fetch('/api/admin/give-coins', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ user_id: userId, coins_amount: coinsAmount })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            const action = coinsAmount > 0 ? 'Выдано' : 'Списано';
+            let message = `✅ ${action} ${Math.abs(data.coins_added)} монет пользователю ${userId}\n`;
+            message += `Монеты: ${data.old_coins} → ${data.new_coins}`;
+            
+            showAdminResult(message, 'success');
+            
+            // Clear form
+            document.getElementById('coinsUserId').value = '';
+            document.getElementById('coinsAmount').value = '';
+        } else {
+            showAdminResult(`❌ Ошибка: ${data.error}`, 'error');
+        }
+    } catch (e) {
+        console.error('Give coins error:', e);
+        showAdminResult('❌ Ошибка сервера', 'error');
+    }
+}
+
+function showAdminResult(message, type) {
+    const result = document.getElementById('adminResult');
+    result.innerHTML = message.replace(/\n/g, '<br>');
+    result.className = `admin-result ${type}`;
+    result.style.display = 'block';
+    
+    // Auto hide after 5 seconds for success messages
+    if (type === 'success') {
+        setTimeout(() => {
+            result.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Add Enter key support for admin forms
+document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const target = e.target;
+        
+        if (target.id === 'userSearch') {
+            searchUser();
+        } else if (target.id === 'xpUserId' || target.id === 'xpAmount') {
+            giveXP();
+        } else if (target.id === 'coinsUserId' || target.id === 'coinsAmount') {
+            giveCoins();
+        }
+    }
+});

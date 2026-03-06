@@ -159,6 +159,12 @@ class PostgresDatabase:
             ADD COLUMN IF NOT EXISTS last_claim TIMESTAMP
         """)
         
+        # Добавляем колонку для купленных цветов (миграция)
+        cur.execute("""
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS purchased_colors JSONB DEFAULT '[]'::jsonb
+        """)
+        
         # Создаём индекс для быстрого поиска по telegram_id
         cur.execute("""
             CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id)
@@ -217,7 +223,7 @@ class PostgresDatabase:
         
         # Преобразуем в dict и парсим JSON поля
         user_dict = dict(user)
-        for json_field in ['daily_tasks', 'achievements', 'inventory', 'active_boosts', 'game_stats']:
+        for json_field in ['daily_tasks', 'achievements', 'inventory', 'active_boosts', 'game_stats', 'purchased_colors']:
             if json_field in user_dict and user_dict[json_field]:
                 if isinstance(user_dict[json_field], str):
                     user_dict[json_field] = json.loads(user_dict[json_field])
@@ -235,11 +241,11 @@ class PostgresDatabase:
             'last_daily', 'daily_streak', 'last_daily_date', 'games_played', 'games_won',
             'last_dice', 'last_coinflip', 'last_work', 'daily_tasks', 'achievements',
             'inventory', 'active_boosts', 'game_stats', 'telegram_id',
-            'voice_streak', 'last_voice_date'
+            'voice_streak', 'last_voice_date', 'purchased_colors'
         ]
         
         # Подготавливаем JSON поля
-        for json_field in ['daily_tasks', 'achievements', 'inventory', 'active_boosts', 'game_stats']:
+        for json_field in ['daily_tasks', 'achievements', 'inventory', 'active_boosts', 'game_stats', 'purchased_colors']:
             if json_field in user_data and not isinstance(user_data[json_field], str):
                 user_data[json_field] = json.dumps(user_data[json_field])
         
@@ -380,7 +386,7 @@ class PostgresDatabase:
         for user in users:
             user_dict = dict(user)
             # Парсим JSON поля
-            for json_field in ['daily_tasks', 'achievements', 'inventory', 'active_boosts', 'game_stats']:
+            for json_field in ['daily_tasks', 'achievements', 'inventory', 'active_boosts', 'game_stats', 'purchased_colors']:
                 if json_field in user_dict and user_dict[json_field]:
                     if isinstance(user_dict[json_field], str):
                         user_dict[json_field] = json.loads(user_dict[json_field])

@@ -184,6 +184,7 @@
     "update shop roles with real Discord role IDs and prices",
     "implement Discord bot improvements per TZ: new balance command, rank system F-S, color command, improved cooldowns, removed unused commands",
     "update commands list: remove deleted commands, add /color, update /balance description, add rank system info",
-    "fix color roles priority and add gradient colors, update shop role names to stylized versions"
+    "fix color roles priority and add gradient colors, update shop role names to stylized versions",
+    "implement color system: /color for rank S only (5 colors), /unsetcolor, gradient colors shop on website"
   ]
 }

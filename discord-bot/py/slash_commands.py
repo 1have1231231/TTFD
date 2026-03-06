@@ -1657,6 +1657,141 @@ async def setup_slash_commands(bot, db):
                 embed_type='error'
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
+    @bot.tree.command(name="customcolor", description="Активировать купленный градиентный цвет")
+    @app_commands.describe(color="Выбери купленный градиентный цвет")
+    async def customcolor_slash(interaction: discord.Interaction, color: str):
+        """Команда для активации купленных градиентных цветов"""
+        from rank_config import GRADIENT_COLORS, CUSTOM_COLOR_ROLE_NAME, CUSTOM_COLOR_ROLE_PERMISSIONS
+        import json
+
+        await interaction.response.defer()
+
+        try:
+            # Получаем данные пользователя
+            user_data = db.get_user(str(interaction.user.id))
+            purchased_colors = user_data.get('purchased_colors', [])
+
+            # Проверяем что цвет куплен
+            if color.lower() not in purchased_colors:
+                available_colors = ", ".join(purchased_colors) if purchased_colors else "нет купленных цветов"
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("❌ цвет не куплен"),
+                    description=convert_to_font(f"этот цвет не куплен\nкупленные цвета: {available_colors}\n\nкупить цвета можно на сайте!"),
+                    embed_type='error'
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+
+            # Проверяем что цвет существует
+            if color.lower() not in GRADIENT_COLORS:
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("❌ неверный цвет"),
+                    description=convert_to_font("такого градиентного цвета не существует"),
+                    embed_type='error'
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+
+            guild = interaction.guild
+            member = interaction.user
+            color_value = GRADIENT_COLORS[color.lower()]
+
+            # Ищем существующую кастомную цветную роль пользователя
+            existing_color_role = None
+            for role in member.roles:
+                if role.name.startswith(CUSTOM_COLOR_ROLE_NAME):
+                    existing_color_role = role
+                    break
+
+            # Проверяем что цвет не активен уже
+            if existing_color_role and existing_color_role.color.value == color_value:
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("❌ цвет уже активен"),
+                    description=convert_to_font(f"градиентный цвет {color} уже активен"),
+                    embed_type='error'
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+
+            # Создаём новую роль с выбранным градиентным цветом
+            new_role_name = f"{CUSTOM_COLOR_ROLE_NAME} - {member.name}"
+
+            try:
+                new_role = await guild.create_role(
+                    name=new_role_name,
+                    color=discord.Color(color_value),
+                    permissions=discord.Permissions(**CUSTOM_COLOR_ROLE_PERMISSIONS),
+                    reason=f"Градиентный цвет {color} для {member.name}"
+                )
+
+                # Устанавливаем высокий приоритет роли (выше ранговых ролей)
+                bot_member = guild.get_member(interaction.client.user.id)
+                if bot_member and bot_member.top_role:
+                    target_position = min(bot_member.top_role.position - 1, len(guild.roles) - 1)
+                    try:
+                        await new_role.edit(position=target_position)
+                        print(f"✅ Градиентная роль {new_role.name} установлена на позицию {target_position}")
+                    except discord.Forbidden:
+                        print(f"⚠️ Не удалось изменить позицию градиентной роли {new_role.name}")
+
+                # Выдаём новую роль
+                await member.add_roles(new_role, reason=f"Активация градиентного цвета {color}")
+
+                # Удаляем старую цветную роль если была
+                if existing_color_role:
+                    await member.remove_roles(existing_color_role, reason="Смена градиентного цвета")
+                    try:
+                        await existing_color_role.delete(reason="Старая кастомная роль")
+                    except:
+                        pass  # Игнорируем ошибки удаления
+
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("🌈 градиентный цвет активирован!"),
+                    description=convert_to_font(f"твой никнейм теперь {color} градиент"),
+                    embed_type='success'
+                )
+                embed.color = color_value
+
+                await interaction.followup.send(embed=embed)
+
+            except discord.Forbidden:
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("❌ нет прав"),
+                    description=convert_to_font("у бота нет прав для создания ролей"),
+                    embed_type='error'
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+
+        except Exception as e:
+            print(f"❌ Ошибка в /customcolor: {e}")
+            import traceback
+            traceback.print_exc()
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font(f"произошла ошибка: {str(e)}"),
+                embed_type='error'
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+
+    # Автокомплит для команды /customcolor
+    @customcolor_slash.autocomplete('color')
+    async def customcolor_autocomplete(interaction: discord.Interaction, current: str):
+        """Автокомплит для купленных градиентных цветов"""
+        from rank_config import GRADIENT_COLORS
+
+        # Получаем купленные цвета пользователя
+        user_data = db.get_user(str(interaction.user.id))
+        purchased_colors = user_data.get('purchased_colors', [])
+
+        choices = []
+        for color_name in purchased_colors:
+            if color_name in GRADIENT_COLORS and current.lower() in color_name.lower():
+                # Красивое название для автокомплита
+                display_name = color_name.replace('_', ' ').title() + " Gradient"
+                choices.append(app_commands.Choice(name=display_name, value=color_name))
+
+        return choices[:25]  # Discord ограничивает до 25 вариантов
+
     
     
     print(f"✅ Slash команды зарегистрированы ({len(bot.tree.get_commands())} команд)")

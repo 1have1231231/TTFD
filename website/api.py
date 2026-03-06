@@ -321,6 +321,109 @@ def buy_color():
         print(f"❌ Buy color error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+# ==================== ADMIN ENDPOINTS ====================
+
+@app.route('/api/admin/give-xp', methods=['POST'])
+def admin_give_xp():
+    """Give XP to user (admin only)"""
+    user = session.get('user')
+    
+    if not user:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    # Check if user is admin
+    admin_id = os.getenv('ADMIN_USER_ID')
+    if not admin_id or user['id'] != admin_id:
+        return jsonify({'success': False, 'error': 'Access denied'}), 403
+    
+    data = request.get_json()
+    
+    try:
+        response = requests.post(
+            f'{DISCORD_BOT_API}/api/admin/give-xp',
+            json=data,
+            timeout=10
+        )
+        
+        return jsonify(response.json()), response.status_code
+        
+    except Exception as e:
+        print(f"❌ Admin give XP error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/admin/give-coins', methods=['POST'])
+def admin_give_coins():
+    """Give coins to user (admin only)"""
+    user = session.get('user')
+    
+    if not user:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    # Check if user is admin
+    admin_id = os.getenv('ADMIN_USER_ID')
+    if not admin_id or user['id'] != admin_id:
+        return jsonify({'success': False, 'error': 'Access denied'}), 403
+    
+    data = request.get_json()
+    
+    try:
+        response = requests.post(
+            f'{DISCORD_BOT_API}/api/admin/give-coins',
+            json=data,
+            timeout=10
+        )
+        
+        return jsonify(response.json()), response.status_code
+        
+    except Exception as e:
+        print(f"❌ Admin give coins error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/admin/get-user', methods=['GET'])
+def admin_get_user():
+    """Get user data by username or ID (admin only)"""
+    user = session.get('user')
+    
+    if not user:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    # Check if user is admin
+    admin_id = os.getenv('ADMIN_USER_ID')
+    if not admin_id or user['id'] != admin_id:
+        return jsonify({'success': False, 'error': 'Access denied'}), 403
+    
+    query = request.args.get('query')
+    
+    try:
+        response = requests.get(
+            f'{DISCORD_BOT_API}/api/admin/get-user',
+            params={'query': query},
+            timeout=10
+        )
+        
+        return jsonify(response.json()), response.status_code
+        
+    except Exception as e:
+        print(f"❌ Admin get user error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/admin/check')
+def admin_check():
+    """Check if current user is admin"""
+    user = session.get('user')
+    
+    if not user:
+        return jsonify({'is_admin': False}), 401
+    
+    admin_id = os.getenv('ADMIN_USER_ID')
+    is_admin = admin_id and user['id'] == admin_id
+    
+    return jsonify({
+        'is_admin': is_admin,
+        'user_id': user['id'],
+        'admin_id': admin_id
+    })
+
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))
     print(f"🚀 Starting TTFD Website API on port {port}...")

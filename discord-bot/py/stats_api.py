@@ -542,16 +542,27 @@ def buy_role():
 def get_shop_colors():
     """Получить список градиентных цветов в магазине"""
     try:
+        from database_postgres import PostgresDatabase
+        db = PostgresDatabase()
+        
         user_id = request.args.get('user_id')
         
         print(f"🎨 Colors shop request for user: {user_id}")
         
         colors = []
+        user_purchased_colors = []
+        
+        # Получаем список купленных цветов пользователя
+        if user_id:
+            user_data = db.get_user(user_id)
+            user_purchased_colors = user_data.get('purchased_colors', [])
+        
         for color in GRADIENT_COLORS_SHOP:
-            owned = False
+            owned = color['id'] in user_purchased_colors
+            active = False
             
-            # Проверяем есть ли цвет у пользователя (через кастомную роль)
-            if discord_bot and user_id:
+            # Проверяем активен ли цвет у пользователя (через кастомную роль)
+            if discord_bot and user_id and owned:
                 try:
                     guild = discord_bot.guilds[0] if discord_bot.guilds else None
                     if guild:
@@ -560,14 +571,15 @@ def get_shop_colors():
                             # Ищем роль с градиентным цветом
                             for role in member.roles:
                                 if role.name.startswith("Custom Color") and role.color.value == int(color['color'].replace('#', '0x'), 16):
-                                    owned = True
+                                    active = True
                                     break
                 except Exception as e:
                     print(f"⚠️ Error checking color {color['name']}: {e}")
             
             colors.append({
                 **color,
-                'owned': owned
+                'owned': owned,
+                'active': active
             })
         
         print(f"✅ Returning {len(colors)} gradient colors")
@@ -604,8 +616,18 @@ def buy_color():
         
         # Получить пользователя
         user = db.get_user(user_id)
-        if not user or user.get('coins', 0) < color['price']:
-            return jsonify({'success': False, 'error': 'Недостаточно монет'}), 400
+        if not user:
+            return jsonify({'success': False, 'error': 'Пользователь не найден'}), 404
+        
+        # Проверяем есть ли уже цвет в купленных
+        purchased_colors = user.get('purchased_colors', [])
+        if color['id'] in purchased_colors:
+            # Цвет уже куплен, просто активируем его
+            pass
+        else:
+            # Проверяем баланс только если цвет не куплен
+            if user.get('coins', 0) < color['price']:
+                return jsonify({'success': False, 'error': 'Недостаточно монет'}), 400
         
         # Проверить есть ли уже цвет у пользователя и выдать его
         if discord_bot:
@@ -616,10 +638,10 @@ def buy_color():
                     if member:
                         color_value = int(color['color'].replace('#', '0x'), 16)
                         
-                        # Проверяем есть ли уже такой цвет
+                        # Проверяем есть ли уже такой цвет активен
                         for role in member.roles:
                             if role.name.startswith("Custom Color") and role.color.value == color_value:
-                                return jsonify({'success': False, 'error': 'У вас уже есть этот цвет'}), 400
+                                return jsonify({'success': False, 'error': 'У вас уже активен этот цвет'}), 400
                         
                         # Создаём роль с градиентным цветом
                         import asyncio
@@ -668,19 +690,24 @@ def buy_color():
         else:
             return jsonify({'success': False, 'error': 'Бот не подключен'}), 500
         
-        # Списать монеты
-        new_coins = user['coins'] - color['price']
-        conn = db.get_connection()
-        cur = conn.cursor()
-        cur.execute("UPDATE users SET coins = %s WHERE id = %s", (new_coins, str(user_id)))
-        conn.commit()
-        cur.close()
-        conn.close()
+        # Обновляем данные пользователя
+        purchased_colors = user.get('purchased_colors', [])
+        new_coins = user.get('coins', 0)
+        
+        # Если цвет не был куплен ранее - списываем монеты и добавляем в купленные
+        if color['id'] not in purchased_colors:
+            new_coins -= color['price']
+            purchased_colors.append(color['id'])
+            user['purchased_colors'] = purchased_colors
+            user['coins'] = new_coins
+            db.save_user(user_id, user)
+            print(f"✅ Цвет {color['name']} добавлен в купленные для пользователя {user_id}")
         
         return jsonify({
             'success': True,
             'new_balance': new_coins,
-            'color_name': color['name']
+            'color_name': color['name'],
+            'was_purchased': color['id'] not in purchased_colors
         })
         
     except Exception as e:
@@ -689,3 +716,148 @@ def buy_color():
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
+
+# ==================== ADMIN ENDPOINTS ====================
+
+@app.route('/api/admin/give-xp', methods=['POST'])
+def admin_give_xp():
+    """Give XP to user (admin only)"""
+    try:
+        from database_postgres import PostgresDatabase
+        db = PostgresDatabase()
+        
+        data = request.json
+        user_id = data.get('user_id')
+        xp_amount = data.get('xp_amount', 0)
+        
+        if not user_id or xp_amount <= 0:
+            return jsonify({'success': False, 'error': 'Invalid parameters'}), 400
+        
+        # Get user
+        user_data = db.get_user(user_id)
+        if not user_data:
+            return jsonify({'success': False, 'error': 'User not found'}), 404
+        
+        # Add XP
+        old_xp = user_data.get('xp', 0)
+        old_rank_id = user_data.get('rank_id', 1)
+        
+        user_data['xp'] = old_xp + xp_amount
+        
+        # Check rank up
+        new_rank_id = db.check_rank_up(user_data)
+        db.save_user(user_id, user_data)
+        
+        return jsonify({
+            'success': True,
+            'old_xp': old_xp,
+            'new_xp': user_data['xp'],
+            'xp_added': xp_amount,
+            'rank_up': new_rank_id > old_rank_id,
+            'old_rank_id': old_rank_id,
+            'new_rank_id': new_rank_id
+        })
+        
+    except Exception as e:
+        print(f"❌ Admin give XP error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/admin/give-coins', methods=['POST'])
+def admin_give_coins():
+    """Give coins to user (admin only)"""
+    try:
+        from database_postgres import PostgresDatabase
+        db = PostgresDatabase()
+        
+        data = request.json
+        user_id = data.get('user_id')
+        coins_amount = data.get('coins_amount', 0)
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Invalid parameters'}), 400
+        
+        # Get user
+        user_data = db.get_user(user_id)
+        if not user_data:
+            return jsonify({'success': False, 'error': 'User not found'}), 404
+        
+        # Add coins (can be negative to remove coins)
+        old_coins = user_data.get('coins', 0)
+        user_data['coins'] = max(0, old_coins + coins_amount)  # Don't go below 0
+        
+        db.save_user(user_id, user_data)
+        
+        return jsonify({
+            'success': True,
+            'old_coins': old_coins,
+            'new_coins': user_data['coins'],
+            'coins_added': coins_amount
+        })
+        
+    except Exception as e:
+        print(f"❌ Admin give coins error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/admin/get-user', methods=['GET'])
+def admin_get_user():
+    """Get user by username or ID (admin only)"""
+    try:
+        from database_postgres import PostgresDatabase
+        db = PostgresDatabase()
+        
+        query = request.args.get('query', '').strip()
+        
+        if not query:
+            return jsonify({'success': False, 'error': 'Query parameter required'}), 400
+        
+        # Try to find user by ID first
+        if query.isdigit():
+            user_data = db.get_user(query)
+            if user_data:
+                return jsonify({
+                    'success': True,
+                    'user': {
+                        'id': user_data['id'],
+                        'username': user_data.get('username', 'Unknown'),
+                        'xp': user_data.get('xp', 0),
+                        'coins': user_data.get('coins', 0),
+                        'rank_id': user_data.get('rank_id', 1),
+                        'games_played': user_data.get('games_played', 0),
+                        'games_won': user_data.get('games_won', 0)
+                    }
+                })
+        
+        # Search by username
+        all_users = db.get_all_users()
+        found_users = []
+        
+        for user_id, user_data in all_users.items():
+            username = user_data.get('username', '').lower()
+            if query.lower() in username:
+                found_users.append({
+                    'id': user_data['id'],
+                    'username': user_data.get('username', 'Unknown'),
+                    'xp': user_data.get('xp', 0),
+                    'coins': user_data.get('coins', 0),
+                    'rank_id': user_data.get('rank_id', 1),
+                    'games_played': user_data.get('games_played', 0),
+                    'games_won': user_data.get('games_won', 0)
+                })
+        
+        if found_users:
+            return jsonify({
+                'success': True,
+                'users': found_users[:10]  # Limit to 10 results
+            })
+        else:
+            return jsonify({'success': False, 'error': 'User not found'}), 404
+        
+    except Exception as e:
+        print(f"❌ Admin get user error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
