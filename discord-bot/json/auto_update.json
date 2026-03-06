@@ -165,6 +165,7 @@
     "исправлены MIME типы для статических файлов",
     "добавлены MIME типы",
     "новый киберпанк дизайн со встроенным CSS",
-    "gitHub-style Gaming UI со встроенным CSS"
+    "gitHub-style Gaming UI со встроенным CSS",
+    "исправлен импорт PostgresDatabase в stats_api"
   ]
 }

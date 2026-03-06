@@ -128,8 +128,12 @@ def play_roulette():
         # Add parent directory to path
         sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         
-        from database_postgres import PostgresDatabase
-        db = PostgresDatabase()
+        try:
+            from database_postgres import PostgresDatabase
+            db = PostgresDatabase()
+        except Exception as db_error:
+            print(f"⚠️ PostgreSQL unavailable: {db_error}")
+            return jsonify({'success': False, 'error': 'База данных временно недоступна'}), 503
         
         data = request.get_json()
         user_id = data.get('user_id')
@@ -144,7 +148,7 @@ def play_roulette():
         # Get user
         user = db.get_user(user_id)
         
-        if user['coins'] < bet:
+        if not user or user.get('coins', 0) < bet:
             return jsonify({'success': False, 'error': 'Недостаточно монет'}), 400
         
         # Generate number (0-14)
@@ -190,7 +194,7 @@ def play_roulette():
         print(f"❌ Roulette error: {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': f'Ошибка сервера: {str(e)}'}), 500
 
 def update_stats(data):
     """Обновить статистику"""
