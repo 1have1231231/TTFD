@@ -41,9 +41,6 @@ COMMANDS_LIST = {
         ('/getcode', 'получить код для привязки Telegram'),
         ('/checklink', 'проверить статус привязки Telegram'),
         ('/unlink', 'отвязать Telegram аккаунт'),
-        ('/gamelink', 'привязать игровой аккаунт TTFD Game'),
-        ('/unlinkgame', 'отвязать игровой аккаунт'),
-        ('/gamestats', 'статистика из TTFD Game'),
     ],
     '💬 поддержка': [
         ('/ticket', 'создать тикет поддержки'),

@@ -42,20 +42,16 @@ async def setup_slash_commands(bot, db):
         
         await interaction.response.send_message(embed=embed)
     
-    @bot.tree.command(name="balance", description="Посмотреть баланс монет")
+    @bot.tree.command(name="balance", description="Посмотреть баланс, XP и прогресс до следующего ранга")
     @app_commands.describe(member="Пользователь (оставь пустым чтобы посмотреть свой)")
     async def balance_slash(interaction: discord.Interaction, member: discord.Member = None):
         """Slash команда для баланса"""
         target = member or interaction.user
         user_data = db.get_user(str(target.id))
         
-        embed = BotTheme.create_embed(
-            title=convert_to_font(f"💰 баланс {target.name}"),
-            description=convert_to_font(f"монеты: {user_data.get('coins', 0)}"),
-            embed_type='success'
-        )
-        
-        embed.set_thumbnail(url=target.display_avatar.url)
+        # Используем новую утилиту для создания embed
+        from embed_utils import create_balance_embed
+        embed = create_balance_embed(interaction.user, user_data, target)
         
         await interaction.response.send_message(embed=embed)
     
@@ -345,6 +341,8 @@ async def setup_slash_commands(bot, db):
         user_data = db.get_user(str(interaction.user.id))
         
         from datetime import datetime, timedelta
+        from rank_config import format_cooldown
+        
         last_daily = user_data.get('last_daily')
         
         if last_daily:
@@ -359,12 +357,11 @@ async def setup_slash_commands(bot, db):
             
             if time_since < timedelta(hours=24):
                 time_left = timedelta(hours=24) - time_since
-                hours = int(time_left.total_seconds() // 3600)
-                minutes = int((time_left.total_seconds() % 3600) // 60)
+                seconds_left = int(time_left.total_seconds())
                 
                 embed = BotTheme.create_embed(
                     title=convert_to_font("⏰ слишком рано"),
-                    description=convert_to_font(f"следующая награда через: {hours}ч {minutes}м"),
+                    description=convert_to_font(f"следующая награда через: {format_cooldown(seconds_left)}"),
                     embed_type='error'
                 )
                 await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -394,6 +391,7 @@ async def setup_slash_commands(bot, db):
         user_data = db.get_user(str(interaction.user.id))
         
         from datetime import datetime, timedelta
+        from rank_config import format_cooldown
         import random
         
         last_work = user_data.get('last_work')
@@ -410,11 +408,11 @@ async def setup_slash_commands(bot, db):
             
             if time_since < timedelta(hours=1):
                 time_left = timedelta(hours=1) - time_since
-                minutes = int(time_left.total_seconds() // 60)
+                seconds_left = int(time_left.total_seconds())
                 
                 embed = BotTheme.create_embed(
                     title=convert_to_font("⏰ ты устал"),
-                    description=convert_to_font(f"отдохни ещё {minutes} минут"),
+                    description=convert_to_font(f"отдохни ещё {format_cooldown(seconds_left)}"),
                     embed_type='error'
                 )
                 await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -493,13 +491,13 @@ async def setup_slash_commands(bot, db):
         
         # Группируем команды по категориям
         categories = {
-            '👤 Профиль': ['profile', 'balance', 'rank', 'top', 'stats'],
-            '🛒 Магазин': ['shop', 'inventory', 'buy', 'pay'],
+            '👤 Профиль': ['profile', 'balance', 'rank', 'top', 'stats', 'streak'],
+            '🛒 Магазин': ['shop', 'buyrole', 'pay'],
             '💰 Заработок': ['daily', 'work'],
             '🎮 Игры': ['dice', 'coinflip'],
-            '🎮 Интеграция': ['gamelink', 'unlink', 'gamestats'],
+            '🔗 Telegram': ['getcode', 'checklink', 'unlink'],
             '🎫 Поддержка': ['ticket', 'close'],
-            '⚙️ Утилиты': ['clear', 'help', 'ping', 'links']
+            '⚙️ Утилиты': ['clear', 'help', 'ping', 'links', 'color']
         }
         
         embed = BotTheme.create_embed(
@@ -760,6 +758,7 @@ async def setup_slash_commands(bot, db):
     async def dice_slash(interaction: discord.Interaction):
         """Slash команда для броска кубика"""
         from datetime import datetime, timedelta
+        from rank_config import format_cooldown
         import random
         
         try:
@@ -775,13 +774,11 @@ async def setup_slash_commands(bot, db):
                 time_diff = (datetime.now() - last_dice).total_seconds()
                 
                 if time_diff < 3600:
-                    time_left = 3600 - time_diff
-                    hours = int(time_left // 3600)
-                    minutes = int((time_left % 3600) // 60)
+                    time_left = int(3600 - time_diff)
                     
                     embed = BotTheme.create_embed(
                         title=convert_to_font("⏰ слишком рано"),
-                        description=convert_to_font(f"следующий бросок через: {hours}ч {minutes}м"),
+                        description=convert_to_font(f"следующий бросок через: {format_cooldown(time_left)}"),
                         embed_type='error'
                     )
                     await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -858,6 +855,7 @@ async def setup_slash_commands(bot, db):
     async def coinflip_slash(interaction: discord.Interaction, choice: str):
         """Slash команда для подбрасывания монетки"""
         from datetime import datetime, timedelta
+        from rank_config import format_cooldown
         import random
         
         try:
@@ -873,13 +871,11 @@ async def setup_slash_commands(bot, db):
                 time_diff = (datetime.now() - last_coinflip).total_seconds()
                 
                 if time_diff < 3600:
-                    time_left = 3600 - time_diff
-                    hours = int(time_left // 3600)
-                    minutes = int((time_left % 3600) // 60)
+                    time_left = int(3600 - time_diff)
                     
                     embed = BotTheme.create_embed(
                         title=convert_to_font("⏰ слишком рано"),
-                        description=convert_to_font(f"следующее подбрасывание через: {hours}ч {minutes}м"),
+                        description=convert_to_font(f"следующее подбрасывание через: {format_cooldown(time_left)}"),
                         embed_type='error'
                     )
                     await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -1484,6 +1480,104 @@ async def setup_slash_commands(bot, db):
                 embed_type='error'
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
+    
+    
+    # ==================== Команда /color ====================
+    
+    @bot.tree.command(name="color", description="Изменить цвет своего никнейма")
+    @app_commands.describe(color="Выбери цвет из списка")
+    async def color_slash(interaction: discord.Interaction, color: str):
+        """Команда для изменения цвета никнейма"""
+        from rank_config import ALLOWED_COLORS, CUSTOM_COLOR_ROLE_NAME, CUSTOM_COLOR_ROLE_PERMISSIONS
+        
+        # Проверяем что цвет допустим
+        if color.lower() not in ALLOWED_COLORS:
+            available_colors = ", ".join(ALLOWED_COLORS.keys())
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ неверный цвет"),
+                description=convert_to_font(f"доступные цвета:\n{available_colors}"),
+                embed_type='error'
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
+        # Проверяем есть ли у пользователя право на смену цвета
+        # Для начала разрешим всем, потом можно добавить проверку на специальную роль
+        
+        await interaction.response.defer()
+        
+        try:
+            guild = interaction.guild
+            member = interaction.user
+            color_value = ALLOWED_COLORS[color.lower()]
+            
+            # Ищем существующую кастомную цветную роль пользователя
+            existing_color_role = None
+            for role in member.roles:
+                if role.name.startswith(CUSTOM_COLOR_ROLE_NAME):
+                    existing_color_role = role
+                    break
+            
+            # Создаём новую роль с выбранным цветом
+            new_role_name = f"{CUSTOM_COLOR_ROLE_NAME} - {member.name}"
+            
+            try:
+                new_role = await guild.create_role(
+                    name=new_role_name,
+                    color=discord.Color(color_value),
+                    permissions=discord.Permissions(**CUSTOM_COLOR_ROLE_PERMISSIONS),
+                    reason=f"Кастомный цвет для {member.name}"
+                )
+                
+                # Выдаём новую роль
+                await member.add_roles(new_role, reason=f"Смена цвета на {color}")
+                
+                # Удаляем старую цветную роль если была
+                if existing_color_role:
+                    await member.remove_roles(existing_color_role, reason="Смена цвета")
+                    try:
+                        await existing_color_role.delete(reason="Старая кастомная роль")
+                    except:
+                        pass  # Игнорируем ошибки удаления
+                
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("🎨 цвет изменён!"),
+                    description=convert_to_font(f"твой никнейм теперь {color}"),
+                    embed_type='success'
+                )
+                embed.color = color_value
+                
+                await interaction.followup.send(embed=embed)
+                
+            except discord.Forbidden:
+                embed = BotTheme.create_embed(
+                    title=convert_to_font("❌ нет прав"),
+                    description=convert_to_font("у бота нет прав для создания ролей"),
+                    embed_type='error'
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                
+        except Exception as e:
+            print(f"❌ Ошибка в /color: {e}")
+            embed = BotTheme.create_embed(
+                title=convert_to_font("❌ ошибка"),
+                description=convert_to_font(f"произошла ошибка: {str(e)}"),
+                embed_type='error'
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+    
+    # Автокомплит для команды /color
+    @color_slash.autocomplete('color')
+    async def color_autocomplete(interaction: discord.Interaction, current: str):
+        """Автокомплит для цветов"""
+        from rank_config import ALLOWED_COLORS
+        
+        choices = []
+        for color_name in ALLOWED_COLORS.keys():
+            if current.lower() in color_name.lower():
+                choices.append(app_commands.Choice(name=color_name.capitalize(), value=color_name))
+        
+        return choices[:25]  # Discord ограничивает до 25 вариантов
     
     
     print(f"✅ Slash команды зарегистрированы ({len(bot.tree.get_commands())} команд)")
