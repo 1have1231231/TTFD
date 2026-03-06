@@ -407,22 +407,40 @@ def admin_get_user():
         print(f"❌ Admin get user error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/admin/check')
 def admin_check():
     """Check if current user is admin"""
     user = session.get('user')
-    
+
     if not user:
-        return jsonify({'is_admin': False}), 401
-    
+        return jsonify({'is_admin': False, 'error': 'No user in session'}), 401
+
     admin_id = os.getenv('ADMIN_USER_ID')
-    is_admin = admin_id and user['id'] == admin_id
-    
+
+    if not admin_id:
+        return jsonify({
+            'is_admin': False,
+            'error': 'ADMIN_USER_ID not set',
+            'user_id': user.get('id')
+        })
+
+    # Ensure both IDs are strings for comparison
+    user_id_str = str(user.get('id', ''))
+    admin_id_str = str(admin_id)
+
+    is_admin = user_id_str == admin_id_str
+
     return jsonify({
         'is_admin': is_admin,
-        'user_id': user['id'],
-        'admin_id': admin_id
+        'user_id': user_id_str,
+        'admin_id': admin_id_str,
+        'comparison': f"{user_id_str} == {admin_id_str}",
+        'debug': {
+            'user_id_type': type(user.get('id')).__name__,
+            'admin_id_type': type(admin_id).__name__,
+            'user_data': user
+        }
     })
+
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))

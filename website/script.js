@@ -3,7 +3,6 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     loadLeaderboard();
-    checkAdminAccess();
 });
 
 function showSection(id) {
@@ -28,6 +27,8 @@ async function checkAuth() {
                 currentUser = data.user;
                 updateUI();
                 loadProfile();
+                // Проверяем админские права после успешной аутентификации
+                checkAdminAccess();
             }
         }
     } catch (e) {
@@ -413,18 +414,28 @@ function loadAdmin() {
 // ==================== ADMIN FUNCTIONS ====================
 
 async function checkAdminAccess() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        console.log('❌ checkAdminAccess: currentUser is null');
+        return;
+    }
+    
+    console.log('🔍 checkAdminAccess: Checking admin rights for user:', currentUser.id);
     
     try {
         const res = await fetch('/api/admin/check', { credentials: 'include' });
+        console.log('📡 Admin check response status:', res.status);
+        
         const data = await res.json();
+        console.log('📊 Admin check response data:', data);
         
         if (data.is_admin) {
             document.getElementById('adminLink').style.display = 'block';
             console.log('✅ Admin access granted');
+        } else {
+            console.log('❌ Admin access denied. User ID:', data.user_id, 'Admin ID:', data.admin_id);
         }
     } catch (e) {
-        console.error('Admin check error:', e);
+        console.error('❌ Admin check error:', e);
     }
 }
 
