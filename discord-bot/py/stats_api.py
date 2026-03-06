@@ -327,6 +327,12 @@ SHOP_ROLES = [
 def get_shop_roles():
     """Получить список ролей в магазине"""
     try:
+        import sys
+        import os
+        
+        # Add parent directory to path
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
         user_id = request.args.get('user_id')
         
         roles = []
@@ -343,8 +349,8 @@ def get_shop_roles():
                             role_obj = guild.get_role(int(role['id']))
                             if role_obj and role_obj in member.roles:
                                 owned = True
-                except:
-                    pass
+                except Exception as e:
+                    print(f"⚠️ Error checking role: {e}")
             
             roles.append({
                 **role,
@@ -363,6 +369,19 @@ def get_shop_roles():
 def buy_role():
     """Купить роль"""
     try:
+        import sys
+        import os
+        
+        # Add parent directory to path
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        try:
+            from database_postgres import PostgresDatabase
+            db = PostgresDatabase()
+        except Exception as db_error:
+            print(f"⚠️ PostgreSQL unavailable: {db_error}")
+            return jsonify({'success': False, 'error': 'База данных временно недоступна'}), 503
+        
         data = request.json
         user_id = data.get('user_id')
         role_id = data.get('role_id')
