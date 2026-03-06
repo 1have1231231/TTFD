@@ -181,6 +181,7 @@
     "fix shop layout - center title and improve error handling",
     "fix shop API - add proper imports and error handling",
     "fix shop API: add proxy endpoints and improve error handling",
-    "update shop roles with real Discord role IDs and prices"
+    "update shop roles with real Discord role IDs and prices",
+    "implement Discord bot improvements per TZ: new balance command, rank system F-S, color command, improved cooldowns, removed unused commands"
   ]
 }
