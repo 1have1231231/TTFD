@@ -153,12 +153,16 @@ async function placeBet(color) {
     }
     
     const wheel = document.getElementById('wheel');
-    const wheelNumber = document.getElementById('wheelNumber');
+    const wheelResult = document.getElementById('wheelResult');
+    const resultNumber = document.getElementById('resultNumber');
     const buttons = document.querySelectorAll('.bet-btn');
     buttons.forEach(btn => btn.disabled = true);
     
+    // Скрыть предыдущий результат
+    wheelResult.style.display = 'none';
+    
+    // Запустить вращение
     wheel.classList.add('spinning');
-    wheelNumber.textContent = '?';
     
     try {
         const res = await fetch('/api/roulette/play', {
@@ -174,7 +178,14 @@ async function placeBet(color) {
             wheel.classList.remove('spinning');
             
             if (data.success) {
-                wheelNumber.textContent = data.number;
+                // Показать результат
+                resultNumber.textContent = data.number;
+                wheelResult.style.display = 'flex';
+                
+                // Скрыть результат через 2 секунды
+                setTimeout(() => {
+                    wheelResult.style.display = 'none';
+                }, 2000);
                 
                 if (data.win) {
                     showResult(`🎉 Выигрыш! +${data.win_amount} монет`, 'win');
@@ -189,11 +200,11 @@ async function placeBet(color) {
             }
             
             buttons.forEach(btn => btn.disabled = false);
-        }, 2000);
+        }, 3000);
     } catch (e) {
         console.error(e);
         wheel.classList.remove('spinning');
-        wheelNumber.textContent = '?';
+        wheelResult.style.display = 'none';
         showResult('Ошибка сервера', 'lose');
         buttons.forEach(btn => btn.disabled = false);
     }

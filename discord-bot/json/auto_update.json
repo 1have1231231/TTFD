@@ -169,6 +169,7 @@
     "исправлен импорт PostgresDatabase в stats_api",
     "добавлена обработка ошибок БД в рулетке",
     "прямое обновление БД без метода update_user",
-    "fix rank display and add roulette wheel image"
+    "fix rank display and add roulette wheel image",
+    "add SVG roulette wheel and fix rank display"
   ]
 }

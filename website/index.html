@@ -415,43 +415,78 @@
         .wheel-container {
             display: flex;
             justify-content: center;
+            align-items: center;
             margin-bottom: 30px;
+            position: relative;
+            height: 320px;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 60px;
+            z-index: 20;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
         }
 
         .wheel {
-            width: 250px;
-            height: 250px;
+            width: 300px;
+            height: 300px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            transition: transform 0.5s;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.7));
         }
 
         .wheel-image {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            box-shadow: 0 0 40px rgba(88, 166, 255, 0.5);
-        }
-
-        .wheel-number {
-            position: absolute;
-            font-size: 72px;
-            font-weight: 900;
-            color: white;
-            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.6);
-            z-index: 10;
         }
 
         .wheel.spinning {
-            animation: spin 2s ease-in-out;
+            animation: spinWheel 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
         }
 
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(1080deg); }
+        @keyframes spinWheel {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(1800deg); }
+        }
+
+        .wheel-result {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #FFD700;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: resultPop 0.5s ease-out;
+        }
+
+        .result-number {
+            font-size: 48px;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        @keyframes resultPop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
         }
 
         .bet-input {
@@ -640,34 +675,97 @@
                         Баланс: <span class="balance-amount" id="rouletteBalance">0</span> монет
                     </div>
                     <div class="wheel-container">
+                        <!-- Стрелка указатель -->
+                        <div class="wheel-pointer">
+                            <svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20,0 L40,20 L25,20 L25,60 L15,60 L15,20 L0,20 Z" fill="#FFD700" stroke="#000" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        
                         <div class="wheel" id="wheel">
-                            <svg class="wheel-image" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="wheel-image" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
                                     <radialGradient id="wheelGrad">
-                                        <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+                                        <stop offset="0%" style="stop-color:#654321;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#3d2817;stop-opacity:1" />
                                     </radialGradient>
                                 </defs>
-                                <!-- Outer rim -->
-                                <circle cx="100" cy="100" r="95" fill="url(#wheelGrad)" stroke="#FFD700" stroke-width="3"/>
-                                <!-- Red/Black segments -->
+                                
+                                <!-- Outer wooden rim -->
+                                <circle cx="150" cy="150" r="148" fill="url(#wheelGrad)" stroke="#2d1810" stroke-width="4"/>
+                                
+                                <!-- Numbers on roulette (0-14) -->
                                 <g id="segments">
-                                    <path d="M100,100 L100,10 A90,90 0 0,1 163.64,36.36 Z" fill="#DC143C"/>
-                                    <path d="M100,100 L163.64,36.36 A90,90 0 0,1 190,100 Z" fill="#000"/>
-                                    <path d="M100,100 L190,100 A90,90 0 0,1 163.64,163.64 Z" fill="#DC143C"/>
-                                    <path d="M100,100 L163.64,163.64 A90,90 0 0,1 100,190 Z" fill="#000"/>
-                                    <path d="M100,100 L100,190 A90,90 0 0,1 36.36,163.64 Z" fill="#DC143C"/>
-                                    <path d="M100,100 L36.36,163.64 A90,90 0 0,1 10,100 Z" fill="#000"/>
-                                    <path d="M100,100 L10,100 A90,90 0 0,1 36.36,36.36 Z" fill="#DC143C"/>
-                                    <path d="M100,100 L36.36,36.36 A90,90 0 0,1 100,10 Z" fill="#000"/>
+                                    <!-- 0 - Green -->
+                                    <path d="M150,150 L150,10 A140,140 0 0,1 179.5,12.8 Z" fill="#228B22"/>
+                                    <text x="165" y="35" text-anchor="middle" fill="white" font-size="16" font-weight="bold">0</text>
+                                    
+                                    <!-- 1 - Red -->
+                                    <path d="M150,150 L179.5,12.8 A140,140 0 0,1 208.3,20.8 Z" fill="#DC143C"/>
+                                    <text x="195" y="45" text-anchor="middle" fill="white" font-size="16" font-weight="bold">1</text>
+                                    
+                                    <!-- 2 - Black -->
+                                    <path d="M150,150 L208.3,20.8 A140,140 0 0,1 235.2,33.8 Z" fill="#1a1a1a"/>
+                                    <text x="223" y="60" text-anchor="middle" fill="white" font-size="16" font-weight="bold">2</text>
+                                    
+                                    <!-- 3 - Red -->
+                                    <path d="M150,150 L235.2,33.8 A140,140 0 0,1 258.8,51.7 Z" fill="#DC143C"/>
+                                    <text x="248" y="80" text-anchor="middle" fill="white" font-size="16" font-weight="bold">3</text>
+                                    
+                                    <!-- 4 - Black -->
+                                    <path d="M150,150 L258.8,51.7 A140,140 0 0,1 277.2,73.5 Z" fill="#1a1a1a"/>
+                                    <text x="268" y="105" text-anchor="middle" fill="white" font-size="16" font-weight="bold">4</text>
+                                    
+                                    <!-- 5 - Red -->
+                                    <path d="M150,150 L277.2,73.5 A140,140 0 0,1 289.2,98.5 Z" fill="#DC143C"/>
+                                    <text x="283" y="133" text-anchor="middle" fill="white" font-size="16" font-weight="bold">5</text>
+                                    
+                                    <!-- 6 - Black -->
+                                    <path d="M150,150 L289.2,98.5 A140,140 0 0,1 294.5,125 Z" fill="#1a1a1a"/>
+                                    <text x="290" y="162" text-anchor="middle" fill="white" font-size="16" font-weight="bold">6</text>
+                                    
+                                    <!-- 7 - Red -->
+                                    <path d="M150,150 L294.5,125 A140,140 0 0,1 292.8,151.5 Z" fill="#DC143C"/>
+                                    <text x="288" y="190" text-anchor="middle" fill="white" font-size="16" font-weight="bold">7</text>
+                                    
+                                    <!-- 8 - Black -->
+                                    <path d="M150,150 L292.8,151.5 A140,140 0 0,1 284.2,177.2 Z" fill="#1a1a1a"/>
+                                    <text x="278" y="217" text-anchor="middle" fill="white" font-size="16" font-weight="bold">8</text>
+                                    
+                                    <!-- 9 - Red -->
+                                    <path d="M150,150 L284.2,177.2 A140,140 0 0,1 268.8,200.5 Z" fill="#DC143C"/>
+                                    <text x="262" y="240" text-anchor="middle" fill="white" font-size="16" font-weight="bold">9</text>
+                                    
+                                    <!-- 10 - Black -->
+                                    <path d="M150,150 L268.8,200.5 A140,140 0 0,1 247.2,220.5 Z" fill="#1a1a1a"/>
+                                    <text x="240" y="258" text-anchor="middle" fill="white" font-size="16" font-weight="bold">10</text>
+                                    
+                                    <!-- 11 - Red -->
+                                    <path d="M150,150 L247.2,220.5 A140,140 0 0,1 220.5,236.2 Z" fill="#DC143C"/>
+                                    <text x="212" y="270" text-anchor="middle" fill="white" font-size="16" font-weight="bold">11</text>
+                                    
+                                    <!-- 12 - Black -->
+                                    <path d="M150,150 L220.5,236.2 A140,140 0 0,1 190,247.2 Z" fill="#1a1a1a"/>
+                                    <text x="180" y="278" text-anchor="middle" fill="white" font-size="16" font-weight="bold">12</text>
+                                    
+                                    <!-- 13 - Red -->
+                                    <path d="M150,150 L190,247.2 A140,140 0 0,1 157.5,252.8 Z" fill="#DC143C"/>
+                                    <text x="148" y="282" text-anchor="middle" fill="white" font-size="16" font-weight="bold">13</text>
+                                    
+                                    <!-- 14 - Black -->
+                                    <path d="M150,150 L157.5,252.8 A140,140 0 0,1 125,252.8 Z" fill="#1a1a1a"/>
+                                    <text x="115" y="280" text-anchor="middle" fill="white" font-size="16" font-weight="bold">14</text>
                                 </g>
-                                <!-- Green zero -->
-                                <circle cx="100" cy="100" r="25" fill="#228B22" stroke="#FFD700" stroke-width="2"/>
-                                <text x="100" y="110" text-anchor="middle" fill="white" font-size="20" font-weight="bold">0</text>
-                                <!-- Center -->
-                                <circle cx="100" cy="100" r="15" fill="#FFD700"/>
+                                
+                                <!-- Center hub -->
+                                <circle cx="150" cy="150" r="30" fill="#FFD700" stroke="#2d1810" stroke-width="3"/>
+                                <circle cx="150" cy="150" r="20" fill="#654321" stroke="#FFD700" stroke-width="2"/>
                             </svg>
-                            <div class="wheel-number" id="wheelNumber">?</div>
+                        </div>
+                        
+                        <!-- Result display -->
+                        <div class="wheel-result" id="wheelResult" style="display: none;">
+                            <div class="result-number" id="resultNumber">0</div>
                         </div>
                     </div>
                     <input type="number" id="betAmount" class="bet-input" placeholder="Ставка" min="10" value="100">
