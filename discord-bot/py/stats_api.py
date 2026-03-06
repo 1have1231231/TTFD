@@ -179,7 +179,13 @@ def play_roulette():
         else:
             new_coins = user['coins'] - bet
         
-        db.update_user(user_id, coins=new_coins)
+        # Update user coins in database
+        conn = db.get_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET coins = %s WHERE id = %s", (new_coins, str(user_id)))
+        conn.commit()
+        cur.close()
+        conn.close()
         
         return jsonify({
             'success': True,

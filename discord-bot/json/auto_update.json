@@ -166,6 +166,7 @@
     "добавлены MIME типы",
     "новый киберпанк дизайн со встроенным CSS",
     "gitHub-style Gaming UI со встроенным CSS",
-    "исправлен импорт PostgresDatabase в stats_api"
+    "исправлен импорт PostgresDatabase в stats_api",
+    "добавлена обработка ошибок БД в рулетке"
   ]
 }
