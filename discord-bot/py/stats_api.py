@@ -280,3 +280,102 @@ def spin_wheel():
         import traceback
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# Shop roles configuration
+SHOP_ROLES = [
+    {
+        'id': '1234567890123456789',  # ID роли в Discord
+        'name': 'VIP',
+        'price': 5000,
+        'color': '#FFD700',
+        'emoji': '👑'
+    },
+    {
+        'id': '1234567890123456790',
+        'name': 'Premium',
+        'price': 3000,
+        'color': '#9370DB',
+        'emoji': '💎'
+    },
+    {
+        'id': '1234567890123456791',
+        'name': 'Supporter',
+        'price': 1500,
+        'color': '#FF69B4',
+        'emoji': '❤️'
+    },
+    {
+        'id': '1234567890123456792',
+        'name': 'Booster',
+        'price': 1000,
+        'color': '#00D4FF',
+        'emoji': '🚀'
+    }
+]
+
+@app.route('/api/shop/roles', methods=['GET'])
+def get_shop_roles():
+    """Получить список ролей в магазине"""
+    try:
+        # TODO: Получить роли пользователя из Discord
+        # Пока возвращаем все роли как не купленные
+        roles = []
+        for role in SHOP_ROLES:
+            roles.append({
+                **role,
+                'owned': False  # TODO: Проверить есть ли роль у пользователя
+            })
+        
+        return jsonify({'success': True, 'roles': roles})
+        
+    except Exception as e:
+        print(f"❌ Shop roles error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/shop/buy', methods=['POST'])
+def buy_role():
+    """Купить роль"""
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        role_id = data.get('role_id')
+        
+        if not user_id or not role_id:
+            return jsonify({'success': False, 'error': 'Неверные данные'}), 400
+        
+        # Найти роль
+        role = next((r for r in SHOP_ROLES if r['id'] == role_id), None)
+        if not role:
+            return jsonify({'success': False, 'error': 'Роль не найдена'}), 404
+        
+        # Получить пользователя
+        user = db.get_user(user_id)
+        if not user or user.get('coins', 0) < role['price']:
+            return jsonify({'success': False, 'error': 'Недостаточно монет'}), 400
+        
+        # TODO: Проверить есть ли уже роль у пользователя
+        # TODO: Выдать роль в Discord через бота
+        
+        # Списать монеты
+        new_coins = user['coins'] - role['price']
+        conn = db.get_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET coins = %s WHERE id = %s", (new_coins, str(user_id)))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'new_balance': new_coins,
+            'role_name': role['name']
+        })
+        
+    except Exception as e:
+        print(f"❌ Buy role error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
