@@ -296,28 +296,28 @@ def spin_wheel():
 # Shop roles configuration
 SHOP_ROLES = [
     {
-        'id': '1234567890123456789',  # ID роли в Discord
+        'id': '1478224551287590983',  # ID роли в Discord
         'name': 'VIP',
         'price': 5000,
         'color': '#FFD700',
         'emoji': '👑'
     },
     {
-        'id': '1234567890123456790',
+        'id': '1478208144319582312',
         'name': 'Premium',
-        'price': 3000,
+        'price': 3500,
         'color': '#9370DB',
         'emoji': '💎'
     },
     {
-        'id': '1234567890123456791',
+        'id': '1478222910794502335',
         'name': 'Supporter',
-        'price': 1500,
+        'price': 2500,
         'color': '#FF69B4',
         'emoji': '❤️'
     },
     {
-        'id': '1234567890123456792',
+        'id': '1478226541094637628',
         'name': 'Booster',
         'price': 1000,
         'color': '#00D4FF',
