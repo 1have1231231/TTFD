@@ -88,7 +88,7 @@ def get_commands_text():
     text_parts.extend([
         convert_to_font('━━━━━━━━━━━━━━━━━━'),
         convert_to_font('🏆 ранговая система: F → E → D → C → B → A → S'),
-        convert_to_font('🎨 доступные цвета: red, blue, green, yellow, purple, pink, orange, cyan, white, black, gold, silver, brown, lime, navy, teal, magenta, crimson, indigo, violet'),
+        convert_to_font('🎨 доступные цвета: red, blue, green, yellow, purple, pink, orange, cyan, white, black, gold, silver, brown, lime, navy, teal, magenta, crimson, indigo, violet, sunset, ocean, forest, galaxy, fire, ice, neon, plasma, aurora, cosmic'),
         convert_to_font('🎮 играй в игры на сайте и получай ранги!'),
         convert_to_font(f'📅 обновлено: {date_str}')
     ])

@@ -1529,6 +1529,18 @@ async def setup_slash_commands(bot, db):
                     reason=f"Кастомный цвет для {member.name}"
                 )
                 
+                # Устанавливаем высокий приоритет роли (выше ранговых ролей)
+                # Получаем позицию самой высокой роли бота
+                bot_member = guild.get_member(interaction.client.user.id)
+                if bot_member and bot_member.top_role:
+                    # Ставим роль на позицию чуть ниже самой высокой роли бота
+                    target_position = min(bot_member.top_role.position - 1, len(guild.roles) - 1)
+                    try:
+                        await new_role.edit(position=target_position)
+                        print(f"✅ Роль {new_role.name} установлена на позицию {target_position}")
+                    except discord.Forbidden:
+                        print(f"⚠️ Не удалось изменить позицию роли {new_role.name}")
+                
                 # Выдаём новую роль
                 await member.add_roles(new_role, reason=f"Смена цвета на {color}")
                 
