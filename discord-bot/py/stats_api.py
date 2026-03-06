@@ -227,3 +227,56 @@ def start_api_server():
         import traceback
         traceback.print_exc()
 
+
+
+@app.route('/api/wheel/spin', methods=['POST'])
+def spin_wheel():
+    """Wheel of Fortune - крутить колесо"""
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        bet = data.get('bet', 0)
+        
+        if not user_id or bet < 10:
+            return jsonify({'success': False, 'error': 'Неверные данные'}), 400
+        
+        # Get user
+        user = db.get_user(user_id)
+        
+        if not user or user.get('coins', 0) < bet:
+            return jsonify({'success': False, 'error': 'Недостаточно монет'}), 400
+        
+        # Wheel segments with probabilities
+        # x0: 16.67% (2/12), x1.2: 25% (3/12), x1.5: 16.67% (2/12)
+        # x2: 16.67% (2/12), x3: 8.33% (1/12), x5: 8.33% (1/12), x10: 8.33% (1/12)
+        multipliers = [0, 1.2, 1.5, 2, 0, 3, 1.2, 5, 1.5, 2, 10, 1.2]
+        
+        # Random multiplier
+        multiplier = random.choice(multipliers)
+        
+        # Calculate win
+        win_amount = int(bet * multiplier)
+        
+        # Update balance
+        new_coins = user['coins'] - bet + win_amount
+        
+        # Update user coins in database
+        conn = db.get_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET coins = %s WHERE id = %s", (new_coins, str(user_id)))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'multiplier': multiplier,
+            'win_amount': win_amount,
+            'new_balance': new_coins
+        })
+        
+    except Exception as e:
+        print(f"❌ Wheel error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500

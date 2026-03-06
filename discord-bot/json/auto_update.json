@@ -172,6 +172,7 @@
     "fix rank display and add roulette wheel image",
     "add SVG roulette wheel and fix rank display",
     "add realistic roulette wheel with pointer and animations",
-    "fix roulette wheel - equal sectors and better design"
+    "fix roulette wheel - equal sectors and better design",
+    "fix roulette: equal sectors, arrow points to winning number"
   ]
 }

@@ -498,45 +498,45 @@
             border-color: #58a6ff;
         }
 
-        .bet-btns {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+        .spin-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
             margin-bottom: 20px;
         }
 
-        .bet-btn {
-            padding: 18px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
+        .spin-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
         }
 
-        .bet-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .bet-btn:disabled {
+        .spin-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .bet-btn.red {
-            background: #da3633;
-            color: white;
+        .result-multiplier {
+            font-size: 48px;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 1);
+            margin-bottom: 5px;
         }
 
-        .bet-btn.green {
-            background: #238636;
-            color: white;
-        }
-
-        .bet-btn.black {
-            background: #21262d;
-            color: white;
+        .result-win {
+            font-size: 24px;
+            font-weight: 700;
+            color: #32CD32;
+            text-shadow: 0 0 10px rgba(50, 205, 50, 0.8);
         }
 
         .result-box {
@@ -592,7 +592,7 @@
             <div class="nav-links">
                 <a href="#" class="nav-link active" onclick="showSection('profile')">Профиль</a>
                 <a href="#" class="nav-link" onclick="showSection('leaderboard')">Лидеры</a>
-                <a href="#" class="nav-link" onclick="showSection('roulette')">Рулетка</a>
+                <a href="#" class="nav-link" onclick="showSection('roulette')">Колесо Фортуны</a>
             </div>
             <div class="user-section">
                 <button class="login-btn" id="loginBtn" onclick="login()">Войти через Discord</button>
@@ -656,7 +656,7 @@
 
         <!-- Roulette -->
         <section id="roulette" class="section">
-            <h2 class="section-title">Рулетка</h2>
+            <h2 class="section-title">Колесо Фортуны</h2>
             <div class="roulette-box">
                 <div id="rouletteAuth" class="auth-msg">
                     Войдите через Discord для доступа к рулетке
@@ -765,21 +765,21 @@
                         
                         <!-- Result display -->
                         <div class="wheel-result" id="wheelResult" style="display: none;">
-                            <div class="result-number" id="resultNumber">0</div>
+                            <div class="result-multiplier" id="resultMultiplier">x0</div>
+                            <div class="result-win" id="resultWin">0</div>
                         </div>
                     </div>
                     <input type="number" id="betAmount" class="bet-input" placeholder="Ставка" min="10" value="100">
-                    <div class="bet-btns">
-                        <button class="bet-btn red" onclick="placeBet('red')">Красное x2</button>
-                        <button class="bet-btn green" onclick="placeBet('green')">Зелёное x14</button>
-                        <button class="bet-btn black" onclick="placeBet('black')">Чёрное x2</button>
-                    </div>
+                    <button class="spin-btn" onclick="spinWheel()" id="spinBtn">
+                        🎰 КРУТИТЬ КОЛЕСО
+                    </button>
                     <div id="result" class="result-box" style="display: none;"></div>
                 </div>
             </div>
         </section>
     </main>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=5"></script>
+    <script src="wheel_fortune.js?v=1"></script>
 </body>
 </html>
