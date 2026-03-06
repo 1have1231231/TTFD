@@ -233,6 +233,50 @@ def play_roulette():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/shop/roles')
+def get_shop_roles():
+    """Get shop roles from Discord bot"""
+    user_id = request.args.get('user_id')
+    
+    try:
+        response = requests.get(
+            f'{DISCORD_BOT_API}/api/shop/roles',
+            params={'user_id': user_id} if user_id else {},
+            timeout=5
+        )
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({'success': False, 'error': 'Shop unavailable'}), response.status_code
+            
+    except Exception as e:
+        print(f"❌ Shop roles error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/shop/buy', methods=['POST'])
+def buy_role():
+    """Buy role from shop"""
+    user = session.get('user')
+    
+    if not user:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    
+    try:
+        response = requests.post(
+            f'{DISCORD_BOT_API}/api/shop/buy',
+            json=data,
+            timeout=10
+        )
+        
+        return jsonify(response.json()), response.status_code
+        
+    except Exception as e:
+        print(f"❌ Buy role error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))
     print(f"🚀 Starting TTFD Website API on port {port}...")

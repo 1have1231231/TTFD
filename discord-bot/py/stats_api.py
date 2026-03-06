@@ -6,6 +6,10 @@ from flask_cors import CORS
 import threading
 import os
 import logging
+import sys
+
+# Add parent directory to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 app = Flask(__name__)
 CORS(app)
@@ -92,12 +96,6 @@ def exchange_code():
 def get_user(user_id):
     """Get user data"""
     try:
-        import sys
-        import os
-        
-        # Add parent directory to path
-        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        
         from database_postgres import PostgresDatabase, RANKS
         db = PostgresDatabase()
         
@@ -131,11 +129,6 @@ def play_roulette():
     """Play roulette"""
     try:
         import random
-        import sys
-        import os
-        
-        # Add parent directory to path
-        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         
         try:
             from database_postgres import PostgresDatabase
@@ -242,6 +235,15 @@ def start_api_server():
 def spin_wheel():
     """Wheel of Fortune - крутить колесо"""
     try:
+        import random
+        
+        try:
+            from database_postgres import PostgresDatabase
+            db = PostgresDatabase()
+        except Exception as db_error:
+            print(f"⚠️ PostgreSQL unavailable: {db_error}")
+            return jsonify({'success': False, 'error': 'База данных временно недоступна'}), 503
+        
         data = request.json
         user_id = data.get('user_id')
         bet = data.get('bet', 0)
@@ -327,13 +329,13 @@ SHOP_ROLES = [
 def get_shop_roles():
     """Получить список ролей в магазине"""
     try:
-        import sys
-        import os
-        
-        # Add parent directory to path
-        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        
         user_id = request.args.get('user_id')
+        
+        print(f"🛒 Shop roles request for user: {user_id}")
+        print(f"🤖 Discord bot connected: {discord_bot is not None}")
+        
+        if discord_bot:
+            print(f"🤖 Bot guilds: {len(discord_bot.guilds) if discord_bot.guilds else 0}")
         
         roles = []
         for role in SHOP_ROLES:
@@ -349,15 +351,19 @@ def get_shop_roles():
                             role_obj = guild.get_role(int(role['id']))
                             if role_obj and role_obj in member.roles:
                                 owned = True
+                                print(f"✅ User {user_id} owns role {role['name']}")
                 except Exception as e:
-                    print(f"⚠️ Error checking role: {e}")
+                    print(f"⚠️ Error checking role {role['name']}: {e}")
             
             roles.append({
                 **role,
                 'owned': owned
             })
         
-        return jsonify({'success': True, 'roles': roles})
+        print(f"✅ Returning {len(roles)} roles")
+        response = jsonify({'success': True, 'roles': roles})
+        print(f"✅ Response created: {response}")
+        return response
         
     except Exception as e:
         print(f"❌ Shop roles error: {e}")
@@ -369,12 +375,6 @@ def get_shop_roles():
 def buy_role():
     """Купить роль"""
     try:
-        import sys
-        import os
-        
-        # Add parent directory to path
-        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        
         try:
             from database_postgres import PostgresDatabase
             db = PostgresDatabase()
